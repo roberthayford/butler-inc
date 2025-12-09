@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+
 const Differentiators = () => {
   return (
     <section className="section-padding bg-secondary">
@@ -14,7 +16,7 @@ const Differentiators = () => {
                 Save when our butlers are nearby
               </h3>
               <p className="text-muted-foreground leading-relaxed mb-4">
-                Our pricing engine rewards you for choosing time slots that fit existing routes. 
+                Our pricing engine rewards you for choosing time slots that fit existing routes.
                 If a butler is already in your area, you'll see "Best Value" slots at a lower price.
               </p>
               <p className="text-sm text-muted-foreground italic">
@@ -34,7 +36,7 @@ const Differentiators = () => {
                 England-wide, with hubs in Cambridge & London
               </h3>
               <p className="text-muted-foreground leading-relaxed mb-6">
-                We prioritise Cambridge and London, but any location reachable by car or train is eligible. 
+                We prioritise Cambridge and London, but any location reachable by car or train is eligible.
                 Distance-based pricing applies for areas outside our core hubs.
               </p>
               <ul className="space-y-2">
@@ -49,6 +51,12 @@ const Differentiators = () => {
               </ul>
             </div>
           </div>
+        </div>
+
+        <div className="mt-12 text-center">
+          <Button size="lg" variant="outline" className="min-w-[200px] border-primary/20 hover:bg-primary/5">
+            See available times
+          </Button>
         </div>
       </div>
     </section>
