@@ -60,12 +60,12 @@ const ServiceSelector = () => {
           <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-ivory to-transparent pointer-events-none z-10 md:hidden" />
           <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-ivory to-transparent pointer-events-none z-10 md:hidden" />
 
-          <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory pb-8 md:pb-0 -mx-4 px-12 md:mx-0 md:px-0 scrollbar-hide">
+          <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory pb-8 md:pb-0 -mx-4 px-14 md:mx-0 md:px-0 scrollbar-hide">
             {services.map((service) => (
               <button
                 key={service.id}
                 onClick={() => scrollToService(service.id)}
-                className="group p-6 rounded-lg bg-background border border-border hover:border-gold/50 hover:shadow-lg transition-all duration-300 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] text-left active:scale-[0.98] active:bg-accent/5 active:border-gold min-w-[85vw] sm:min-w-[300px] md:min-w-0 md:w-auto snap-center shrink-0 flex flex-col h-full"
+                className="group p-6 rounded-lg bg-background border border-border hover:border-gold/50 hover:shadow-lg transition-all duration-300 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] text-left active:scale-[0.98] active:bg-accent/5 active:border-gold min-w-[85vw] sm:min-w-[300px] md:min-w-0 md:w-auto snap-start shrink-0 flex flex-col h-full"
               >
                 <div className="flex-1">
                   <h3 className="font-serif text-lg md:text-xl font-medium text-foreground mb-1 group-hover:text-gold transition-colors">
