@@ -60,7 +60,7 @@ const ServiceSelector = () => {
             <button
               key={service.id}
               onClick={() => scrollToService(service.id)}
-              className="group p-6 rounded-lg bg-background border border-border hover:border-gold/50 hover:shadow-lg transition-all duration-300 text-left"
+              className="group p-8 md:p-6 rounded-lg bg-background border border-border hover:border-gold/50 hover:shadow-lg transition-all duration-300 text-left"
             >
               <h3 className="font-serif text-lg md:text-xl font-medium text-foreground mb-1 group-hover:text-gold transition-colors">
                 {service.name}
