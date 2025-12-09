@@ -13,7 +13,7 @@ const Membership = () => {
 
         <div className="grid md:grid-cols-2 gap-6 md:gap-8">
           {/* Membership Card */}
-          <div className="p-8 rounded-2xl bg-primary-foreground/5 border border-primary-foreground/10 backdrop-blur">
+          <div className="p-8 rounded-2xl bg-primary-foreground/5 border border-primary-foreground/10 backdrop-blur transition-all duration-300 hover:bg-primary-foreground/10 hover:border-primary-foreground/20 hover:-translate-y-1 hover:shadow-2xl">
             <span className="inline-block text-xs font-medium uppercase tracking-wider text-gold mb-4">
               Best Value
             </span>
@@ -66,7 +66,7 @@ const Membership = () => {
           </div>
 
           {/* PAYG Card */}
-          <div className="p-8 rounded-2xl bg-primary-foreground/5 border border-primary-foreground/10 backdrop-blur">
+          <div className="p-8 rounded-2xl bg-primary-foreground/5 border border-primary-foreground/10 backdrop-blur transition-all duration-300 hover:bg-primary-foreground/10 hover:border-primary-foreground/20 hover:-translate-y-1 hover:shadow-2xl">
             <span className="inline-block text-xs font-medium uppercase tracking-wider text-primary-foreground/50 mb-4">
               No Commitment
             </span>

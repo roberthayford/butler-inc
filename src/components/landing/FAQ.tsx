@@ -39,7 +39,7 @@ const FAQ = () => {
         <Accordion type="single" collapsible className="w-full">
           {faqs.map((faq, index) => (
             <AccordionItem key={index} value={`item-${index}`} className="border-b border-border">
-              <AccordionTrigger className="text-left font-serif text-lg font-medium py-6 hover:no-underline hover:text-gold transition-colors">
+              <AccordionTrigger className="text-left font-serif text-lg font-medium py-6 hover:no-underline hover:text-gold transition-all duration-300 active:scale-[0.98] origin-left">
                 {faq.question}
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">
