@@ -60,7 +60,7 @@ const ServiceSelector = () => {
           <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-ivory to-transparent pointer-events-none z-10 md:hidden" />
           <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-ivory to-transparent pointer-events-none z-10 md:hidden" />
 
-          <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory pb-8 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
+          <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory pb-8 md:pb-0 -mx-4 px-12 md:mx-0 md:px-0 scrollbar-hide">
             {services.map((service) => (
               <button
                 key={service.id}
