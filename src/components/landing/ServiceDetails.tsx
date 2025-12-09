@@ -6,6 +6,7 @@ const services = [
     name: "Busy Butler",
     subtitle: "Urgent professional logistics",
     type: "In-Person",
+    image: "/images/busy-butler.png",
     examples: [
       "Same-day document delivery",
       "Urgent package collection",
@@ -20,6 +21,7 @@ const services = [
     subtitle: "School runs & child logistics",
     type: "In-Person",
     bodycam: true,
+    image: "/images/baby-butler.png",
     examples: [
       "School pick-ups and drop-offs",
       "After-school club shuttling",
@@ -33,6 +35,7 @@ const services = [
     name: "Bougie Butler",
     subtitle: "Luxury sourcing & experiences",
     type: "In-Person",
+    image: "/images/bougie-butler.png",
     examples: [
       "Hard-to-find luxury items",
       "VIP restaurant reservations",
@@ -47,6 +50,7 @@ const services = [
     subtitle: "Property & home waiting",
     type: "In-Person",
     bodycam: true,
+    image: "/images/base-butler.png",
     examples: [
       "Waiting for deliveries",
       "Tradesman coordination",
@@ -60,6 +64,7 @@ const services = [
     name: "Budget Butler",
     subtitle: "Flexible timing, best rates",
     type: "In-Person",
+    image: "/images/budget-butler.png",
     examples: [
       "Non-urgent errands",
       "Batch tasks in your area",
@@ -73,6 +78,7 @@ const services = [
     name: "Bespoke Butler",
     subtitle: "Custom requests",
     type: "In-Person",
+    image: "/images/bespoke-butler.png",
     examples: [
       "Unique personal tasks",
       "Complex multi-step errands",
@@ -99,9 +105,8 @@ const ServiceDetails = () => {
             <div
               key={service.id}
               id={`service-${service.id}`}
-              className={`grid md:grid-cols-2 gap-8 items-center p-8 rounded-2xl ${
-                index % 2 === 0 ? "bg-ivory" : "bg-background"
-              }`}
+              className={`grid md:grid-cols-2 gap-8 items-center p-8 rounded-2xl ${index % 2 === 0 ? "bg-ivory" : "bg-background"
+                }`}
             >
               <div className={index % 2 !== 0 ? "md:order-2" : ""}>
                 <div className="flex items-center gap-3 mb-3">
@@ -135,12 +140,13 @@ const ServiceDetails = () => {
                 </div>
               </div>
 
-              <div className={`aspect-[4/3] rounded-xl bg-gradient-to-br from-secondary to-muted flex items-center justify-center ${
-                index % 2 !== 0 ? "md:order-1" : ""
-              }`}>
-                <span className="font-serif text-6xl text-gold-muted/50">
-                  {service.name.split(" ")[0][0]}
-                </span>
+              <div className={`aspect-[4/3] rounded-xl overflow-hidden relative shadow-lg ${index % 2 !== 0 ? "md:order-1" : ""
+                }`}>
+                <img
+                  src={service.image}
+                  alt={service.name}
+                  className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                />
               </div>
             </div>
           ))}
