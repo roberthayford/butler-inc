@@ -9,13 +9,13 @@ const Hero = () => {
         <div className="absolute bottom-1/4 left-1/4 w-80 h-80 rounded-full bg-sage blur-3xl" />
       </div>
 
-      <div className="max-w-5xl mx-auto px-5 md:px-8 text-center relative z-10">
-        <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight text-foreground mb-6 animate-fade-up">
+      <div className="max-w-5xl mx-auto pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] md:px-8 text-center relative z-10">
+        <h1 className="font-serif text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight text-foreground mb-6 animate-fade-up leading-[1.1] text-balance">
           Your personal butler,
           <br />
           <span className="italic">on demand</span>
         </h1>
-        
+
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-up" style={{ animationDelay: "0.1s" }}>
           Trusted assistants for urgent tasks, childcare logistics, luxury sourcing and home waiting – across England.
         </p>

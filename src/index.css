@@ -113,7 +113,23 @@
 
 @layer components {
   .section-padding {
-    @apply px-5 py-16 md:px-8 md:py-24 lg:px-12 lg:py-32;
+    @apply py-16 md:py-24 lg:py-32;
+    padding-left: calc(1.25rem + env(safe-area-inset-left));
+    padding-right: calc(1.25rem + env(safe-area-inset-right));
+  }
+
+  @media (min-width: 768px) {
+    .section-padding {
+      padding-left: calc(2rem + env(safe-area-inset-left));
+      padding-right: calc(2rem + env(safe-area-inset-right));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .section-padding {
+      padding-left: calc(3rem + env(safe-area-inset-left));
+      padding-right: calc(3rem + env(safe-area-inset-right));
+    }
   }
 
   .container-narrow {

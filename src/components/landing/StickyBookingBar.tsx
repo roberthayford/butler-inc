@@ -17,7 +17,7 @@ const StickyBookingBar = () => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border shadow-lg md:hidden">
-      <div className="px-5 py-4 flex items-center justify-between gap-4">
+      <div className="pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] flex items-center justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-foreground">Need help today?</p>
           <p className="text-xs text-muted-foreground">From £20/hr</p>
