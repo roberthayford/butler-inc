@@ -1,0 +1,41 @@
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+
+const Header = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled ? "bg-background/95 backdrop-blur-sm shadow-sm" : "bg-transparent"
+      }`}
+    >
+      <nav className="max-w-7xl mx-auto px-5 md:px-8 py-4 flex items-center justify-between">
+        <a href="/" className="font-serif text-2xl font-semibold tracking-tight text-foreground">
+          Ohmybutler
+        </a>
+        <div className="flex items-center gap-3">
+          <a
+            href="#"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Log in
+          </a>
+          <Button variant="outline" size="sm" className="font-medium">
+            Join
+          </Button>
+        </div>
+      </nav>
+    </header>
+  );
+};
+
+export default Header;
