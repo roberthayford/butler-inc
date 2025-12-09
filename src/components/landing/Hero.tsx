@@ -14,7 +14,7 @@ const Hero = () => {
       </div>
 
       <div className="max-w-5xl mx-auto pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] md:px-8 text-center relative z-10">
-        <h1 className="font-serif text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight text-foreground mb-6 animate-fade-up leading-[1.05] text-balance">
+        <h1 className="font-serif text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-medium tracking-normal text-foreground mb-6 animate-fade-up leading-[1.1] md:leading-[1.15] text-balance">
           Your personal butler,
           <br />
           <span className="italic">on demand</span>
@@ -25,8 +25,8 @@ const Hero = () => {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up" style={{ animationDelay: "0.2s" }}>
-          <Button size="lg" className="min-w-[200px] min-h-[48px] text-base font-medium">
-            Book a Butler
+          <Button size="lg" className="min-w-[200px] min-h-[48px] text-base font-medium active:scale-95 transition-transform duration-200">
+            Request Assistance
           </Button>
           <a
             href="#membership"

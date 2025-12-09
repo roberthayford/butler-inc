@@ -24,7 +24,7 @@ const Header = () => {
         <div className="flex items-center gap-3">
           <a
             href="#"
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden md:block"
+            className="text-sm font-medium text-muted-foreground/60 hover:text-foreground transition-colors hidden md:block"
           >
             Log in
           </a>
