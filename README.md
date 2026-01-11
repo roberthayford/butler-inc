@@ -1,73 +1,121 @@
-# Welcome to your Lovable project
+# Ohmybutler | Premium Personal Butler Service
 
-## Project info
+Your personal butler, on demand. Trusted assistants for urgent tasks, childcare logistics, luxury sourcing and home waiting across England.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## About
 
-## How can I edit this code?
+Ohmybutler is a premium personal concierge service website built with modern web technologies. The landing page showcases six distinct butler services with an elegant, luxury-focused design.
 
-There are several ways of editing your application.
+### Services
 
-**Use Lovable**
+- **Busy Butler** – Same-day professional logistics and confidential tasks
+- **Baby Butler** – Child logistics with optional body-cam for peace of mind  
+- **Bougie Butler** – Exclusive access to high-end goods and experiences
+- **Base Butler** – Property checks, key holding, and tradesman coordination
+- **Budget Butler** – Best rates with route-optimised flexible timing
+- **Bespoke Butler** – Custom tasks tailored to your specific needs
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### Features
 
-Changes made via Lovable will be committed automatically to this repo.
+- Interactive tabbed service details
+- Membership tiers (Light, Standard, Premium) or Pay As You Go pricing
+- Trust & safety information with vetting process details
+- Mobile-first responsive design
+- Premium visual aesthetics following Apple/Google design principles
 
-**Use your preferred IDE**
+## Tech Stack
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **[Vite](https://vitejs.dev/)** – Fast build tool and dev server
+- **[React 18](https://react.dev/)** – UI library
+- **[TypeScript](https://www.typescriptlang.org/)** – Type-safe JavaScript
+- **[Tailwind CSS](https://tailwindcss.com/)** – Utility-first CSS framework
+- **[shadcn/ui](https://ui.shadcn.com/)** – High-quality React components
+- **[Radix UI](https://www.radix-ui.com/)** – Accessible component primitives
+- **[React Router](https://reactrouter.com/)** – Client-side routing
+- **[Playwright](https://playwright.dev/)** – End-to-end testing
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Getting Started
 
-Follow these steps:
+### Prerequisites
+
+- Node.js 18+ (recommended: install via [nvm](https://github.com/nvm-sh/nvm))
+- npm or bun
+
+### Installation
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Clone the repository
 git clone <YOUR_GIT_URL>
+cd Ohmybutler-premium-concierge
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Install dependencies
+npm install
+# or
+bun install
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The app will be available at `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Available Scripts
 
-**Use GitHub Codespaces**
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server with hot reload |
+| `npm run build` | Build for production |
+| `npm run build:dev` | Build with development mode |
+| `npm run preview` | Preview production build locally |
+| `npm run lint` | Run ESLint |
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Project Structure
 
-## What technologies are used for this project?
+```
+src/
+├── components/
+│   ├── landing/          # Landing page sections
+│   │   ├── Header.tsx
+│   │   ├── Hero.tsx
+│   │   ├── ServiceSelector.tsx
+│   │   ├── ServiceDetails.tsx
+│   │   ├── HowItWorks.tsx
+│   │   ├── Membership.tsx
+│   │   ├── TrustSafety.tsx
+│   │   ├── Testimonials.tsx
+│   │   ├── FAQ.tsx
+│   │   └── Footer.tsx
+│   └── ui/               # Reusable UI components (shadcn)
+├── pages/
+│   ├── Index.tsx         # Main landing page
+│   └── NotFound.tsx      # 404 page
+├── hooks/                # Custom React hooks
+├── lib/                  # Utility functions
+└── index.css             # Global styles & design tokens
+```
 
-This project is built with:
+## Testing
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+End-to-end tests are configured with Playwright:
 
-## How can I deploy this project?
+```sh
+# Run tests
+npx playwright test
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+# Run tests with UI
+npx playwright test --ui
+```
 
-## Can I connect a custom domain to my Lovable project?
+## Deployment
 
-Yes, you can!
+Build the production bundle:
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```sh
+npm run build
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+The output will be in the `dist/` directory, ready for deployment to any static hosting service.
+
+## License
+
+Private project. All rights reserved.
