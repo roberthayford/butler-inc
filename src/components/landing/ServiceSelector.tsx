@@ -37,9 +37,17 @@ const services = [
   },
 ];
 
-const ServiceSelector = () => {
-  const scrollToService = (id: string) => {
-    const element = document.getElementById(`service-${id}`);
+interface ServiceSelectorProps {
+  onServiceSelect?: (serviceId: string) => void;
+}
+
+const ServiceSelector = ({ onServiceSelect }: ServiceSelectorProps) => {
+  const handleServiceClick = (id: string) => {
+    // Update the active tab
+    onServiceSelect?.(id);
+
+    // Scroll to the service details section
+    const element = document.getElementById("service-details");
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
@@ -59,7 +67,7 @@ const ServiceSelector = () => {
           {services.map((service) => (
             <div key={service.id} className="min-w-[280px] md:min-w-0 snap-center px-2 md:px-0 first:pl-2 last:pr-2">
               <button
-                onClick={() => scrollToService(service.id)}
+                onClick={() => handleServiceClick(service.id)}
                 className="w-full group p-6 rounded-xl bg-background shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] hover:shadow-xl transition-all duration-300 text-left active:scale-[0.98] active:bg-accent/5 h-full border border-transparent hover:border-gold/20"
               >
                 <div className="flex-1">

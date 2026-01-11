@@ -168,6 +168,24 @@
     display: none;
   }
 
+  /* Horizontal scroll tabs for mobile - smooth snap behavior */
+  .tabs-scroll {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .tabs-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tabs-scroll>* {
+    scroll-snap-align: center;
+    flex-shrink: 0;
+  }
+
   @keyframes fade-up {
     from {
       opacity: 0;
