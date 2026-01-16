@@ -10,10 +10,9 @@ const services = [
     type: "In-Person",
     image: "/images/busy-butler.png",
     examples: [
-      "Same-day document delivery",
-      "Urgent package collection",
-      "Last-minute errands",
-      "Confidential courier tasks",
+      "Pick up passport, deliver to HM Passport Office, wait and return it",
+      "Get document notarised and personally deliver to Edinburgh",
+      "Emergency pickup and same-day hand delivery",
     ],
     priceFrom: "£45",
   },
@@ -21,15 +20,14 @@ const services = [
     id: "baby",
     name: "Baby Butler",
     shortName: "Baby",
-    subtitle: "School runs & child logistics",
+    subtitle: "School runs & care checks",
     type: "In-Person",
     bodycam: true,
     image: "/images/baby-butler.png",
     examples: [
-      "School pick-ups and drop-offs",
-      "After-school club shuttling",
-      "Collecting forgotten items",
-      "Child activity transportation",
+      "School pick-up when you have an important meeting",
+      "Watch your child for a few hours between activities",
+      "Check on elderly relative who isn't answering the phone",
     ],
     priceFrom: "£50",
   },
@@ -41,10 +39,9 @@ const services = [
     type: "In-Person",
     image: "/images/bougie-butler.png",
     examples: [
-      "Hard-to-find luxury items",
-      "VIP restaurant reservations",
-      "Exclusive event access",
-      "Personal shopping assistance",
+      "Source rare scotch only sold in a tiny shop in Scotland",
+      "Plan and organise a personalised family holiday",
+      "Secure VIP reservations and exclusive event access",
     ],
     priceFrom: "£80",
   },
@@ -57,10 +54,9 @@ const services = [
     bodycam: true,
     image: "/images/base-butler.png",
     examples: [
-      "Waiting for deliveries",
-      "Tradesman coordination",
-      "Property checks whilst away",
-      "Key holding services",
+      "Wait for Sky broadband installation while you're at work",
+      "Costco shop, fill fridge and organise cleaning before arrival",
+      "Hold keys and coordinate with tradesmen",
     ],
     priceFrom: "£35",
   },
@@ -72,10 +68,9 @@ const services = [
     type: "In-Person",
     image: "/images/budget-butler.png",
     examples: [
-      "Non-urgent errands",
-      "Batch tasks in your area",
-      "Scheduled collections",
-      "Flexible delivery windows",
+      "Water plants while you're away",
+      "Do a big weekly shop and stock the fridge",
+      "Non-urgent errands with flexible timing",
     ],
     priceFrom: "£20",
   },
@@ -87,10 +82,9 @@ const services = [
     type: "In-Person",
     image: "/images/bespoke-butler.png",
     examples: [
-      "Unique personal tasks",
-      "Complex multi-step errands",
-      "Special occasion support",
-      "Whatever you need – just ask",
+      "Plan and execute a dinner party with chefs and personalised menu",
+      "Surprise delivery of flowers, chocolates and cake to her office at 4pm",
+      "Complex multi-vendor coordination for special occasions",
     ],
     priceFrom: "Quote",
   },
@@ -103,7 +97,7 @@ interface ServiceDetailsProps {
 
 const ServiceDetails = ({ activeService = "busy", onServiceChange }: ServiceDetailsProps) => {
   return (
-    <section id="service-details" className="section-padding">
+    <section id="service-details" className="section-padding bg-secondary">
       <div className="max-w-6xl mx-auto">
         <h2 className="font-serif text-3xl md:text-4xl font-medium text-center mb-4">
           Our Butler Services

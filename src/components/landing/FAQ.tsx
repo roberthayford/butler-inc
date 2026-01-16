@@ -11,6 +11,10 @@ const faqs = [
     answer: "Pricing is dynamic based on timing, location, and demand. Budget Butler starts from £20/hr for flexible slots, while same-day urgent services are priced higher. You'll always see the exact price before booking.",
   },
   {
+    question: "How does smart pricing work?",
+    answer: "Our pricing engine rewards you for choosing time slots that fit existing routes. If a butler is already in your area, you'll see \"Best Value\" slots at a lower price. Book during off-peak hours for the best rates, or opt for Budget Butler with flexible timing for maximum savings. Same-day and emergency requests are available at a premium for instant response.",
+  },
+  {
     question: "Can I book without a membership?",
     answer: "Absolutely. Our Pay As You Go option lets you book Personal Butler services instantly with no commitment. Membership offers better rates and access to Virtual Butler services for regular users.",
   },
@@ -20,11 +24,7 @@ const faqs = [
   },
   {
     question: "Do you cover my area?",
-    answer: "We serve all of England. Our core hubs are Cambridge and London where same-day service is typically available. For other areas, we offer next-day or scheduled services with distance-based pricing.",
-  },
-  {
-    question: "Are your butlers employees or contractors?",
-    answer: "Our butlers are vetted independent contractors who meet our strict standards for professionalism, reliability, and trust. All undergo DBS checks and thorough vetting before joining our network.",
+    answer: "We prioritise Cambridge and London, where same-day service is typically available. However, any location in England reachable by car or train is eligible. Distance-based pricing applies for areas outside our core hubs, with next-day or scheduled service available nationwide.",
   },
 ];
 

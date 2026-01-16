@@ -2,7 +2,6 @@ import Header from "@/components/landing/Header";
 import Hero from "@/components/landing/Hero";
 import ServiceSelector from "@/components/landing/ServiceSelector";
 import HowItWorks from "@/components/landing/HowItWorks";
-import Differentiators from "@/components/landing/Differentiators";
 import ServiceDetails from "@/components/landing/ServiceDetails";
 import Membership from "@/components/landing/Membership";
 import TrustSafety from "@/components/landing/TrustSafety";
@@ -21,7 +20,6 @@ const Index = () => {
       <Hero />
       <ServiceSelector onServiceSelect={setSelectedService} />
       <HowItWorks />
-      <Differentiators />
       <ServiceDetails
         activeService={selectedService}
         onServiceChange={setSelectedService}
