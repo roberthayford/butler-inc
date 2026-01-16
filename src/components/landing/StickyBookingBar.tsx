@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import GenieButton from "./GenieButton";
 
 const StickyBookingBar = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -23,14 +24,17 @@ const StickyBookingBar = () => {
         <div className="w-10 h-1 bg-muted-foreground/20 rounded-full" />
       </div>
 
-      <div className="pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] pb-[calc(1rem+env(safe-area-inset-bottom))] p-4 flex items-center justify-between gap-4">
-        <div>
-          <p className="text-base font-medium text-foreground">Need help today?</p>
-          <p className="text-sm text-muted-foreground">From £20/hr</p>
+      <div className="pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] pb-[calc(1rem+env(safe-area-inset-bottom))] p-4 flex items-center justify-between gap-3">
+        <div className="flex-shrink-0">
+          <p className="text-sm font-medium text-foreground">Need help?</p>
+          <p className="text-xs text-muted-foreground">From £20/hr</p>
         </div>
-        <Button size="lg" className="whitespace-nowrap h-12 px-6 text-base font-medium shadow-sm active:scale-[0.96] transition-transform">
-          Book a Butler
-        </Button>
+        <div className="flex gap-2">
+          <GenieButton variant="inline" className="h-10 px-3 text-sm" />
+          <Button size="lg" className="whitespace-nowrap h-10 px-4 text-sm font-medium shadow-sm active:scale-[0.96] transition-transform">
+            Book Butler
+          </Button>
+        </div>
       </div>
     </div>
   );

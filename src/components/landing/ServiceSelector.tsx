@@ -1,3 +1,6 @@
+import { useState } from "react";
+import Quiz from "./Quiz";
+
 const services = [
   {
     id: "busy",
@@ -42,6 +45,8 @@ interface ServiceSelectorProps {
 }
 
 const ServiceSelector = ({ onServiceSelect }: ServiceSelectorProps) => {
+  const [quizOpen, setQuizOpen] = useState(false);
+
   const handleServiceClick = (id: string) => {
     // Update the active tab
     onServiceSelect?.(id);
@@ -53,45 +58,56 @@ const ServiceSelector = ({ onServiceSelect }: ServiceSelectorProps) => {
     }
   };
 
+  const handleQuizSelect = (serviceId: string) => {
+    handleServiceClick(serviceId);
+  };
+
   return (
-    <section className="section-padding bg-ivory">
-      <div className="max-w-6xl mx-auto">
-        <h2 className="font-serif text-3xl md:text-4xl font-medium text-center mb-4">
-          What do you need help with?
-        </h2>
-        <p className="text-muted-foreground text-center mb-12 max-w-xl mx-auto">
-          Choose a service type, or tell us what you need and we'll match you with the right butler.
-        </p>
+    <>
+      <section id="services" className="section-padding bg-ivory">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="font-serif text-3xl md:text-4xl font-medium text-center mb-4">
+            What do you need help with?
+          </h2>
+          <p className="text-muted-foreground text-center mb-12 max-w-xl mx-auto">
+            Choose a service type, or take our quick quiz to find the right butler for you.
+          </p>
 
-        <div className="flex overflow-x-auto pb-8 -mx-4 px-4 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 md:pb-0 md:mx-0 md:px-0 scrollbar-hide">
-          {services.map((service) => (
-            <div key={service.id} className="min-w-[280px] md:min-w-0 snap-center px-2 md:px-0 first:pl-2 last:pr-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+            {services.map((service) => (
               <button
+                key={service.id}
                 onClick={() => handleServiceClick(service.id)}
-                className="w-full group p-6 rounded-xl bg-background shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] hover:shadow-xl transition-all duration-300 text-left active:scale-[0.98] active:bg-accent/5 h-full border border-transparent hover:border-gold/20"
+                className="w-full group p-4 md:p-6 rounded-xl bg-background shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] hover:shadow-xl transition-all duration-300 text-left active:scale-[0.98] active:bg-accent/5 border border-transparent hover:border-gold/20"
               >
-                <div className="flex-1">
-                  <h3 className="font-serif text-xl md:text-2xl font-medium text-foreground mb-2 group-hover:text-gold transition-colors">
-                    {service.name}
-                  </h3>
-                  <p className="text-sm text-gold font-medium mb-3 uppercase tracking-wider text-[10px]">{service.tagline}</p>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {service.description}
-                  </p>
-                </div>
+                <h3 className="font-serif text-lg md:text-xl font-medium text-foreground mb-1 group-hover:text-gold transition-colors">
+                  {service.name}
+                </h3>
+                <p className="text-xs md:text-sm text-gold font-medium uppercase tracking-wider">
+                  {service.tagline}
+                </p>
               </button>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <p className="text-center mt-8 text-muted-foreground">
-          Not sure?{" "}
-          <a href="#" className="text-foreground underline underline-offset-4 hover:text-gold transition-colors">
-            Just tell us what you need
-          </a>
-        </p>
-      </div>
-    </section>
+          <p className="text-center mt-8 text-muted-foreground">
+            Not sure?{" "}
+            <button
+              onClick={() => setQuizOpen(true)}
+              className="text-foreground underline underline-offset-4 hover:text-gold transition-colors"
+            >
+              Take our short quiz
+            </button>
+          </p>
+        </div>
+      </section>
+
+      <Quiz
+        open={quizOpen}
+        onOpenChange={setQuizOpen}
+        onSelectService={handleQuizSelect}
+      />
+    </>
   );
 };
 

@@ -24,19 +24,23 @@ const Membership = () => {
             <ul className="space-y-3 mb-8">
               <li className="flex items-start gap-3 text-sm">
                 <span className="text-gold">✓</span>
-                Lower per-visit cost
+                Priority time slots
               </li>
               <li className="flex items-start gap-3 text-sm">
                 <span className="text-gold">✓</span>
-                Access to Virtual & Personal Butler services
+                Access to Genie in a Butler service
               </li>
               <li className="flex items-start gap-3 text-sm">
                 <span className="text-gold">✓</span>
-                Priority access to popular time slots
+                Dedicated member helpline
               </li>
               <li className="flex items-start gap-3 text-sm">
                 <span className="text-gold">✓</span>
-                Dedicated concierge support
+                Discounted hourly rate vs PAYG
+              </li>
+              <li className="flex items-start gap-3 text-sm">
+                <span className="text-gold">✓</span>
+                Free virtual butler task credits
               </li>
             </ul>
 
@@ -44,18 +48,21 @@ const Membership = () => {
               <div className="grid grid-cols-3 gap-4 text-center text-sm">
                 <div>
                   <p className="text-primary-foreground/50 mb-1">Light</p>
-                  <p className="font-medium">5 virtual</p>
-                  <p className="text-primary-foreground/70">3 personal</p>
+                  <p className="font-medium">3 credits</p>
+                  <p className="text-primary-foreground/70 text-xs">10% off</p>
+                  <p className="text-red-400 text-xs mt-1">🧞 1/year</p>
                 </div>
                 <div>
                   <p className="text-primary-foreground/50 mb-1">Standard</p>
-                  <p className="font-medium">12 virtual</p>
-                  <p className="text-primary-foreground/70">6 personal</p>
+                  <p className="font-medium">8 credits</p>
+                  <p className="text-primary-foreground/70 text-xs">15% off</p>
+                  <p className="text-red-400 text-xs mt-1">🧞 3/year</p>
                 </div>
                 <div>
                   <p className="text-primary-foreground/50 mb-1">Premium</p>
-                  <p className="font-medium">20 virtual</p>
-                  <p className="text-primary-foreground/70">10 personal</p>
+                  <p className="font-medium">15 credits</p>
+                  <p className="text-primary-foreground/70 text-xs">20% off</p>
+                  <p className="text-red-400 text-xs mt-1">🧞 6/year</p>
                 </div>
               </div>
             </div>

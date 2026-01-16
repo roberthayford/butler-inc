@@ -2,17 +2,17 @@ import { Button } from "@/components/ui/button";
 
 const steps = [
   {
-    number: "01",
-    title: "Tell us what you need",
+    number: "Step 1",
+    title: "Required Service",
     description: "Choose a butler type and describe your task in under a minute.",
   },
   {
-    number: "02",
+    number: "Step 2",
     title: "Pick a time & price",
     description: "See live time slots with dynamic pricing based on routes and demand.",
   },
   {
-    number: "03",
+    number: "Step 3",
     title: "We handle the rest",
     description: "A vetted butler completes your task – track via updates or body-cam where enabled.",
   },
@@ -33,7 +33,7 @@ const HowItWorks = () => {
               {index < steps.length - 1 && (
                 <div className="hidden md:block absolute top-8 left-[60%] w-[80%] h-px bg-border" />
               )}
-              
+
               <span className="inline-block font-serif text-4xl text-gold-muted mb-4">
                 {step.number}
               </span>

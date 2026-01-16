@@ -21,24 +21,33 @@ const Hero = () => {
         </h1>
 
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-up" style={{ animationDelay: "0.1s" }}>
-          Trusted assistants for urgent tasks, childcare logistics, luxury sourcing and home waiting – across England.
+          Trusted assistants for urgent tasks, luxury sourcing, and home services – across England.
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up" style={{ animationDelay: "0.2s" }}>
-          <Button size="lg" className="min-w-[200px] min-h-[48px] text-base font-medium active:scale-95 transition-transform duration-200">
-            Request Assistance
-          </Button>
+        <div className="flex flex-col items-center gap-6 animate-fade-up" style={{ animationDelay: "0.2s" }}>
+          {/* Members / Non-Members Segmented Control */}
+          <div className="inline-flex rounded-xl bg-secondary/50 p-1.5 gap-1">
+            <Button
+              size="lg"
+              className="min-w-[140px] min-h-[48px] text-base font-medium"
+            >
+              Members
+            </Button>
+            <Button
+              size="lg"
+              variant="ghost"
+              className="min-w-[140px] min-h-[48px] text-base font-medium hover:bg-background/50"
+            >
+              Non-Members
+            </Button>
+          </div>
           <a
-            href="#membership"
+            href="#services"
             className="text-sm font-medium text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
           >
-            Explore membership
+            Explore services
           </a>
         </div>
-
-        <p className="text-sm text-muted-foreground mt-6 animate-fade-up" style={{ animationDelay: "0.3s" }}>
-          No membership required for Pay As You Go.
-        </p>
       </div>
 
       {/* Scroll indicator */}
