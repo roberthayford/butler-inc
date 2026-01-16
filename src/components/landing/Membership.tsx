@@ -106,7 +106,7 @@ const Membership = () => {
               <p className="text-primary-foreground/50 text-sm mt-1">Dynamic pricing based on timing</p>
             </div>
 
-            <Button variant="outline" size="lg" className="w-full border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10">
+            <Button variant="outline" size="lg" className="w-full border-primary-foreground/20 text-charcoal hover:bg-primary-foreground/90 hover:text-charcoal">
               Book as PAYG
             </Button>
           </div>
