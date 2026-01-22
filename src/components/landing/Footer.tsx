@@ -4,8 +4,12 @@ const Footer = () => {
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           <div className="col-span-2 md:col-span-1">
-            <a href="/" className="font-serif text-2xl font-semibold text-primary-foreground">
-              Ohmybutler
+            <a href="/" className="flex items-center">
+              <img
+                src="/images/butler-inc-trans-logo.webp"
+                alt="Butler Inc."
+                className="h-9 w-auto brightness-150"
+              />
             </a>
             <p className="text-sm mt-4 leading-relaxed">
               Your personal butler, on demand – across England.
@@ -44,7 +48,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-primary-foreground/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm">© 2025 Ohmybutler. All rights reserved.</p>
+          <p className="text-sm">© 2025 Butler Inc. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <span className="text-sm">Cambridge & London</span>
           </div>

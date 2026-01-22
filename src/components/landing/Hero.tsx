@@ -15,13 +15,12 @@ const Hero = () => {
 
       <div className="max-w-5xl mx-auto pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] md:px-8 text-center relative z-10">
         <h1 className="font-serif text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-medium tracking-normal text-foreground mb-6 animate-fade-up leading-[1.1] md:leading-[1.15] text-balance">
-          Your personal butler,
-          <br />
-          <span className="italic">on demand</span>
+          Life, <span className="italic">handled.</span>
         </h1>
 
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-up" style={{ animationDelay: "0.1s" }}>
-          Trusted assistants for urgent tasks, luxury sourcing, and home services – across England.
+          Discreet assistance for everything you'd rather not handle yourself.<br className="hidden sm:block" />
+          Across England.
         </p>
 
         <div className="flex flex-col items-center gap-6 animate-fade-up" style={{ animationDelay: "0.2s" }}>
@@ -41,19 +40,6 @@ const Hero = () => {
               Non-Members
             </Button>
           </div>
-          <a
-            href="#services"
-            className="text-sm font-medium text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
-          >
-            Explore services
-          </a>
-        </div>
-      </div>
-
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 rounded-full border-2 border-muted-foreground/30 flex items-start justify-center p-2">
-          <div className="w-1 h-2 bg-muted-foreground/50 rounded-full" />
         </div>
       </div>
     </section>

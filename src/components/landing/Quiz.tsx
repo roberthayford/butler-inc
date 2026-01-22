@@ -153,21 +153,21 @@ const Quiz = ({ open, onOpenChange, onSelectService }: QuizProps) => {
                             </p>
                             <button
                                 onClick={() => handleUrgencySelect("today")}
-                                className="w-full p-4 text-left rounded-lg border border-border hover:border-gold/50 hover:bg-accent/50 transition-all"
+                                className="w-full p-4 text-left rounded-lg border border-border hover:border-brass/50 hover:bg-accent/50 transition-all"
                             >
                                 <span className="font-medium">Today / ASAP</span>
                                 <span className="block text-sm text-muted-foreground">I need urgent help</span>
                             </button>
                             <button
                                 onClick={() => handleUrgencySelect("week")}
-                                className="w-full p-4 text-left rounded-lg border border-border hover:border-gold/50 hover:bg-accent/50 transition-all"
+                                className="w-full p-4 text-left rounded-lg border border-border hover:border-brass/50 hover:bg-accent/50 transition-all"
                             >
                                 <span className="font-medium">This week</span>
                                 <span className="block text-sm text-muted-foreground">I can wait a day or two</span>
                             </button>
                             <button
                                 onClick={() => handleUrgencySelect("flexible")}
-                                className="w-full p-4 text-left rounded-lg border border-border hover:border-gold/50 hover:bg-accent/50 transition-all"
+                                className="w-full p-4 text-left rounded-lg border border-border hover:border-brass/50 hover:bg-accent/50 transition-all"
                             >
                                 <span className="font-medium">Flexible timing</span>
                                 <span className="block text-sm text-muted-foreground">Whenever works best</span>
@@ -183,31 +183,31 @@ const Quiz = ({ open, onOpenChange, onSelectService }: QuizProps) => {
                             </p>
                             <button
                                 onClick={() => handleTaskSelect("errands")}
-                                className="w-full p-4 text-left rounded-lg border border-border hover:border-gold/50 hover:bg-accent/50 transition-all"
+                                className="w-full p-4 text-left rounded-lg border border-border hover:border-brass/50 hover:bg-accent/50 transition-all"
                             >
                                 <span className="font-medium">Deliveries or errands</span>
                             </button>
                             <button
                                 onClick={() => handleTaskSelect("childcare")}
-                                className="w-full p-4 text-left rounded-lg border border-border hover:border-gold/50 hover:bg-accent/50 transition-all"
+                                className="w-full p-4 text-left rounded-lg border border-border hover:border-brass/50 hover:bg-accent/50 transition-all"
                             >
                                 <span className="font-medium">Childcare logistics</span>
                             </button>
                             <button
                                 onClick={() => handleTaskSelect("property")}
-                                className="w-full p-4 text-left rounded-lg border border-border hover:border-gold/50 hover:bg-accent/50 transition-all"
+                                className="w-full p-4 text-left rounded-lg border border-border hover:border-brass/50 hover:bg-accent/50 transition-all"
                             >
                                 <span className="font-medium">Property / home tasks</span>
                             </button>
                             <button
                                 onClick={() => handleTaskSelect("luxury")}
-                                className="w-full p-4 text-left rounded-lg border border-border hover:border-gold/50 hover:bg-accent/50 transition-all"
+                                className="w-full p-4 text-left rounded-lg border border-border hover:border-brass/50 hover:bg-accent/50 transition-all"
                             >
                                 <span className="font-medium">Luxury sourcing</span>
                             </button>
                             <button
                                 onClick={() => handleTaskSelect("custom")}
-                                className="w-full p-4 text-left rounded-lg border border-border hover:border-gold/50 hover:bg-accent/50 transition-all"
+                                className="w-full p-4 text-left rounded-lg border border-border hover:border-brass/50 hover:bg-accent/50 transition-all"
                             >
                                 <span className="font-medium">Something else</span>
                             </button>
@@ -222,21 +222,21 @@ const Quiz = ({ open, onOpenChange, onSelectService }: QuizProps) => {
                             </p>
                             <button
                                 onClick={() => handlePrioritySelect("speed")}
-                                className="w-full p-4 text-left rounded-lg border border-border hover:border-gold/50 hover:bg-accent/50 transition-all"
+                                className="w-full p-4 text-left rounded-lg border border-border hover:border-brass/50 hover:bg-accent/50 transition-all"
                             >
                                 <span className="font-medium">Speed</span>
                                 <span className="block text-sm text-muted-foreground">Get it done fast</span>
                             </button>
                             <button
                                 onClick={() => handlePrioritySelect("value")}
-                                className="w-full p-4 text-left rounded-lg border border-border hover:border-gold/50 hover:bg-accent/50 transition-all"
+                                className="w-full p-4 text-left rounded-lg border border-border hover:border-brass/50 hover:bg-accent/50 transition-all"
                             >
                                 <span className="font-medium">Value</span>
                                 <span className="block text-sm text-muted-foreground">Best price possible</span>
                             </button>
                             <button
                                 onClick={() => handlePrioritySelect("quality")}
-                                className="w-full p-4 text-left rounded-lg border border-border hover:border-gold/50 hover:bg-accent/50 transition-all"
+                                className="w-full p-4 text-left rounded-lg border border-border hover:border-brass/50 hover:bg-accent/50 transition-all"
                             >
                                 <span className="font-medium">Premium experience</span>
                                 <span className="block text-sm text-muted-foreground">Quality over everything</span>
@@ -248,7 +248,7 @@ const Quiz = ({ open, onOpenChange, onSelectService }: QuizProps) => {
                     {step === "result" && result && (
                         <div className="space-y-6">
                             <div className="p-6 rounded-xl bg-ivory text-center">
-                                <h3 className="font-serif text-2xl font-medium text-gold mb-2">
+                                <h3 className="font-serif text-2xl font-medium text-brass mb-2">
                                     {result.name}
                                 </h3>
                                 <p className="text-muted-foreground mb-4">{result.description}</p>
@@ -259,8 +259,8 @@ const Quiz = ({ open, onOpenChange, onSelectService }: QuizProps) => {
                                     <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Pay As You Go</p>
                                     <p className="font-medium">{result.payg}</p>
                                 </div>
-                                <div className="p-4 rounded-lg bg-gold/10 border border-gold/20">
-                                    <p className="text-xs text-gold uppercase tracking-wider mb-1">With Membership</p>
+                                <div className="p-4 rounded-lg bg-brass/10 border border-brass/20">
+                                    <p className="text-xs text-brass uppercase tracking-wider mb-1">With Membership</p>
                                     <p className="font-medium">{result.membership}</p>
                                 </div>
                             </div>

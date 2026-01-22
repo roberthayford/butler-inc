@@ -8,23 +8,23 @@ import {
 const faqs = [
   {
     question: "How much does it cost?",
-    answer: "Pricing is dynamic based on timing, location, and demand. Budget Butler starts from £20/hr for flexible slots, while same-day urgent services are priced higher. You'll always see the exact price before booking.",
+    answer: "Starting from £20 per hour for Budget Butler. Same-day and premium services are priced accordingly. You see the exact cost before you book.",
   },
   {
     question: "How does smart pricing work?",
-    answer: "Our pricing engine rewards you for choosing time slots that fit existing routes. If a butler is already in your area, you'll see \"Best Value\" slots at a lower price. Book during off-peak hours for the best rates, or opt for Budget Butler with flexible timing for maximum savings. Same-day and emergency requests are available at a premium for instant response.",
+    answer: "Off-peak slots and route-efficient bookings cost less. Same-day urgency costs more. Price displayed before you confirm.",
   },
   {
     question: "Can I book without a membership?",
-    answer: "Absolutely. Our Pay As You Go option lets you book Personal Butler services instantly with no commitment. Membership offers better rates and access to Virtual Butler services for regular users.",
+    answer: "Yes. Pay As You Go is instant, requires no sign-up, and covers all Personal Butler services. Members enjoy better rates and additional features.",
   },
   {
     question: "How does the body-cam work?",
-    answer: "For Baby Butler and Base Butler services, you can opt for live-streaming via an encrypted link. The stream is live-only – we don't store any recordings. You control who can access the viewing link.",
+    answer: "For Baby Butler and Base Butler: encrypted live-stream, visible only to you. No recordings stored. You control access.",
   },
   {
     question: "Do you cover my area?",
-    answer: "We prioritise Cambridge and London, where same-day service is typically available. However, any location in England reachable by car or train is eligible. Distance-based pricing applies for areas outside our core hubs, with next-day or scheduled service available nationwide.",
+    answer: "Same-day service in Cambridge and London. Anywhere in England reachable by car or train is eligible—distance pricing applies outside core zones.",
   },
 ];
 
@@ -39,7 +39,7 @@ const FAQ = () => {
         <Accordion type="single" collapsible className="w-full">
           {faqs.map((faq, index) => (
             <AccordionItem key={index} value={`item-${index}`} className="border-b border-border">
-              <AccordionTrigger className="text-left font-serif text-lg font-medium py-6 hover:no-underline hover:text-gold transition-all duration-300 active:scale-[0.98] origin-left">
+              <AccordionTrigger className="text-left font-serif text-lg font-medium py-6 hover:no-underline hover:text-brass transition-all duration-300 active:scale-[0.98] origin-left">
                 {faq.question}
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">

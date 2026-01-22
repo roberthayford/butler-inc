@@ -78,12 +78,12 @@ const ServiceSelector = ({ onServiceSelect }: ServiceSelectorProps) => {
               <button
                 key={service.id}
                 onClick={() => handleServiceClick(service.id)}
-                className="w-full group p-4 md:p-6 rounded-xl bg-background shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] hover:shadow-xl transition-all duration-300 text-left active:scale-[0.98] active:bg-accent/5 border border-transparent hover:border-gold/20"
+                className="w-full group p-4 md:p-6 rounded-xl bg-background shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] hover:shadow-xl transition-all duration-300 text-left active:scale-[0.98] active:bg-accent/5 border border-transparent hover:border-brass/20"
               >
-                <h3 className="font-serif text-lg md:text-xl font-medium text-foreground mb-1 group-hover:text-gold transition-colors">
+                <h3 className="font-serif text-lg md:text-xl font-medium text-foreground mb-1 group-hover:text-brass transition-colors">
                   {service.name}
                 </h3>
-                <p className="text-xs md:text-sm text-gold font-medium uppercase tracking-wider">
+                <p className="text-xs md:text-sm text-brass font-medium uppercase tracking-wider">
                   {service.tagline}
                 </p>
               </button>
@@ -94,7 +94,7 @@ const ServiceSelector = ({ onServiceSelect }: ServiceSelectorProps) => {
             Not sure?{" "}
             <button
               onClick={() => setQuizOpen(true)}
-              className="text-foreground underline underline-offset-4 hover:text-gold transition-colors"
+              className="text-foreground underline underline-offset-4 hover:text-brass transition-colors"
             >
               Take our short quiz
             </button>

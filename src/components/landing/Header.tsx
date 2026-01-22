@@ -18,8 +18,12 @@ const Header = () => {
         }`}
     >
       <nav className="max-w-7xl mx-auto pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] md:px-8 py-4 flex items-center justify-between">
-        <a href="/" className="font-serif text-xl md:text-2xl font-semibold tracking-tight text-foreground">
-          Ohmybutler
+        <a href="/" className="flex items-center">
+          <img
+            src="/images/butler-inc-trans-logo.webp"
+            alt="Butler Inc."
+            className="h-9 md:h-11 w-auto"
+          />
         </a>
         <div className="flex items-center gap-3">
           <a

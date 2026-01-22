@@ -1,6 +1,5 @@
 import Header from "@/components/landing/Header";
 import Hero from "@/components/landing/Hero";
-import ServiceSelector from "@/components/landing/ServiceSelector";
 import HowItWorks from "@/components/landing/HowItWorks";
 import ServiceDetails from "@/components/landing/ServiceDetails";
 import Membership from "@/components/landing/Membership";
@@ -18,7 +17,6 @@ const Index = () => {
     <main className="min-h-screen">
       <Header />
       <Hero />
-      <ServiceSelector onServiceSelect={setSelectedService} />
       <HowItWorks />
       <ServiceDetails
         activeService={selectedService}

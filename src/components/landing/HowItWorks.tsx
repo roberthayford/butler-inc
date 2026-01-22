@@ -3,27 +3,27 @@ import { Button } from "@/components/ui/button";
 const steps = [
   {
     number: "Step 1",
-    title: "Required Service",
-    description: "Choose a butler type and describe your task in under a minute.",
+    title: "Select",
+    description: "Choose a butler. Describe the task. Done in under sixty seconds.",
   },
   {
     number: "Step 2",
-    title: "Pick a time & price",
-    description: "See live time slots with dynamic pricing based on routes and demand.",
+    title: "Confirm",
+    description: "Select an available slot. Price shown upfront.",
   },
   {
     number: "Step 3",
-    title: "We handle the rest",
-    description: "A vetted butler completes your task – track via updates or body-cam where enabled.",
+    title: "Relax",
+    description: "Your butler takes over. Track progress in real time.",
   },
 ];
 
 const HowItWorks = () => {
   return (
-    <section className="section-padding">
+    <section className="section-padding bg-ivory">
       <div className="max-w-5xl mx-auto">
         <h2 className="font-serif text-3xl md:text-4xl font-medium text-center mb-16">
-          How Ohmybutler works
+          How Butler Inc. works
         </h2>
 
         <div className="grid md:grid-cols-3 gap-12 md:gap-8 mb-12">
@@ -34,7 +34,7 @@ const HowItWorks = () => {
                 <div className="hidden md:block absolute top-8 left-[60%] w-[80%] h-px bg-border" />
               )}
 
-              <span className="inline-block font-serif text-4xl text-gold-muted mb-4">
+              <span className="inline-block font-serif text-4xl text-brass-muted mb-4">
                 {step.number}
               </span>
               <h3 className="font-serif text-xl font-medium mb-3">{step.title}</h3>
@@ -45,7 +45,7 @@ const HowItWorks = () => {
 
         <div className="text-center">
           <Button size="lg" className="min-w-[200px]">
-            Start a booking
+            Begin Now
           </Button>
         </div>
       </div>

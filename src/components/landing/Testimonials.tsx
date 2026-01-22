@@ -21,20 +21,20 @@ const Testimonials = () => {
     <section className="section-padding bg-ivory">
       <div className="max-w-5xl mx-auto">
         <h2 className="font-serif text-3xl md:text-4xl font-medium text-center mb-16">
-          Why people love Ohmybutler
+          Why people love Butler Inc.
         </h2>
 
         <div className="grid md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
             <div key={index} className="relative">
-              <div className="absolute -top-4 left-6 text-6xl text-gold/30 font-serif">"</div>
+              <div className="absolute -top-4 left-6 text-6xl text-brass/30 font-serif">"</div>
               <div className="p-6 pt-8 rounded-xl bg-background border border-border">
                 <p className="text-foreground leading-relaxed mb-6 relative z-10">
                   {testimonial.quote}
                 </p>
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">{testimonial.context}</p>
-                  <span className="text-xs font-medium text-gold bg-gold/10 px-2 py-1 rounded">
+                  <span className="text-xs font-medium text-brass bg-brass/10 px-2 py-1 rounded">
                     {testimonial.service}
                   </span>
                 </div>

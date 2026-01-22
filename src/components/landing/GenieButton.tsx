@@ -7,6 +7,7 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog";
 import { useState } from "react";
+import { membershipTiers } from "@/data/membership-tiers";
 
 interface GenieButtonProps {
     variant?: "floating" | "inline";
@@ -26,52 +27,34 @@ const GenieButton = ({ variant = "inline", className = "" }: GenieButtonProps) =
                 onClick={() => setDialogOpen(true)}
                 className={`${buttonClasses} ${className}`}
             >
-                🧞 Genie in a Butler
+                Summon the Genie
             </Button>
 
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle className="font-serif text-xl flex items-center gap-2">
-                            <span className="text-2xl">🧞</span> Summon the Genie
+                            <span className="text-2xl">🧞</span> The Genie
                         </DialogTitle>
                         <DialogDescription className="text-base leading-relaxed">
-                            For those crazy outlandish requests that only a genie can fulfil
-                            <span className="text-muted-foreground/70"> (*within reason 😉)</span>,
-                            or when you desperately need something and none of the time slots work for you.
+                            For the impossible request. The missed deadline. The moment when ordinary service won't do.
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="py-4 space-y-6">
-                        <div className="p-4 rounded-lg bg-red-50 border border-red-100">
-                            <p className="text-sm text-red-800 font-medium mb-1">
-                                💡 Think of it as the button to stop you from:
-                            </p>
-                            <ul className="text-sm text-red-700 space-y-1 ml-4">
-                                <li>• Getting fired</li>
-                                <li>• Your partner being mad you forgot your anniversary</li>
-                                <li>• Missing that critical deadline</li>
-                            </ul>
-                        </div>
-
-                        <div className="p-4 rounded-lg bg-gold/10 border border-gold/20">
-                            <p className="text-sm font-medium text-foreground mb-2">
-                                Genie Button Allowance
+                        <div className="p-4 rounded-lg bg-brass/10 border border-brass/20">
+                            <p className="text-sm font-medium text-foreground mb-3">
+                                Genie Allowance by Tier
                             </p>
                             <div className="grid grid-cols-3 gap-3 text-center text-sm">
-                                <div>
-                                    <p className="text-muted-foreground">Light</p>
-                                    <p className="font-medium">1/year</p>
-                                </div>
-                                <div>
-                                    <p className="text-muted-foreground">Standard</p>
-                                    <p className="font-medium">3/year</p>
-                                </div>
-                                <div>
-                                    <p className="text-muted-foreground">Premium</p>
-                                    <p className="font-medium">6/year</p>
-                                </div>
+                                {membershipTiers.map((tier) => (
+                                    <div key={tier.name}>
+                                        <p className="text-muted-foreground">{tier.name}</p>
+                                        <p className="font-medium">{tier.genieAllowance}</p>
+                                    </div>
+                                ))}
                             </div>
+                            <p className="text-xs text-muted-foreground text-center mt-3">Use it wisely.</p>
                         </div>
 
                         <div className="flex flex-col gap-3">
@@ -79,14 +62,14 @@ const GenieButton = ({ variant = "inline", className = "" }: GenieButtonProps) =
                                 className="w-full bg-red-600 hover:bg-red-700 text-white"
                                 onClick={() => setDialogOpen(false)}
                             >
-                                Summon Now (Members Only)
+                                Summon
                             </Button>
                             <Button
                                 variant="outline"
                                 className="w-full"
                                 onClick={() => setDialogOpen(false)}
                             >
-                                Become a Member
+                                Join
                             </Button>
                         </div>
                     </div>
