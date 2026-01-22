@@ -6,8 +6,8 @@ const Footer = () => {
           <div className="col-span-2 md:col-span-1">
             <a href="/" className="flex items-center">
               <img
-                src="/images/butler-inc-trans-logo.webp"
-                alt="Butler Inc."
+                src="/images/butlers-inc-logo.webp"
+                alt="Butlers Inc."
                 className="h-9 w-auto brightness-150"
               />
             </a>
@@ -48,7 +48,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-primary-foreground/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm">© 2025 Butler Inc. All rights reserved.</p>
+          <p className="text-sm">© 2025 Butlers Inc. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <span className="text-sm">Cambridge & London</span>
           </div>

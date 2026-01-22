@@ -23,7 +23,7 @@ const HowItWorks = () => {
     <section className="section-padding bg-ivory">
       <div className="max-w-5xl mx-auto">
         <h2 className="font-serif text-3xl md:text-4xl font-medium text-center mb-16">
-          How Butler Inc. works
+          How Butlers Inc. works
         </h2>
 
         <div className="grid md:grid-cols-3 gap-12 md:gap-8 mb-12">

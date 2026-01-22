@@ -1,4 +1,4 @@
-# Butler Inc. | Premium Personal Concierge Service
+# Butlers Inc. | Premium Personal Concierge Service
 
 > Your personal butler, on demand. Trusted assistants for urgent tasks, childcare logistics, luxury sourcing and home waiting across England.
 
@@ -9,7 +9,7 @@
 
 ## 📋 Table of Contents
 
-- [About Butler Inc.](#about-butler-inc)
+- [About Butlers Inc.](#about-butler-inc)
 - [Key Features](#key-features)
 - [Tech Stack](#tech-stack)
 - [Design System](#design-system)
@@ -23,9 +23,9 @@
 - [Brand Assets](#brand-assets)
 - [Contributing](#contributing)
 
-## About Butler Inc.
+## About Butlers Inc.
 
-**Butler Inc.** is a premium personal concierge platform designed for discerning professionals, families, and executives across England who value their time and demand exceptional service. We provide vetted, trusted personal assistants who handle everything from urgent logistics to luxury sourcing, all delivered with the discretion and reliability of a traditional British butler.
+**Butlers Inc.** is a premium personal concierge platform designed for discerning professionals, families, and executives across England who value their time and demand exceptional service. We provide vetted, trusted personal assistants who handle everything from urgent logistics to luxury sourcing, all delivered with the discretion and reliability of a traditional British butler.
 
 ### Target Market
 
@@ -36,7 +36,7 @@
 
 ### Business Model
 
-Butler Inc. operates on a flexible pricing structure:
+Butlers Inc. operates on a flexible pricing structure:
 
 - **Pay As You Go**: On-demand service for occasional needs
 - **Membership Tiers**: Three subscription levels (Light, Standard, Premium) offering credits, discounts, and priority access
@@ -114,7 +114,7 @@ Butler Inc. operates on a flexible pricing structure:
 
 ## Design System
 
-Butler Inc. implements a **"Hybrid Enterprise"** design philosophy, blending the elegance of Apple's Human Interface Guidelines with the functionality of Google's Material Design 3 and the clarity of Monday.com's interfaces.
+Butlers Inc. implements a **"Hybrid Enterprise"** design philosophy, blending the elegance of Apple's Human Interface Guidelines with the functionality of Google's Material Design 3 and the clarity of Monday.com's interfaces.
 
 ### Color Palette
 
@@ -215,7 +215,7 @@ Create a `.env` file in the project root if you need to override default configu
 butler-inc-concierge/
 ├── public/
 │   ├── images/
-│   │   └── butler-inc-trans-logo.webp    # Primary logo (19.9KB)
+│   │   └── butlers-inc-logo.webp         # Primary logo
 │   └── favicon.png                        # Bowler hat monogram (309KB)
 │
 ├── src/
@@ -290,7 +290,7 @@ butler-inc-concierge/
 
 ### Centralized Data Layer
 
-Butler Inc. implements a **single source of truth** pattern for business data, extracted into `src/data/`:
+Butlers Inc. implements a **single source of truth** pattern for business data, extracted into `src/data/`:
 
 #### `src/data/services.ts`
 
@@ -415,7 +415,7 @@ export function ServiceDetails() {
 
 ### shadcn/ui Integration
 
-All UI components are sourced from [shadcn/ui](https://ui.shadcn.com/) and customized to match the Butler Inc. design system:
+All UI components are sourced from [shadcn/ui](https://ui.shadcn.com/) and customized to match the Butlers Inc. design system:
 
 1. Components are **copied** into `src/components/ui/` (not installed via npm)
 2. Each component extends Radix UI primitives with Tailwind styling
@@ -527,7 +527,7 @@ npm run build
 
 ### Vercel Deployment (Recommended)
 
-Butler Inc. is currently deployed on **[Vercel](https://vercel.com/)**, optimized for static site hosting:
+Butlers Inc. is currently deployed on **[Vercel](https://vercel.com/)**, optimized for static site hosting:
 
 #### Initial Setup
 
@@ -567,7 +567,7 @@ Create `vercel.json` in project root (if custom configuration needed):
 
 ### Alternative Hosting Platforms
 
-Butler Inc. can be deployed to any static hosting service:
+Butlers Inc. can be deployed to any static hosting service:
 
 - **Netlify**: Drag-and-drop `dist/` folder or connect GitHub repo
 - **Cloudflare Pages**: Push to GitHub, connect repo in Cloudflare dashboard
@@ -592,7 +592,7 @@ The production build includes:
 
 ### Logos
 
-- **Primary Logo**: `/public/images/butler-inc-trans-logo.webp` (19.9KB, transparent background)
+- **Primary Logo**: `/public/images/butlers-inc-logo.webp` (transparent background)
 - **Favicon**: `/public/favicon.png` (309KB, bowler hat monogram)
 - **Apple Touch Icon**: Uses same favicon
 
@@ -652,4 +652,4 @@ For questions or support, contact: [your-email@butlerinc.com]
 
 ---
 
-**Built with ❤️ by the Butler Inc. team**
+**Built with ❤️ by the Butlers Inc. team**

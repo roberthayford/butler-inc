@@ -21,7 +21,7 @@ const Testimonials = () => {
     <section className="section-padding bg-ivory">
       <div className="max-w-5xl mx-auto">
         <h2 className="font-serif text-3xl md:text-4xl font-medium text-center mb-16">
-          Why people love Butler Inc.
+          Why people love Butlers Inc.
         </h2>
 
         <div className="grid md:grid-cols-3 gap-8">
