@@ -152,6 +152,41 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Hero Section - Dark Overlay */
+  .hero-overlay {
+    background: linear-gradient(to bottom,
+        hsl(220 20% 12% / 0.70) 0%,
+        hsl(220 20% 12% / 0.55) 40%,
+        hsl(220 20% 12% / 0.65) 100%);
+  }
+
+  .text-shadow-crisp {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Hero CTA - Dark Mode Styling */
+  .hero-cta-outline {
+    @apply border-2 border-optical-white text-optical-white bg-transparent;
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .hero-cta-outline:hover {
+    @apply border-brass bg-brass text-charcoal;
+  }
+
+  .hero-cta-solid {
+    @apply bg-optical-white text-charcoal border-2 border-optical-white;
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .hero-cta-solid:hover {
+    @apply bg-brass border-brass;
+  }
+
+  .hero-segmented-control {
+    @apply bg-charcoal/40 backdrop-blur-sm;
+  }
 }
 
 @layer utilities {
