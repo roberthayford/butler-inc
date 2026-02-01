@@ -15,8 +15,8 @@ const Hero = () => {
 
   const handleNonMembersClick = () => {
     setActiveSegment("non-members");
-    // Scroll to butler selection grid
-    document.getElementById("butler-selection")?.scrollIntoView({
+    // Scroll to butler categories section
+    document.getElementById("butler-categories")?.scrollIntoView({
       behavior: "smooth",
       block: "start"
     });
@@ -53,8 +53,8 @@ const Hero = () => {
               variant={activeSegment === "members" ? "default" : "ghost"}
               onClick={handleMembersClick}
               className={`min-w-[140px] min-h-[48px] text-base font-medium ${activeSegment === "members"
-                  ? "bg-optical-white text-charcoal hover:bg-optical-white/90"
-                  : "text-optical-white/80 hover:text-optical-white hover:bg-optical-white/10"
+                ? "bg-optical-white text-charcoal hover:bg-optical-white/90"
+                : "text-optical-white/80 hover:text-optical-white hover:bg-optical-white/10"
                 }`}
             >
               Members
@@ -64,8 +64,8 @@ const Hero = () => {
               variant={activeSegment === "non-members" ? "default" : "ghost"}
               onClick={handleNonMembersClick}
               className={`min-w-[140px] min-h-[48px] text-base font-medium ${activeSegment === "non-members"
-                  ? "bg-optical-white text-charcoal hover:bg-optical-white/90"
-                  : "text-optical-white/80 hover:text-optical-white hover:bg-optical-white/10"
+                ? "bg-optical-white text-charcoal hover:bg-optical-white/90"
+                : "text-optical-white/80 hover:text-optical-white hover:bg-optical-white/10"
                 }`}
             >
               Non-Members

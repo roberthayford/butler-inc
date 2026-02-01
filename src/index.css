@@ -187,6 +187,11 @@
   .hero-segmented-control {
     @apply bg-charcoal/40 backdrop-blur-sm;
   }
+
+  /* Butler Category Grid - Custom transition */
+  .duration-350 {
+    transition-duration: 350ms;
+  }
 }
 
 @layer utilities {

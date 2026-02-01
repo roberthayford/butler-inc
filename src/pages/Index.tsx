@@ -1,6 +1,6 @@
 import Header from "@/components/landing/Header";
 import Hero from "@/components/landing/Hero";
-import ButlerSelectionGrid from "@/components/landing/ButlerSelectionGrid";
+import ButlerCategoryGrid from "@/components/landing/ButlerCategoryGrid";
 import HowItWorks from "@/components/landing/HowItWorks";
 import ServiceDetails from "@/components/landing/ServiceDetails";
 import Membership from "@/components/landing/Membership";
@@ -18,7 +18,7 @@ const Index = () => {
     <main className="min-h-screen">
       <Header />
       <Hero />
-      <ButlerSelectionGrid onButlerSelect={setSelectedService} />
+      <ButlerCategoryGrid onCategorySelect={setSelectedService} />
       <HowItWorks />
       <ServiceDetails
         activeService={selectedService}
