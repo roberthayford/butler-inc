@@ -66,7 +66,7 @@ export function BookingFlow({ butlerType }: BookingFlowProps) {
       : BUTLER_TASKS[butlerType].find((t) => t.id === selectedService)?.label;
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto" aria-live="polite" aria-atomic="false">
       <AnimatePresence mode="wait">
         {phase === "service" ? (
           <motion.div
@@ -90,14 +90,14 @@ export function BookingFlow({ butlerType }: BookingFlowProps) {
             transition={{ duration: 0.2 }}
           >
             {/* Selected service summary */}
-            <div className="mb-6 flex items-center justify-between p-3 rounded-lg bg-primary-foreground/5 border border-primary-foreground/10">
+            <div className="mb-6 flex items-center justify-between p-3 rounded-sm bg-primary-foreground/5 border border-primary-foreground/10">
               <span className="text-optical-white text-sm truncate mr-2">
                 {selectedTaskLabel}
               </span>
               <button
                 type="button"
                 onClick={handleBack}
-                className="text-brass text-sm hover:text-brass-muted transition-colors shrink-0"
+                className="text-brass-text text-sm hover:text-brass-muted transition-colors shrink-0"
               >
                 Change
               </button>

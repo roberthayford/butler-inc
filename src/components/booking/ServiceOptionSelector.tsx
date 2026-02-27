@@ -29,7 +29,7 @@ export function ServiceOptionSelector({
         <Textarea
           value={customDescription}
           onChange={(e) => setCustomDescription(e.target.value)}
-          placeholder="Tell us what you need — no request is too ambitious..."
+          placeholder="Describe what you need in as much detail as possible..."
           className="min-h-[120px] bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray resize-none"
         />
         <motion.button
@@ -37,7 +37,7 @@ export function ServiceOptionSelector({
           whileTap={{ scale: 0.98 }}
           onClick={() => onSelect("bespoke", customDescription)}
           disabled={!customDescription.trim()}
-          className="w-full py-3 rounded-lg bg-brass text-charcoal font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors hover:bg-brass-muted"
+          className="w-full py-3 rounded-sm bg-brass text-charcoal font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors hover:bg-brass-muted"
         >
           Continue
         </motion.button>
@@ -68,7 +68,7 @@ export function ServiceOptionSelector({
                 }
               }}
               className={`
-                p-4 rounded-lg text-left transition-all duration-200
+                p-4 rounded-sm text-left transition-all duration-200
                 bg-primary-foreground/5 border backdrop-blur-sm
                 ${
                   isSelected
@@ -100,7 +100,7 @@ export function ServiceOptionSelector({
             whileTap={{ scale: 0.98 }}
             onClick={() => onSelect("other", customDescription)}
             disabled={!customDescription.trim()}
-            className="w-full py-3 rounded-lg bg-brass text-charcoal font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors hover:bg-brass-muted"
+            className="w-full py-3 rounded-sm bg-brass text-charcoal font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors hover:bg-brass-muted"
           >
             Continue
           </motion.button>

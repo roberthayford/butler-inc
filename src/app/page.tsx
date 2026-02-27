@@ -7,8 +7,10 @@ export default function Home() {
   return (
     <>
       <Header />
-      <Hero />
-      <ButlerCategoryGrid />
+      <main id="main-content">
+        <Hero />
+        <ButlerCategoryGrid />
+      </main>
       <Footer />
     </>
   );

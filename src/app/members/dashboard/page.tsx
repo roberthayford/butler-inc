@@ -3,7 +3,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -19,9 +18,8 @@ interface Booking {
 }
 
 export default function MemberDashboard() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, signOut, supabase } = useAuth();
   const router = useRouter();
-  const supabase = createClient();
 
   const { data: bookings, isLoading: bookingsLoading } = useQuery({
     queryKey: ["bookings", user?.id],
@@ -72,7 +70,7 @@ export default function MemberDashboard() {
       </header>
 
       <main className="max-w-4xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-serif font-bold text-optical-white mb-8">
+        <h1 className="text-3xl font-serif font-bold text-optical-white tracking-tight mb-8">
           Your Dashboard
         </h1>
 
@@ -84,7 +82,7 @@ export default function MemberDashboard() {
           {bookingsLoading ? (
             <p className="text-warm-gray">Loading bookings...</p>
           ) : !bookings?.length ? (
-            <div className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-xl p-8 text-center">
+            <div className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-sm p-8 text-center">
               <p className="text-warm-gray mb-4">No bookings yet.</p>
               <Link href="/">
                 <Button className="bg-brass text-charcoal hover:bg-brass-muted">
@@ -97,7 +95,7 @@ export default function MemberDashboard() {
               {bookings.map((booking) => (
                 <div
                   key={booking.id}
-                  className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-lg p-4 flex items-center justify-between"
+                  className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-sm p-4 flex items-center justify-between"
                 >
                   <div>
                     <p className="text-optical-white font-medium">
@@ -108,7 +106,7 @@ export default function MemberDashboard() {
                       {booking.day_option} &bull; {booking.time_slot}
                     </p>
                   </div>
-                  <span className="text-xs font-medium px-2 py-1 rounded bg-brass/20 text-brass">
+                  <span className="text-xs font-medium px-2 py-1 rounded bg-brass/20 text-brass-text">
                     {booking.status}
                   </span>
                 </div>

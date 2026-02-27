@@ -1,25 +1,4 @@
 import { ServiceId } from './services';
-import {
-    ClipboardList,
-    Bike,
-    MapPin,
-    ShieldCheck,
-    BadgePoundSterling,
-    Baby,
-    Heart,
-    Clock,
-    Sparkles,
-    Gift,
-    Crown,
-    Home,
-    Key,
-    Package,
-    Wallet,
-    Calendar,
-    Wand2,
-    Star,
-    type LucideIcon,
-} from 'lucide-react';
 
 /**
  * SEO metadata for each butler type
@@ -43,7 +22,6 @@ export interface ButlerHero {
  * How It Works step
  */
 export interface HowItWorksStep {
-    icon: LucideIcon;
     title: string;
     description: string;
 }
@@ -52,7 +30,6 @@ export interface HowItWorksStep {
  * Trust indicator
  */
 export interface TrustIndicator {
-    icon: LucideIcon;
     text: string;
 }
 
@@ -102,17 +79,14 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             title: 'How Busy Butler works',
             steps: [
                 {
-                    icon: ClipboardList,
                     title: 'Tell us what',
                     description: 'Describe your urgent task and where it needs to go.',
                 },
                 {
-                    icon: Bike,
                     title: 'We collect it',
                     description: 'Butler dispatched within 15 minutes of confirmation.',
                 },
                 {
-                    icon: MapPin,
                     title: 'You receive it',
                     description: 'Live GPS tracking until delivery complete.',
                 },
@@ -128,9 +102,9 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             'Urgent shopping—forgotten ingredients, replacement charger, specific item needed today',
         ],
         trustIndicators: [
-            { icon: ShieldCheck, text: 'DBS checked and reference verified' },
-            { icon: BadgePoundSterling, text: 'Insured for items up to £5,000' },
-            { icon: MapPin, text: 'Live GPS tracking on every delivery' },
+            { text: 'DBS checked and reference verified' },
+            { text: 'Insured for items up to £5,000' },
+            { text: 'Live GPS tracking on every delivery' },
         ],
         accentColor: 'hsl(15 70% 60%)', // Warm coral
     },
@@ -162,18 +136,15 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             title: 'How Baby Butler works',
             steps: [
                 {
-                    icon: Calendar,
                     title: 'Book your slot',
                     description: 'Tell us who, when, and where they need to be.',
                 },
                 {
-                    icon: Baby,
                     title: 'We arrive',
                     description: 'DBS-checked butler arrives with body-cam active.',
                 },
                 {
-                    icon: Heart,
-                    title: 'Peace of mind',
+                    title: 'Safe handover',
                     description: 'Live updates and safe handover confirmed.',
                 },
             ],
@@ -187,9 +158,9 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             'Emergency childcare when regular arrangements fall through',
         ],
         trustIndicators: [
-            { icon: ShieldCheck, text: 'Enhanced DBS check required' },
-            { icon: Baby, text: 'Body-cam equipped for your peace of mind' },
-            { icon: Heart, text: 'Real-time photo updates sent to you' },
+            { text: 'Enhanced DBS check required' },
+            { text: 'Body-cam equipped for your peace of mind' },
+            { text: 'Real-time photo updates sent to you' },
         ],
         accentColor: 'hsl(210 60% 70%)', // Soft blue
     },
@@ -221,17 +192,14 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             title: 'How Bougie Butler works',
             steps: [
                 {
-                    icon: Sparkles,
                     title: 'Share your wish',
-                    description: 'Tell us what you\'re after—no request too ambitious.',
+                    description: 'Tell us what you\'re after. We\'ll confirm what\'s possible within the hour.',
                 },
                 {
-                    icon: Crown,
                     title: 'We source it',
                     description: 'Our network and relationships unlock what others can\'t.',
                 },
                 {
-                    icon: Gift,
                     title: 'Delivered to you',
                     description: 'White-glove presentation to your door or venue.',
                 },
@@ -246,9 +214,9 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             'Personalised luxury holiday planning and booking',
         ],
         trustIndicators: [
-            { icon: Crown, text: 'Exclusive network access' },
-            { icon: ShieldCheck, text: 'Vetted, discreet professionals' },
-            { icon: Star, text: '5-star service guarantee' },
+            { text: 'Exclusive network access' },
+            { text: 'Vetted, discreet professionals' },
+            { text: '5-star service guarantee' },
         ],
         accentColor: 'hsl(345 50% 45%)', // Rich burgundy
     },
@@ -280,17 +248,14 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             title: 'How Base Butler works',
             steps: [
                 {
-                    icon: Key,
                     title: 'Hand over access',
                     description: 'Provide keys or access codes securely.',
                 },
                 {
-                    icon: Home,
                     title: 'We manage it',
                     description: 'Butler on-site, handling exactly what you need.',
                 },
                 {
-                    icon: Package,
                     title: 'You\'re updated',
                     description: 'Photo confirmation and handover report sent.',
                 },
@@ -305,9 +270,9 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             'Coordinate multiple tradesmen on renovation day',
         ],
         trustIndicators: [
-            { icon: ShieldCheck, text: 'DBS checked and insured' },
-            { icon: Home, text: 'Body-cam available on request' },
-            { icon: Key, text: 'Secure key handling protocols' },
+            { text: 'DBS checked and insured' },
+            { text: 'Body-cam available on request' },
+            { text: 'Secure key handling protocols' },
         ],
         accentColor: 'hsl(var(--brass))', // Antique Brass
     },
@@ -339,17 +304,14 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             title: 'How Budget Butler works',
             steps: [
                 {
-                    icon: Calendar,
                     title: 'Flexible booking',
                     description: 'Choose a date range—we fit it in when available.',
                 },
                 {
-                    icon: Wallet,
                     title: 'Best rates',
                     description: 'Lower prices because we optimise our schedule.',
                 },
                 {
-                    icon: Package,
                     title: 'Task complete',
                     description: 'Photo confirmation when done.',
                 },
@@ -364,9 +326,9 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             'Pick up dry cleaning on a flexible schedule',
         ],
         trustIndicators: [
-            { icon: ShieldCheck, text: 'DBS checked, same standards' },
-            { icon: Wallet, text: 'Transparent pricing, no surprises' },
-            { icon: Clock, text: 'Flexible scheduling saves you money' },
+            { text: 'DBS checked, same standards' },
+            { text: 'Transparent pricing, no surprises' },
+            { text: 'Flexible scheduling saves you money' },
         ],
         accentColor: 'hsl(145 40% 50%)', // Sage/Green
     },
@@ -398,17 +360,14 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             title: 'How Bespoke Butler works',
             steps: [
                 {
-                    icon: ClipboardList,
                     title: 'Brief us',
                     description: 'Describe your challenge or vision in detail.',
                 },
                 {
-                    icon: Wand2,
                     title: 'We plan it',
                     description: 'Custom proposal with timeline and transparent pricing.',
                 },
                 {
-                    icon: Star,
                     title: 'We deliver',
                     description: 'End-to-end execution with regular updates.',
                 },
@@ -420,43 +379,13 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             'Complex multi-vendor coordination for a wedding anniversary',
             'Manage entire house move: packing, transit, unpacking',
             'Source and install home office setup while owner is away',
-            'If you can describe it, we can probably do it',
+            'If you can describe it, consider it arranged',
         ],
         trustIndicators: [
-            { icon: Star, text: 'Senior butler assigned to complex requests' },
-            { icon: ShieldCheck, text: 'Fully insured operations' },
-            { icon: Crown, text: 'White-glove service standard' },
+            { text: 'Senior butler assigned to complex requests' },
+            { text: 'Fully insured operations' },
+            { text: 'White-glove service standard' },
         ],
         accentColor: 'hsl(270 40% 55%)', // Lavender/Purple
     },
 };
-
-/**
- * JSON-LD structured data generator for butler pages
- */
-export function generateButlerJsonLd(serviceId: ServiceId, priceFrom: string): object {
-    const config = butlerPageConfigs[serviceId];
-    const priceValue = priceFrom.replace(/[^0-9]/g, '');
-
-    return {
-        '@context': 'https://schema.org',
-        '@type': 'Service',
-        name: config.seo.title.split('|')[1]?.trim() || config.seo.title,
-        provider: {
-            '@type': 'Organization',
-            name: 'Butlers Inc.',
-            url: 'https://butlersinc.co.uk',
-        },
-        areaServed: {
-            '@type': 'City',
-            name: 'London',
-        },
-        description: config.seo.description,
-        offers: {
-            '@type': 'Offer',
-            priceCurrency: 'GBP',
-            price: priceValue || 'Contact for quote',
-            priceValidUntil: '2027-12-31',
-        },
-    };
-}

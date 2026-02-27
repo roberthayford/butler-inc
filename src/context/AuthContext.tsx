@@ -4,16 +4,19 @@ import {
   createContext,
   useContext,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import { createClient } from "@/lib/supabase/client";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { User, Session } from "@supabase/supabase-js";
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  supabase: SupabaseClient;
   signUp: (
     email: string,
     password: string,
@@ -32,7 +35,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
+  const supabaseRef = useRef<SupabaseClient | null>(null);
+  if (!supabaseRef.current) {
+    supabaseRef.current = createClient();
+  }
+  const supabase = supabaseRef.current;
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: s } }) => {
@@ -74,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, loading, signUp, signIn, signOut }}
+      value={{ user, session, loading, supabase, signUp, signIn, signOut }}
     >
       {children}
     </AuthContext.Provider>

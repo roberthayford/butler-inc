@@ -59,24 +59,33 @@ export function BookingForm({ onSubmit, isSubmitting }: BookingFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-      {/* Day Options */}
-      <div className="space-y-3">
-        <Label className="text-optical-white text-base font-serif">
-          When do you need this?
+      {/* Day Options — accessible radiogroup */}
+      <fieldset className="space-y-3">
+        <Label asChild>
+          <legend className="text-optical-white text-base font-serif">
+            When do you need this?
+          </legend>
         </Label>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div
+          role="radiogroup"
+          aria-label="Urgency and pricing"
+          className="grid grid-cols-1 sm:grid-cols-3 gap-3"
+        >
           {DAY_OPTIONS.map((opt) => (
             <motion.button
               key={opt.key}
               type="button"
+              role="radio"
+              aria-checked={selectedDay === opt.key}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() =>
                 setValue("dayOption", opt.key, { shouldValidate: true })
               }
               className={`
-                p-4 rounded-lg text-center transition-all duration-200
+                p-4 rounded-sm text-center transition-colors duration-200
                 bg-primary-foreground/5 border backdrop-blur-sm
+                focus-visible:outline-2 focus-visible:outline-brass
                 ${
                   selectedDay === opt.key
                     ? "border-brass text-optical-white"
@@ -85,13 +94,13 @@ export function BookingForm({ onSubmit, isSubmitting }: BookingFormProps) {
               `}
             >
               <span className="block font-medium">{opt.label}</span>
-              <span className="block text-sm mt-1 text-brass">
+              <span className="block text-sm mt-1 text-brass-text">
                 {opt.priceLabel}
               </span>
             </motion.button>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       {/* Date picker for advance bookings */}
       {selectedDay === "advance" && (
@@ -110,10 +119,10 @@ export function BookingForm({ onSubmit, isSubmitting }: BookingFormProps) {
                   selected={field.value}
                   onSelect={field.onChange}
                   disabled={(date) => date < addDays(new Date(), 3)}
-                  className="rounded-lg border border-primary-foreground/10 bg-primary-foreground/5 text-optical-white"
+                  className="rounded-sm border border-primary-foreground/10 bg-primary-foreground/5 text-optical-white"
                 />
                 {errors.specificDate && (
-                  <p className="text-destructive text-sm mt-1">
+                  <p className="text-destructive text-sm mt-1" role="alert">
                     {errors.specificDate.message}
                   </p>
                 )}
@@ -123,24 +132,33 @@ export function BookingForm({ onSubmit, isSubmitting }: BookingFormProps) {
         </motion.div>
       )}
 
-      {/* Time Slots */}
-      <div className="space-y-3">
-        <Label className="text-optical-white text-base font-serif">
-          Preferred time
+      {/* Time Slots — accessible radiogroup */}
+      <fieldset className="space-y-3">
+        <Label asChild>
+          <legend className="text-optical-white text-base font-serif">
+            Preferred time
+          </legend>
         </Label>
-        <div className="grid grid-cols-3 gap-3">
+        <div
+          role="radiogroup"
+          aria-label="Time of day"
+          className="grid grid-cols-1 sm:grid-cols-3 gap-3"
+        >
           {TIME_SLOTS.map((slot) => (
             <motion.button
               key={slot.key}
               type="button"
+              role="radio"
+              aria-checked={selectedTime === slot.key}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() =>
                 setValue("timeSlot", slot.key, { shouldValidate: true })
               }
               className={`
-                p-4 rounded-lg text-center transition-all duration-200
+                p-4 rounded-sm text-center transition-colors duration-200
                 bg-primary-foreground/5 border backdrop-blur-sm
+                focus-visible:outline-2 focus-visible:outline-brass
                 ${
                   selectedTime === slot.key
                     ? "border-brass text-optical-white"
@@ -155,66 +173,87 @@ export function BookingForm({ onSubmit, isSubmitting }: BookingFormProps) {
             </motion.button>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       {/* Contact Details */}
-      <div className="space-y-4">
-        <Label className="text-optical-white text-base font-serif">
-          Your details
+      <fieldset className="space-y-4">
+        <Label asChild>
+          <legend className="text-optical-white text-base font-serif">
+            Your details
+          </legend>
         </Label>
 
         <div className="space-y-3">
           <div>
+            <label htmlFor="booking-name" className="sr-only">
+              Full name
+            </label>
             <Input
+              id="booking-name"
               {...register("name")}
               placeholder="Full name"
-              className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray"
+              autoComplete="name"
+              className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray focus-visible:ring-brass"
             />
             {errors.name && (
-              <p className="text-destructive text-sm mt-1">
+              <p className="text-destructive text-sm mt-1" role="alert">
                 {errors.name.message}
               </p>
             )}
           </div>
 
           <div>
+            <label htmlFor="booking-email" className="sr-only">
+              Email address
+            </label>
             <Input
+              id="booking-email"
               {...register("email")}
               type="email"
               placeholder="Email address"
-              className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray"
+              autoComplete="email"
+              className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray focus-visible:ring-brass"
             />
             {errors.email && (
-              <p className="text-destructive text-sm mt-1">
+              <p className="text-destructive text-sm mt-1" role="alert">
                 {errors.email.message}
               </p>
             )}
           </div>
 
           <div>
+            <label htmlFor="booking-phone" className="sr-only">
+              Phone number
+            </label>
             <Input
+              id="booking-phone"
               {...register("phone")}
               type="tel"
               placeholder="Phone number"
-              className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray"
+              autoComplete="tel"
+              className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray focus-visible:ring-brass"
             />
             {errors.phone && (
-              <p className="text-destructive text-sm mt-1">
+              <p className="text-destructive text-sm mt-1" role="alert">
                 {errors.phone.message}
               </p>
             )}
           </div>
 
           <div>
+            <label htmlFor="booking-notes" className="sr-only">
+              Additional notes
+            </label>
             <Textarea
+              id="booking-notes"
               {...register("notes")}
               placeholder="Additional notes (optional)"
-              className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray resize-none"
+              className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray resize-none focus-visible:ring-brass"
               rows={3}
             />
           </div>
         </div>
-      </div>
+      </fieldset>
 
       <Button
         type="submit"

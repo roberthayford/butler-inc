@@ -1,11 +1,18 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import type { Metadata } from "next";
 import { services, type ServiceId } from "@/data/services";
 import { butlerPageConfigs } from "@/data/butler-page-configs";
 import type { ButlerTypeKey } from "@/data/butler-tasks";
+import { HeroBackground } from "@/components/ui/hero-background";
+import { ButlerPageSections } from "@/components/butler-page-sections";
 
+/**
+ * bundle-dynamic-imports: BookingFlow is the heaviest client component.
+ * Dynamic import keeps the SSG shell lightweight.
+ */
 const BookingFlow = dynamic(
   () =>
     import("@/components/booking/BookingFlow").then((mod) => ({
@@ -47,33 +54,11 @@ export async function generateMetadata({
   if (!VALID_IDS.includes(id as ServiceId)) return {};
 
   const config = butlerPageConfigs[id as ServiceId];
-  const service = services.find((s) => s.id === id)!;
-  const priceValue = service.priceFrom.replace(/[^0-9]/g, "");
 
   return {
     title: config.seo.title,
     description: config.seo.description,
     keywords: config.seo.keywords,
-    other: {
-      "script:ld+json": JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "Service",
-        name: config.seo.title.split("|")[1]?.trim() || config.seo.title,
-        provider: {
-          "@type": "Organization",
-          name: "Butlers Inc.",
-          url: "https://butlersinc.co.uk",
-        },
-        areaServed: { "@type": "Country", name: "England" },
-        description: config.seo.description,
-        offers: {
-          "@type": "Offer",
-          priceCurrency: "GBP",
-          price: priceValue || "Contact for quote",
-          priceValidUntil: "2027-12-31",
-        },
-      }),
-    },
   };
 }
 
@@ -89,42 +74,124 @@ export default async function ButlerPage({
   }
 
   const butlerType = id as ButlerTypeKey;
-  const config = butlerPageConfigs[id as ServiceId];
+  const serviceId = id as ServiceId;
+  const config = butlerPageConfigs[serviceId];
+  const service = services.find((s) => s.id === id)!;
+
+  const priceValue = service.priceFrom.replace(/[^0-9]/g, "");
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: config.seo.title.split("|")[1]?.trim() || config.seo.title,
+    provider: {
+      "@type": "Organization",
+      name: "Butlers Inc.",
+      url: "https://butlersinc.co.uk",
+    },
+    areaServed: { "@type": "Country", name: "England" },
+    description: config.seo.description,
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "GBP",
+      price: priceValue || "Contact for quote",
+      priceValidUntil: "2027-12-31",
+    },
+  };
 
   return (
     <div className="min-h-screen bg-charcoal">
-      {/* Compact hero */}
-      <header className="pt-24 pb-12 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl sm:text-5xl font-serif font-bold text-optical-white">
-            {config.hero.headline}
-          </h1>
-          <p className="mt-4 text-lg text-warm-gray max-w-2xl mx-auto">
-            {config.hero.subheading}
-          </p>
-        </div>
-      </header>
+      {/* JSON-LD structured data — content is from static data files only, no user input */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      {/* Atmospheric hero with per-butler gradient */}
+      <HeroBackground butlerType={serviceId}>
+        <header className="pt-24 pb-16 px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Breadcrumb navigation */}
+            <nav className="mb-8">
+              <ol className="flex items-center justify-center gap-2 text-sm text-warm-gray">
+                <li>
+                  <Link
+                    href="/"
+                    className="hover:text-optical-white transition-colors"
+                  >
+                    Home
+                  </Link>
+                </li>
+                <li aria-hidden="true">/</li>
+                <li>
+                  <Link
+                    href="/butlers"
+                    className="hover:text-optical-white transition-colors"
+                  >
+                    Butlers
+                  </Link>
+                </li>
+                <li aria-hidden="true">/</li>
+                <li className="text-optical-white">{service.name}</li>
+              </ol>
+            </nav>
 
-      {/* Booking flow wrapped in Suspense */}
-      <main className="px-6 pb-24">
-        <Suspense
-          fallback={
-            <div className="max-w-2xl mx-auto text-center py-12">
-              <p className="text-warm-gray">Loading booking options...</p>
-            </div>
-          }
-        >
-          <BookingFlow butlerType={butlerType} />
-        </Suspense>
+            <h1 className="text-4xl sm:text-5xl font-serif font-bold text-optical-white tracking-tight">
+              {config.hero.headline}
+            </h1>
+            <p className="mt-4 text-lg text-warm-gray max-w-2xl mx-auto leading-relaxed">
+              {config.hero.subheading}
+            </p>
+
+            {/* Price badge */}
+            {service.priceFrom !== "Quote" ? (
+              <p className="mt-6 text-sm text-brass-text font-medium">
+                From {service.priceFrom}/hr
+              </p>
+            ) : (
+              <p className="mt-6 text-sm text-brass-text font-medium">
+                Custom quote
+              </p>
+            )}
+          </div>
+        </header>
+      </HeroBackground>
+
+      {/* Content sections: How It Works, Trust Indicators, Common Requests */}
+      <div className="px-6 py-20 border-b border-primary-foreground/5">
+        <ButlerPageSections config={config} />
+      </div>
+
+      {/* Booking flow */}
+      <main id="book" className="px-6 py-20">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-serif font-semibold text-optical-white text-center tracking-tight mb-10">
+            Book your {service.shortName} Butler
+          </h2>
+          <Suspense
+            fallback={
+              <div className="text-center py-12">
+                <p className="text-warm-gray">Loading booking options...</p>
+              </div>
+            }
+          >
+            <BookingFlow butlerType={butlerType} />
+          </Suspense>
+        </div>
       </main>
 
-      <div className="text-center pb-12">
-        <a
+      {/* Footer navigation */}
+      <div className="text-center pb-12 space-y-3">
+        <Link
+          href="/butlers"
+          className="text-warm-gray text-sm hover:text-optical-white transition-colors block"
+        >
+          Explore other butlers
+        </Link>
+        <Link
           href="/"
-          className="text-warm-gray text-sm hover:text-optical-white transition-colors"
+          className="text-warm-gray text-sm hover:text-optical-white transition-colors block"
         >
           &larr; Back to home
-        </a>
+        </Link>
       </div>
     </div>
   );

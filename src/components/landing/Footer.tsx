@@ -14,14 +14,14 @@ export function Footer() {
             >
               Butlers Inc.
             </Link>
-            <p className="text-warm-gray text-sm mt-3 max-w-xs">
+            <p className="text-warm-gray text-sm mt-3 max-w-xs leading-relaxed">
               Premium concierge service across England. Your personal butler, on
               demand.
             </p>
             <p className="text-warm-gray text-sm mt-4">
               <a
                 href="mailto:hello@butlersinc.co.uk"
-                className="hover:text-brass transition-colors"
+                className="hover:text-brass-text transition-colors"
               >
                 hello@butlersinc.co.uk
               </a>
@@ -38,7 +38,7 @@ export function Footer() {
                 <li key={s.id}>
                   <Link
                     href={`/butlers/${s.id}`}
-                    className="text-warm-gray text-sm hover:text-brass transition-colors"
+                    className="text-warm-gray text-sm hover:text-brass-text transition-colors"
                   >
                     {s.name}
                   </Link>
@@ -52,14 +52,20 @@ export function Footer() {
             <h4 className="text-optical-white font-semibold mb-4">Legal</h4>
             <ul className="space-y-2">
               <li>
-                <span className="text-warm-gray text-sm">
+                <Link
+                  href="/privacy"
+                  className="text-warm-gray text-sm hover:text-brass-text transition-colors"
+                >
                   Privacy Policy
-                </span>
+                </Link>
               </li>
               <li>
-                <span className="text-warm-gray text-sm">
+                <Link
+                  href="/terms"
+                  className="text-warm-gray text-sm hover:text-brass-text transition-colors"
+                >
                   Terms of Service
-                </span>
+                </Link>
               </li>
             </ul>
           </div>

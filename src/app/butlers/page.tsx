@@ -13,11 +13,11 @@ export default function ButlersPage() {
     <div className="min-h-screen bg-charcoal">
       <header className="pt-24 pb-12 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl sm:text-5xl font-serif font-bold text-optical-white">
+          <h1 className="text-4xl sm:text-5xl font-serif font-bold text-optical-white tracking-tight">
             Our Butlers
           </h1>
-          <p className="mt-4 text-lg text-warm-gray max-w-2xl mx-auto">
-            Six specialist butlers. One mission: get it done.
+          <p className="mt-4 text-lg text-warm-gray max-w-2xl mx-auto leading-relaxed">
+            Six specialist butlers. Each one precisely matched to the task.
           </p>
         </div>
       </header>
@@ -28,7 +28,7 @@ export default function ButlersPage() {
             <Link
               key={service.id}
               href={`/butlers/${service.id}`}
-              className="block p-6 rounded-xl bg-primary-foreground/5 border border-primary-foreground/10 hover:border-brass/50 transition-all duration-350 hover:bg-primary-foreground/10"
+              className="block p-6 rounded-sm bg-primary-foreground/5 border border-primary-foreground/10 hover:border-brass-text/50 transition-all duration-350 hover:bg-primary-foreground/10"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -39,7 +39,7 @@ export default function ButlersPage() {
                     {service.subtitle}
                   </p>
                 </div>
-                <span className="text-sm font-medium px-3 py-1 rounded bg-brass/20 text-brass shrink-0 ml-4">
+                <span className="text-sm font-medium px-3 py-1 rounded bg-brass/20 text-brass-text shrink-0 ml-4">
                   {service.priceFrom === "Quote"
                     ? "Quote"
                     : `From ${service.priceFrom}`}

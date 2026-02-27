@@ -47,7 +47,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-charcoal flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-serif font-bold text-optical-white">
+          <h1 className="text-3xl font-serif font-bold text-optical-white tracking-tight">
             Welcome Back
           </h1>
           <p className="text-warm-gray mt-2">
@@ -55,7 +55,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <div className="bg-primary-foreground/5 border border-primary-foreground/10 backdrop-blur-sm rounded-xl p-8">
+        <div className="bg-primary-foreground/5 border border-primary-foreground/10 backdrop-blur-sm rounded-sm p-8">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
               <FormField
@@ -112,7 +112,7 @@ export default function LoginPage() {
             Don&apos;t have an account?{" "}
             <Link
               href="/members/signup"
-              className="text-brass hover:text-brass-muted transition-colors"
+              className="text-brass-text hover:text-brass-muted transition-colors"
             >
               Join Butlers Inc.
             </Link>

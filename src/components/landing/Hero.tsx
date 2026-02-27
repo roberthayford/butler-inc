@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "motion/react";
+import { LandingHeroBackground } from "@/components/ui/hero-background";
 
 export function Hero() {
   const router = useRouter();
@@ -20,29 +22,50 @@ export function Hero() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Dark overlay */}
-      <div className="absolute inset-0 hero-overlay z-10" />
-      <div className="absolute inset-0 bg-charcoal" />
-
-      <div className="relative z-20 text-center px-6 max-w-4xl mx-auto">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-optical-white text-shadow-crisp leading-tight">
+    <LandingHeroBackground className="min-h-screen flex items-center justify-center">
+      <div className="text-center px-6 max-w-4xl mx-auto">
+        {/* Staggered entrance: headline -> subtitle -> CTA */}
+        <motion.h1
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-optical-white tracking-tight leading-tight"
+        >
           Your personal butler, on demand.
-        </h1>
-        <p className="mt-6 text-lg sm:text-xl text-optical-white/80 text-shadow-crisp">
-          Across England. From £35/hr.
-        </p>
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.6,
+            delay: 0.15,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="mt-6 text-lg sm:text-xl text-optical-white/90 leading-relaxed"
+        >
+          Across England. From &pound;35/hr.
+        </motion.p>
 
         {/* Segmented control */}
-        <div className="mt-10 inline-flex rounded-full hero-segmented-control p-1">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.5,
+            delay: 0.3,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="mt-10 inline-flex gap-8"
+        >
           <button
             onClick={() => handleTabClick("non-members")}
             className={`
-              px-6 py-3 rounded-full text-sm font-medium transition-all duration-300
+              px-1 pb-2 text-sm font-medium tracking-wide transition-all duration-300 border-b-2
               ${
                 activeTab === "non-members"
-                  ? "bg-optical-white text-charcoal"
-                  : "text-optical-white/70 hover:text-optical-white"
+                  ? "border-optical-white text-optical-white"
+                  : "border-transparent text-optical-white/50 hover:text-optical-white"
               }
             `}
           >
@@ -51,18 +74,18 @@ export function Hero() {
           <button
             onClick={() => handleTabClick("members")}
             className={`
-              px-6 py-3 rounded-full text-sm font-medium transition-all duration-300
+              px-1 pb-2 text-sm font-medium tracking-wide transition-all duration-300 border-b-2
               ${
                 activeTab === "members"
-                  ? "bg-optical-white text-charcoal"
-                  : "text-optical-white/70 hover:text-optical-white"
+                  ? "border-optical-white text-optical-white"
+                  : "border-transparent text-optical-white/50 hover:text-optical-white"
               }
             `}
           >
             Members
           </button>
-        </div>
+        </motion.div>
       </div>
-    </section>
+    </LandingHeroBackground>
   );
 }
