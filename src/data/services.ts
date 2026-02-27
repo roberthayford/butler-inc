@@ -42,7 +42,7 @@ export const services: Service[] = [
         name: "Bougie Butler",
         shortName: "Bougie",
         subtitle: "Luxury sourcing & experiences",
-        image: "/images/bougie-butler.png",
+        image: "/images/nano-banana.png",
         examples: [
             "Source rare scotch only sold in a tiny shop in Scotland",
             "Plan and organise a personalised family holiday",

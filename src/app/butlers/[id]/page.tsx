@@ -109,31 +109,6 @@ export default async function ButlerPage({
       <HeroBackground butlerType={serviceId}>
         <header className="pt-24 pb-16 px-6">
           <div className="max-w-4xl mx-auto text-center">
-            {/* Breadcrumb navigation */}
-            <nav className="mb-8">
-              <ol className="flex items-center justify-center gap-2 text-sm text-warm-gray">
-                <li>
-                  <Link
-                    href="/"
-                    className="hover:text-optical-white transition-colors"
-                  >
-                    Home
-                  </Link>
-                </li>
-                <li aria-hidden="true">/</li>
-                <li>
-                  <Link
-                    href="/butlers"
-                    className="hover:text-optical-white transition-colors"
-                  >
-                    Butlers
-                  </Link>
-                </li>
-                <li aria-hidden="true">/</li>
-                <li className="text-optical-white">{service.name}</li>
-              </ol>
-            </nav>
-
             <h1 className="text-4xl sm:text-5xl font-serif font-bold text-optical-white tracking-tight">
               {config.hero.headline}
             </h1>
@@ -185,12 +160,6 @@ export default async function ButlerPage({
           className="text-warm-gray text-sm hover:text-optical-white transition-colors block"
         >
           Explore other butlers
-        </Link>
-        <Link
-          href="/"
-          className="text-warm-gray text-sm hover:text-optical-white transition-colors block"
-        >
-          &larr; Back to home
         </Link>
       </div>
     </div>

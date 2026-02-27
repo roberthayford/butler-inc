@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "motion/react";
 import { services, type ServiceId } from "@/data/services";
 import { butlerPageConfigs } from "@/data/butler-page-configs";
@@ -26,7 +27,8 @@ const STAGGER_DELAY = 0.06;
 
 export function ButlerCategoryGrid() {
   return (
-    <section id="butler-categories" className="bg-charcoal section-padding">
+    <section id="butler-categories" className="bg-charcoal section-padding relative">
+      <div className="bg-noise" />
       <div className="max-w-6xl mx-auto">
         <motion.h2
           initial={{ opacity: 0, y: 16 }}
@@ -70,14 +72,26 @@ export function ButlerCategoryGrid() {
               >
                 <Link
                   href={`/butlers/${service.id}`}
-                  className="group relative overflow-hidden block p-6 rounded-sm bg-primary-foreground/5 border border-primary-foreground/10 backdrop-blur-sm hover:border-primary-foreground/25 transition-all duration-350 hover:bg-primary-foreground/10 h-full"
+                  className="group relative overflow-hidden block p-6 rounded-sm bg-primary-foreground/5 border border-primary-foreground/10 backdrop-blur-sm hover:border-primary-foreground/25 transition-all duration-500 ease-out hover:bg-primary-foreground/10 h-full"
                 >
-                  {/* Accent gradient bar at top */}
                   <div
-                    className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${accent} opacity-0 group-hover:opacity-100 transition-opacity duration-350`}
+                    className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${accent} opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out z-20`}
                   />
 
-                  <div className="flex items-start justify-between mb-3">
+                  {/* Atmospheric Image Layer */}
+                  {service.image && (
+                    <div className="absolute inset-0 z-0 overflow-hidden rounded-sm opacity-10 group-hover:opacity-40 transition-opacity duration-700 ease-out mix-blend-luminosity">
+                      <Image
+                        src={service.image}
+                        alt={`${service.name} background`}
+                        fill
+                        className="object-cover scale-105 group-hover:scale-100 transition-transform duration-1000 ease-out"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/80 to-transparent" />
+                    </div>
+                  )}
+
+                  <div className="relative z-10 flex items-start justify-between mb-3">
                     <h3 className="text-xl font-serif font-semibold text-optical-white group-hover:text-brass-text transition-colors">
                       {service.name}
                     </h3>
@@ -87,12 +101,11 @@ export function ButlerCategoryGrid() {
                         : `From ${service.priceFrom}`}
                     </span>
                   </div>
-                  <p className="text-warm-gray text-sm leading-relaxed">
+                  <p className="relative z-10 text-warm-gray text-sm leading-relaxed">
                     {service.subtitle}
                   </p>
 
-                  {/* Use cases from hero config */}
-                  <ul className="mt-3 space-y-1.5">
+                  <ul className="relative z-10 mt-3 space-y-1.5">
                     {config.hero.useCases.slice(0, 2).map((useCase, j) => (
                       <li
                         key={j}

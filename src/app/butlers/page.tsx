@@ -50,14 +50,6 @@ export default function ButlersPage() {
         </div>
       </main>
 
-      <div className="text-center pb-12">
-        <Link
-          href="/"
-          className="text-warm-gray text-sm hover:text-optical-white transition-colors"
-        >
-          &larr; Back to home
-        </Link>
-      </div>
     </div>
   );
 }

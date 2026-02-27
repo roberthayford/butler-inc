@@ -7,7 +7,8 @@
  * string crosses the server/client boundary.
  */
 
-import type { ServiceId } from "@/data/services";
+import Image from "next/image";
+import { services, type ServiceId } from "@/data/services";
 
 const BUTLER_ATMOSPHERES: Record<
   ServiceId,
@@ -75,6 +76,7 @@ export function HeroBackground({
   className = "",
 }: HeroBackgroundProps) {
   const atmosphere = BUTLER_ATMOSPHERES[butlerType];
+  const serviceImage = services.find((s) => s.id === butlerType)?.image;
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
@@ -101,6 +103,20 @@ export function HeroBackground({
           background: `linear-gradient(135deg, transparent 40%, ${atmosphere.accent} 50%, transparent 60%)`,
         }}
       />
+
+      {/* Atmospheric Image Layer */}
+      {serviceImage && (
+        <div className="absolute inset-0 z-0 overflow-hidden opacity-20 mix-blend-luminosity pointer-events-none">
+          <Image
+            src={serviceImage}
+            alt="Hero background"
+            fill
+            priority
+            className="object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/60 to-charcoal/30" />
+        </div>
+      )}
 
       {/* Content */}
       <div className="relative z-10">{children}</div>
