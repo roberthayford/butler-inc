@@ -25,7 +25,7 @@ export const services: Service[] = [
             "Get document notarised and personally deliver to Edinburgh",
             "Emergency pickup and same-day hand delivery",
         ],
-        priceFrom: "£45",
+        priceFrom: "£35",
     },
     {
         id: "baby",
@@ -40,7 +40,7 @@ export const services: Service[] = [
             "Watch your child for a few hours between activities",
             "Check on elderly relative who isn't answering the phone",
         ],
-        priceFrom: "£50",
+        priceFrom: "£35",
     },
     {
         id: "bougie",
@@ -54,7 +54,7 @@ export const services: Service[] = [
             "Plan and organise a personalised family holiday",
             "Secure VIP reservations and exclusive event access",
         ],
-        priceFrom: "£80",
+        priceFrom: "£35",
     },
     {
         id: "base",
@@ -83,7 +83,7 @@ export const services: Service[] = [
             "Do a big weekly shop and stock the fridge",
             "Non-urgent errands with flexible timing",
         ],
-        priceFrom: "£20",
+        priceFrom: "£35",
     },
     {
         id: "bespoke",

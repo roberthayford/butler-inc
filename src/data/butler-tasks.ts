@@ -1,48 +1,78 @@
-/**
- * Task options for each butler type
- * 
- * Used in the reservation form to help users select what they need.
- * Each butler type has predefined tasks, with an "Other" option available.
- */
-
-import type { ButlerTypeKey } from './pricing-config';
+export type ButlerTypeKey =
+  | "busy"
+  | "baby"
+  | "bougie"
+  | "base"
+  | "budget"
+  | "bespoke";
 
 export interface ButlerTask {
   id: string;
   label: string;
 }
 
-/**
- * Task options for each butler type
- * 
- * Phase 1: Only Busy Butler tasks are actively used
- * Other butler tasks are defined for Phase 2 implementation
- */
 export const BUTLER_TASKS: Record<ButlerTypeKey, ButlerTask[]> = {
   busy: [
-    { id: 'courier', label: 'Courier/delivery' },
-    { id: 'document', label: 'Document pickup' },
-    { id: 'shopping', label: 'Urgent shopping' },
+    { id: "courier", label: "Courier and package services" },
+    {
+      id: "errands",
+      label: "Household errands, maintenance, decoration, organisation",
+    },
+    {
+      id: "personal",
+      label: "Personal, confidential or sensitive errands",
+    },
+    { id: "stand-in", label: "Stand in, proxy attendance" },
+    { id: "cross-country", label: "Cross country errands" },
+    { id: "procurement", label: "Procurement services" },
+    { id: "gifting", label: "Corporate and personal gifting" },
+    { id: "other", label: "Other" },
   ],
   baby: [
-    { id: 'school-run', label: 'School run' },
-    { id: 'childcare-logistics', label: 'Childcare logistics' },
-    { id: 'elderly-check', label: 'Elderly welfare check' },
+    { id: "school-runs", label: "School runs" },
+    {
+      id: "recital-recording",
+      label: "School play and recital recording",
+    },
+    { id: "babysitting", label: "Baby sitting" },
+    { id: "forgotten-items", label: "Forgotten items runs to school" },
+    { id: "parent-respite", label: "Parent respite" },
+    { id: "activity-planning", label: "Kids activity planning" },
+    { id: "welfare-checks", label: "Welfare checks on elderly" },
+    { id: "other", label: "Other" },
   ],
   bougie: [
-    { id: 'luxury-sourcing', label: 'Luxury sourcing' },
-    { id: 'vip-access', label: 'VIP event access' },
-    { id: 'exclusive-reservations', label: 'Exclusive reservations' },
+    { id: "rare-sourcing", label: "Sourcing rare or high value items" },
+    { id: "gift-packages", label: "Personalised gift packages" },
+    { id: "special-order", label: "Special order involving travel" },
+    { id: "luxury-lifestyle", label: "Luxury lifestyle" },
+    { id: "holiday-planning", label: "Luxury holiday planning" },
+    { id: "event-organising", label: "Luxury event organising" },
+    { id: "other", label: "Other" },
   ],
   base: [
-    { id: 'key-holding', label: 'Key holding' },
-    { id: 'tradesman-coordination', label: 'Tradesman coordination' },
-    { id: 'property-check', label: 'Property check' },
+    { id: "house-waiting", label: "House waiting" },
+    {
+      id: "property-management",
+      label: "Vacant property management and maintenance",
+    },
+    {
+      id: "key-holding",
+      label: "Key holding, mail sorting, delivery acceptance, plant watering",
+    },
+    { id: "pickups", label: "Pick ups and drop offs, forgotten items" },
+    { id: "wait-staff", label: "Wait staff during dinner parties" },
+    { id: "grocery-delivery", label: "Grocery delivery and set up" },
+    { id: "other", label: "Other" },
   ],
   budget: [
-    { id: 'general-errands', label: 'General errands' },
-    { id: 'non-urgent-shopping', label: 'Non-urgent shopping' },
-    { id: 'returns-exchanges', label: 'Returns/exchanges' },
+    { id: "errands", label: "General errands and household tasks" },
+    { id: "grocery", label: "Grocery shopping and delivery" },
+    { id: "plant-care", label: "Plant watering and home checks" },
+    { id: "returns", label: "Returns, exchanges, and drop-offs" },
+    { id: "mail-packages", label: "Mail sorting and package collection" },
+    { id: "non-urgent-shopping", label: "Non-urgent shopping" },
+    { id: "other", label: "Other" },
   ],
-  bespoke: [], // Bespoke butler uses free-text description only
+  bespoke: [],
 };
