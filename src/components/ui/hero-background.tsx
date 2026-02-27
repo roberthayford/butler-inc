@@ -148,9 +148,21 @@ export function LandingHeroBackground({
         }}
       />
 
-      {/* Noise texture */}
+      {/* Atmospheric Image Layer */}
+      <div className="absolute inset-0 z-0 overflow-hidden opacity-30 mix-blend-luminosity pointer-events-none">
+        <Image
+          src="/images/landing-hero-bg.png"
+          alt="Premium concierge background"
+          fill
+          priority
+          className="object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/80 to-charcoal/40" />
+      </div>
+
+      {/* Noise texture overlay on top of everything for cinematic grain */}
       <div
-        className="absolute inset-0 opacity-40"
+        className="absolute inset-0 opacity-40 mix-blend-overlay pointer-events-none"
         style={{
           backgroundImage: NOISE_SVG,
           backgroundRepeat: "repeat",
