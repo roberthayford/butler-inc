@@ -29,7 +29,7 @@
 | Token | HSL Value | Hex Equivalent | Purpose |
 |-------|-----------|----------------|---------|
 | **Sage** | `145 25% 45%` | `#5B9473` | Trust indicators, success states, body-cam badges |
-| **Sage Light** | `145 30% 92%` | `#E4F2E9` | Success backgrounds, trust icon circles |
+| **Sage Light** | `145 30% 92%` | `#E4F2E9` | Success backgrounds, trust indicator highlights |
 | **Warm Gray** | `30 8% 60%` | `#9E9893` | Secondary text, muted content |
 | **Destructive Red** | `0 72% 51%` | `#DF3131` | "Genie" emergency button, destructive actions |
 
@@ -45,7 +45,7 @@
 
 - **Sophisticated & Understated**: No bright colours or playful tones; muted palette projects mature confidence
 - **Warm Luxury**: The brass and cream combination evokes antique brass fixtures, leather-bound books, and traditional British service
-- **Trustworthy & Discreet**: Sage green for safety messaging, restrained colour palette, minimal decorative elements
+- **Trustworthy & Discreet**: Sage green for safety messaging, restrained colour palette, no decorative icons; typography and layout carry the interface
 - **Modern Refinement**: Clean interfaces despite luxury positioning; no ornate details or excessive embellishment
 
 ---
@@ -123,7 +123,7 @@ Based on design choices, the target audience appears to be:
 
 | Trait | Expression in UI |
 |-------|------------------|
-| **Discretion** | "Discreet assistance", muted visuals, no flashy elements |
+| **Discretion** | "Discreet assistance", muted visuals, no flashy elements, no decorative iconography |
 | **Reliability** | Trust & Safety section, DBS checks, vetting process |
 | **Sophistication** | Antique brass, serif headings, "Bougie Butler" tier |
 | **Efficiency** | "Done in under sixty seconds", real-time tracking, smart pricing |
@@ -143,18 +143,22 @@ Based on design choices, the target audience appears to be:
 
 ### Observed UI Patterns
 
-1. **Section Rhythm**: Alternating background colours (cream → charcoal → ivory → charcoal) create clear visual separation without hard borders
+1. **Architectural Geometry**: 2px base radius (`rounded-sm`) on all components. No pill shapes, no `rounded-full`, no `rounded-xl`. Square corners convey precision and intentionality.
 
-2. **Card Elevation Pattern**:
+2. **Icon-Free Marketing Content**: No decorative Lucide icons on any marketing-facing surface. Sequential content uses typographic numerals (`01`, `02`, `03` in brand serif). Trust indicators use em-dash-separated text. Lucide is retained only for shadcn/ui functional primitives (accordion chevrons, checkbox marks, calendar navigation).
+
+3. **Section Rhythm**: Alternating background colours (cream → charcoal → ivory → charcoal) create clear visual separation without hard borders
+
+4. **Card Elevation Pattern**:
    - Light sections: `bg-background border border-border` with subtle `shadow-sm`
    - Dark sections: `bg-primary-foreground/5 border border-primary-foreground/10 backdrop-blur`
    - Hover states elevate with `-translate-y-1 shadow-2xl`
 
-3. **Glass-morphism on Dark**: Butler category cards and membership cards use `backdrop-blur` with translucent backgrounds
+5. **Glass-morphism on Dark**: Butler category cards and membership cards use `backdrop-blur` with translucent backgrounds
 
-4. **Consistent Spacing**: Section padding follows `py-24 md:py-32 lg:py-40` pattern with safe-area-inset support
+6. **Consistent Spacing**: Section padding follows `py-24 md:py-32 lg:py-40` pattern with safe-area-inset support
 
-5. **Grid Patterns**:
+7. **Grid Patterns**:
    - 2-column for membership comparison
    - 3-column for features, testimonials, trust indicators
    - 6-item butler grid as 1×6 (mobile) → 2×3 (tablet) → 3×2 (desktop)

@@ -1,5 +1,7 @@
 # Butlers Inc. Product Requirements Document
 
+> **HISTORICAL REFERENCE ONLY** — This document reflects the pre-migration React + Vite SPA architecture (React Router 6, Tailwind 3, `src/index.css`). The project has since migrated to Next.js 16 with Tailwind 4. For current architecture and design patterns, see `docs/design-system.md` and the live codebase.
+
 > Comprehensive PRD derived from codebase analysis.
 > **Version:** 1.0 • **Generated:** February 2026
 
