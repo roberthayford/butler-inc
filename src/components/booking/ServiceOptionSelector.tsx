@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "motion/react";
 import { BUTLER_TASKS, type ButlerTypeKey } from "@/data/butler-tasks";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +17,13 @@ export function ServiceOptionSelector({
   const tasks = BUTLER_TASKS[butlerType];
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [customDescription, setCustomDescription] = useState("");
+  const otherRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (selectedId === "other" && otherRef.current) {
+      otherRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [selectedId]);
 
   const isBespoke = butlerType === "bespoke";
 
@@ -85,6 +92,7 @@ export function ServiceOptionSelector({
 
       {selectedId === "other" && (
         <motion.div
+          ref={otherRef}
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
           className="space-y-3"

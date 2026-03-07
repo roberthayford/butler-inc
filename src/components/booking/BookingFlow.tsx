@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
@@ -18,6 +18,17 @@ export function BookingFlow({ butlerType }: BookingFlowProps) {
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [customDescription, setCustomDescription] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const formRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (phase === "form") {
+      // Small delay to let AnimatePresence finish the swap
+      const timer = setTimeout(() => {
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 250);
+      return () => clearTimeout(timer);
+    }
+  }, [phase]);
 
   const handleServiceSelect = (taskId: string, description?: string) => {
     setSelectedService(taskId);
@@ -83,6 +94,7 @@ export function BookingFlow({ butlerType }: BookingFlowProps) {
           </motion.div>
         ) : (
           <motion.div
+            ref={formRef}
             key="form"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
