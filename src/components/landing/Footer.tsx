@@ -20,10 +20,10 @@ export function Footer() {
             </p>
             <p className="text-warm-gray text-sm mt-4">
               <a
-                href="mailto:hello@butlersinc.co.uk"
+                href="mailto:hello@butlersinc.com"
                 className="hover:text-brass-text transition-colors"
               >
-                hello@butlersinc.co.uk
+                hello@butlersinc.com
               </a>
             </p>
           </div>

@@ -86,7 +86,7 @@ export default async function ButlerPage({
     provider: {
       "@type": "Organization",
       name: "Butlers Inc.",
-      url: "https://butlersinc.co.uk",
+      url: "https://butlersinc.com",
     },
     areaServed: { "@type": "Country", name: "England" },
     description: config.seo.description,

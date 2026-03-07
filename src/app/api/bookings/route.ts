@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { after } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 import { z } from "zod";
 
@@ -39,13 +39,14 @@ export async function POST(request: NextRequest) {
 
   const data = parsed.data;
   const supabase = await createClient();
+  const admin = createServiceClient();
   const reference = generateReference();
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { error: insertError } = await supabase.from("bookings").insert({
+  const { error: insertError } = await admin.from("bookings").insert({
     user_id: user?.id ?? null,
     butler_type: data.butlerType,
     service_option: data.serviceOption,
@@ -71,9 +72,14 @@ export async function POST(request: NextRequest) {
 
   // server-after-nonblocking: send email without blocking the response
   after(async () => {
+    console.log("[after] callback started for booking:", reference);
     try {
       const resendKey = process.env.RESEND_API_KEY;
-      if (!resendKey || resendKey === "your-resend-api-key") return;
+      console.log("[after] RESEND_API_KEY present:", !!resendKey, "value starts with:", resendKey?.slice(0, 6));
+      if (!resendKey || resendKey === "your-resend-api-key") {
+        console.warn("[after] Skipping email — no valid Resend key");
+        return;
+      }
 
       const resend = new Resend(resendKey);
 
@@ -84,10 +90,11 @@ export async function POST(request: NextRequest) {
             ? "£55/hr"
             : "£35/hr";
 
-      await Promise.all([
+      console.log("[after] Sending emails to:", "hello@butlersinc.com", "and", data.email);
+      const results = await Promise.all([
         resend.emails.send({
-          from: "Butlers Inc. <bookings@butlersinc.co.uk>",
-          to: "bookings@butlersinc.co.uk",
+          from: "Butlers Inc. <bookings@butlersinc.com>",
+          to: "hello@butlersinc.com",
           subject: `New Booking: ${reference} - ${data.butlerType} Butler`,
           html: `
             <h2>New Booking Request</h2>
@@ -104,7 +111,7 @@ export async function POST(request: NextRequest) {
           `,
         }),
         resend.emails.send({
-          from: "Butlers Inc. <bookings@butlersinc.co.uk>",
+          from: "Butlers Inc. <bookings@butlersinc.com>",
           to: data.email,
           subject: `Booking Confirmed: ${reference} - Butlers Inc.`,
           html: `
@@ -113,12 +120,13 @@ export async function POST(request: NextRequest) {
             <p><strong>Reference:</strong> ${reference}</p>
             <p><strong>Service:</strong> ${data.butlerType} Butler</p>
             <p>We'll be in touch within 30 minutes to confirm the details.</p>
-            <p>If you have any questions, reply to this email or contact us at <a href="mailto:bookings@butlersinc.co.uk">bookings@butlersinc.co.uk</a>.</p>
+            <p>If you have any questions, reply to this email or contact us at <a href="mailto:bookings@butlersinc.com">bookings@butlersinc.com</a>.</p>
           `,
         }),
       ]);
+      console.log("[after] Email results:", JSON.stringify(results));
     } catch (emailError) {
-      console.warn("Email sending failed (non-blocking):", emailError);
+      console.error("[after] Email sending failed:", emailError);
     }
   });
 

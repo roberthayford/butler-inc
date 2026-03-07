@@ -33,10 +33,10 @@ function ConfirmationContent() {
         <p className="text-warm-gray text-sm mb-8">
           Questions? Email us at{" "}
           <a
-            href="mailto:bookings@butlersinc.co.uk"
+            href="mailto:bookings@butlersinc.com"
             className="text-brass-text hover:text-brass-muted transition-colors"
           >
-            bookings@butlersinc.co.uk
+            bookings@butlersinc.com
           </a>
         </p>
 
