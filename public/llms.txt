@@ -1,0 +1,25 @@
+# Butlers Inc.
+
+> Premium personal concierge service across England. Launching soon.
+
+## About
+
+Butlers Inc. is the new standard in premium concierge. We provide trusted, DBS-checked professionals who handle life's tasks — from urgent same-day errands to luxury sourcing and bespoke event coordination. Based in England, serving nationwide.
+
+## Services
+
+- Busy Butler: Same-day courier, urgent errands, and professional logistics. From GBP 35/hr.
+- Baby Butler: School runs, emergency childcare, and elderly welfare checks. DBS-checked, body-cam equipped. From GBP 35/hr.
+- Bougie Butler: Luxury sourcing, VIP reservations, rare finds, and exclusive experiences. From GBP 35/hr.
+- Base Butler: Property waiting, key holding, tradesman coordination, and home preparation. From GBP 35/hr.
+- Budget Butler: Flexible-timing errands at the best rates — grocery shopping, plant care, returns. From GBP 35/hr.
+- Bespoke Butler: Custom requests for complex coordination, special occasions, and unique challenges. Quote-based.
+
+## Contact
+
+- Email: hello@butlersinc.com
+- Website: https://butlersinc.com
+
+## Status
+
+Launching soon. Currently accepting enquiries via email.
