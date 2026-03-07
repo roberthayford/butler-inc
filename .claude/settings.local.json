@@ -7,7 +7,15 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(npx tsc:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(npx jest:*)",
+      "Bash(curl:*)",
+      "Bash(npx supabase:*)",
+      "Bash(supabase projects:*)",
+      "Bash(supabase link:*)",
+      "Bash(lsof:*)",
+      "Bash(ls:*)",
+      "Bash(node:*)"
     ]
   }
 }
