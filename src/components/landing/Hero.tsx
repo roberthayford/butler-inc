@@ -61,7 +61,7 @@ export function Hero() {
           <button
             onClick={() => handleTabClick("non-members")}
             className={`
-              px-1 pb-2 text-sm font-medium tracking-wide transition-all duration-500 ease-out border-b-2
+              px-1 pb-2 text-sm font-medium tracking-wide transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-105 active:scale-95 border-b-2
               ${activeTab === "non-members"
                 ? "border-optical-white text-optical-white"
                 : "border-transparent text-optical-white/50 hover:text-optical-white"
@@ -73,7 +73,7 @@ export function Hero() {
           <button
             onClick={() => handleTabClick("members")}
             className={`
-              px-1 pb-2 text-sm font-medium tracking-wide transition-all duration-500 ease-out border-b-2
+              px-1 pb-2 text-sm font-medium tracking-wide transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-105 active:scale-95 border-b-2
               ${activeTab === "members"
                 ? "border-optical-white text-optical-white"
                 : "border-transparent text-optical-white/50 hover:text-optical-white"

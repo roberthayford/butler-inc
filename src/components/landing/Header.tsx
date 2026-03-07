@@ -39,7 +39,7 @@ export function Header() {
     <>
       <header
         className={`
-          fixed top-0 left-0 right-0 z-50 transition-all duration-300 will-change-[background-color,backdrop-filter]
+          fixed top-0 left-0 right-0 z-[100] transition-all duration-300 will-change-[background-color,backdrop-filter]
           ${scrolled ? "bg-charcoal/95 backdrop-blur-md shadow-lg" : "bg-transparent"}
         `}
       >
@@ -53,6 +53,12 @@ export function Header() {
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-6">
+            <Link
+              href="/"
+              className="text-optical-white/80 hover:text-optical-white transition-colors text-sm"
+            >
+              Home
+            </Link>
             <Link
               href="/butlers"
               className="text-optical-white/80 hover:text-optical-white transition-colors text-sm"
@@ -112,6 +118,13 @@ export function Header() {
               className="md:hidden bg-charcoal/95 backdrop-blur-md border-t border-primary-foreground/10 overflow-hidden"
             >
               <div className="px-6 py-4 space-y-1">
+                <Link
+                  href="/"
+                  className="block text-optical-white/80 hover:text-optical-white py-3"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Home
+                </Link>
                 <Link
                   href="/butlers"
                   className="block text-optical-white/80 hover:text-optical-white py-3"

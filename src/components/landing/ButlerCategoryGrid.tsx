@@ -72,7 +72,7 @@ export function ButlerCategoryGrid() {
               >
                 <Link
                   href={`/butlers/${service.id}`}
-                  className="group relative overflow-hidden block p-6 rounded-sm bg-primary-foreground/5 border border-primary-foreground/10 backdrop-blur-sm hover:border-primary-foreground/25 transition-all duration-500 ease-out hover:bg-primary-foreground/10 h-full"
+                  className="group relative overflow-hidden block p-6 rounded-sm bg-primary-foreground/5 border border-primary-foreground/10 backdrop-blur-sm hover:border-primary-foreground/25 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.01] active:scale-[0.99] hover:bg-primary-foreground/10 h-full"
                 >
                   <div
                     className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${accent} opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out z-20`}

@@ -151,7 +151,7 @@ export function LandingHeroBackground({
       {/* Atmospheric Image Layer */}
       <div className="absolute inset-0 z-0 overflow-hidden opacity-30 mix-blend-luminosity pointer-events-none">
         <Image
-          src="/images/landing-hero-bg.png"
+          src="/images/hero-butler.png"
           alt="Premium concierge background"
           fill
           priority
