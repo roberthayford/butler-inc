@@ -1,61 +1,82 @@
-const Footer = () => {
+import Link from "next/link";
+import { services } from "@/data/services";
+
+export function Footer() {
   return (
-    <footer className="py-12 pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] md:px-8 bg-charcoal text-primary-foreground/70">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-          <div className="col-span-2 md:col-span-1">
-            <a href="/" className="flex items-center">
-              <img
-                src="/images/butlers-inc-logo.webp"
-                alt="Butlers Inc."
-                className="h-9 w-auto brightness-150"
-              />
-            </a>
-            <p className="text-sm mt-4 leading-relaxed">
-              Your personal butler, on demand – across England.
+    <footer className="bg-charcoal border-t border-primary-foreground/10">
+      <div className="max-w-6xl mx-auto px-6 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          {/* Brand */}
+          <div>
+            <Link
+              href="/"
+              className="text-2xl font-serif font-bold text-optical-white"
+            >
+              Butlers Inc.
+            </Link>
+            <p className="text-warm-gray text-sm mt-3 max-w-xs leading-relaxed">
+              Premium concierge service across England. Your personal butler, on
+              demand.
+            </p>
+            <p className="text-warm-gray text-sm mt-4">
+              <a
+                href="mailto:hello@butlersinc.co.uk"
+                className="hover:text-brass-text transition-colors"
+              >
+                hello@butlersinc.co.uk
+              </a>
             </p>
           </div>
 
+          {/* Butlers */}
           <div>
-            <h4 className="font-medium text-primary-foreground mb-4">Services</h4>
-            <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Busy Butler</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Baby Butler</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Bougie Butler</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Base Butler</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Budget Butler</a></li>
+            <h4 className="text-optical-white font-semibold mb-4">
+              Our Butlers
+            </h4>
+            <ul className="space-y-2">
+              {services.map((s) => (
+                <li key={s.id}>
+                  <Link
+                    href={`/butlers/${s.id}`}
+                    className="text-warm-gray text-sm hover:text-brass-text transition-colors"
+                  >
+                    {s.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
+          {/* Legal */}
           <div>
-            <h4 className="font-medium text-primary-foreground mb-4">Company</h4>
-            <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">About</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Trust & Safety</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Memberships</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Contact</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-medium text-primary-foreground mb-4">Legal</h4>
-            <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Cookie Policy</a></li>
+            <h4 className="text-optical-white font-semibold mb-4">Legal</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/privacy"
+                  className="text-warm-gray text-sm hover:text-brass-text transition-colors"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/terms"
+                  className="text-warm-gray text-sm hover:text-brass-text transition-colors"
+                >
+                  Terms of Service
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-primary-foreground/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm">© 2025 Butlers Inc. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <span className="text-sm">Cambridge & London</span>
-          </div>
+        <div className="mt-12 pt-8 border-t border-primary-foreground/10 text-center">
+          <p className="text-warm-gray text-sm">
+            &copy; {new Date().getFullYear()} Butlers Inc. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}

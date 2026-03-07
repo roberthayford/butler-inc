@@ -1,44 +1,168 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+"use client";
 
-const Header = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
+import { useState, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
+import { motion, AnimatePresence } from "motion/react";
+import { useAuth } from "@/context/AuthContext";
+import { Menu, X } from "lucide-react";
+
+export function Header() {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, loading } = useAuth();
+  const menuRef = useRef<HTMLDivElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener("scroll", handleScroll);
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 pt-[env(safe-area-inset-top)] ${isScrolled ? "bg-background/95 backdrop-blur-sm shadow-sm" : "bg-transparent"
-        }`}
-    >
-      <nav className="max-w-7xl mx-auto pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] md:px-8 py-4 flex items-center justify-between">
-        <a href="/" className="flex items-center">
-          <img
-            src="/images/butlers-inc-logo.webp"
-            alt="Butlers Inc."
-            className="h-9 md:h-11 w-auto"
-          />
-        </a>
-        <div className="flex items-center gap-3">
-          <a
-            href="#"
-            className="text-sm font-medium text-muted-foreground/60 hover:text-foreground transition-colors hidden md:block"
-          >
-            Log in
-          </a>
-          <Button variant="outline" size="sm" className="font-medium">
-            Join
-          </Button>
-        </div>
-      </nav>
-    </header>
+  // Focus trap: close mobile menu on Escape
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape" && mobileOpen) {
+        setMobileOpen(false);
+        toggleRef.current?.focus();
+      }
+    },
+    [mobileOpen]
   );
-};
 
-export default Header;
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
+
+  return (
+    <>
+      <header
+        className={`
+          fixed top-0 left-0 right-0 z-[100] transition-all duration-300 will-change-[background-color,backdrop-filter]
+          ${scrolled ? "bg-charcoal/95 backdrop-blur-md shadow-lg" : "bg-transparent"}
+        `}
+      >
+        <nav className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link
+            href="/"
+            className="text-2xl font-serif font-bold text-optical-white"
+          >
+            Butlers Inc.
+          </Link>
+
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-6">
+            <Link
+              href="/"
+              className="text-optical-white/80 hover:text-optical-white transition-colors text-sm"
+            >
+              Home
+            </Link>
+            <Link
+              href="/butlers"
+              className="text-optical-white/80 hover:text-optical-white transition-colors text-sm"
+            >
+              Our Butlers
+            </Link>
+            {loading ? null : user ? (
+              <Link
+                href="/members/dashboard"
+                className="text-sm px-4 py-2 rounded-sm bg-brass text-charcoal hover:bg-brass-muted transition-colors"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/members/login"
+                  className="text-optical-white/80 hover:text-optical-white transition-colors text-sm"
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/members/signup"
+                  className="text-sm px-4 py-2 rounded-sm bg-brass text-charcoal hover:bg-brass-muted transition-colors"
+                >
+                  Join
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobile hamburger — 44x44 touch target */}
+          <button
+            ref={toggleRef}
+            onClick={() => setMobileOpen((prev) => !prev)}
+            className="md:hidden p-2 -mr-2 text-optical-white rounded-sm focus-visible:outline-2 focus-visible:outline-brass"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-menu"
+          >
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </nav>
+
+        {/* Mobile menu with slide animation */}
+        <AnimatePresence>
+          {mobileOpen && (
+            <motion.div
+              ref={menuRef}
+              id="mobile-menu"
+              role="navigation"
+              aria-label="Mobile navigation"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className="md:hidden bg-charcoal/95 backdrop-blur-md border-t border-primary-foreground/10 overflow-hidden"
+            >
+              <div className="px-6 py-4 space-y-1">
+                <Link
+                  href="/"
+                  className="block text-optical-white/80 hover:text-optical-white py-3"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Home
+                </Link>
+                <Link
+                  href="/butlers"
+                  className="block text-optical-white/80 hover:text-optical-white py-3"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Our Butlers
+                </Link>
+                {loading ? null : user ? (
+                  <Link
+                    href="/members/dashboard"
+                    className="block text-brass-text hover:text-brass-muted py-3"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      href="/members/login"
+                      className="block text-optical-white/80 hover:text-optical-white py-3"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Log in
+                    </Link>
+                    <Link
+                      href="/members/signup"
+                      className="block text-brass-text hover:text-brass-muted py-3"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Join
+                    </Link>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </header>
+    </>
+  );
+}

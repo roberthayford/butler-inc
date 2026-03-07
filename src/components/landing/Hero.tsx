@@ -1,49 +1,89 @@
-import { Button } from "@/components/ui/button";
+"use client";
 
-const Hero = () => {
-  return (
-    <section className="min-h-screen flex flex-col justify-center relative overflow-hidden pt-20">
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src="/images/hero-butler.png"
-          alt="Luxury Butler Service"
-          className="w-full h-full object-cover opacity-60"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/95 via-background/70 to-background" />
-      </div>
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { motion } from "motion/react";
+import { LandingHeroBackground } from "@/components/ui/hero-background";
 
-      <div className="max-w-5xl mx-auto pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] md:px-8 text-center relative z-10">
-        <h1 className="font-serif text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-medium tracking-normal text-foreground mb-6 animate-fade-up leading-[1.1] md:leading-[1.15] text-balance">
-          Life, <span className="italic">handled.</span>
-        </h1>
-
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-up" style={{ animationDelay: "0.1s" }}>
-          Discreet assistance for everything you'd rather not handle yourself.<br className="hidden sm:block" />
-          Across England.
-        </p>
-
-        <div className="flex flex-col items-center gap-6 animate-fade-up" style={{ animationDelay: "0.2s" }}>
-          {/* Members / Non-Members Segmented Control */}
-          <div className="inline-flex rounded-xl bg-secondary/50 p-1.5 gap-1">
-            <Button
-              size="lg"
-              className="min-w-[140px] min-h-[48px] text-base font-medium"
-            >
-              Members
-            </Button>
-            <Button
-              size="lg"
-              variant="ghost"
-              className="min-w-[140px] min-h-[48px] text-base font-medium hover:bg-background/50"
-            >
-              Non-Members
-            </Button>
-          </div>
-        </div>
-      </div>
-    </section>
+export function Hero() {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<"non-members" | "members">(
+    "non-members"
   );
-};
 
-export default Hero;
+  const handleTabClick = (tab: "non-members" | "members") => {
+    setActiveTab(tab);
+    if (tab === "members") {
+      router.push("/members/login");
+    } else {
+      const el = document.getElementById("butler-categories");
+      el?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  return (
+    <LandingHeroBackground className="min-h-screen flex items-center justify-center">
+      <div className="text-center px-6 max-w-4xl mx-auto">
+        {/* Staggered entrance: headline -> subtitle -> CTA */}
+        <motion.h1
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-optical-white tracking-tight leading-tight"
+        >
+          Your personal butler, on demand.
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.6,
+            delay: 0.15,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="mt-6 text-lg sm:text-xl text-optical-white/90 leading-relaxed"
+        >
+          Across England. From &pound;35/hr.
+        </motion.p>
+
+        {/* Segmented control */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.5,
+            delay: 0.3,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="mt-10 inline-flex gap-8"
+        >
+          <button
+            onClick={() => handleTabClick("non-members")}
+            className={`
+              px-1 pb-2 text-sm font-medium tracking-wide transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-105 active:scale-95 border-b-2
+              ${activeTab === "non-members"
+                ? "border-optical-white text-optical-white"
+                : "border-transparent text-optical-white/50 hover:text-optical-white"
+              }
+            `}
+          >
+            Non-Members
+          </button>
+          <button
+            onClick={() => handleTabClick("members")}
+            className={`
+              px-1 pb-2 text-sm font-medium tracking-wide transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-105 active:scale-95 border-b-2
+              ${activeTab === "members"
+                ? "border-optical-white text-optical-white"
+                : "border-transparent text-optical-white/50 hover:text-optical-white"
+              }
+            `}
+          >
+            Members
+          </button>
+        </motion.div>
+      </div>
+    </LandingHeroBackground>
+  );
+}

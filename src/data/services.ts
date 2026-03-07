@@ -5,8 +5,6 @@ export interface Service {
     name: string;
     shortName: string;
     subtitle: string;
-    type: string;
-    bodycam?: boolean;
     image: string;
     examples: string[];
     priceFrom: string;
@@ -18,51 +16,45 @@ export const services: Service[] = [
         name: "Busy Butler",
         shortName: "Busy",
         subtitle: "Urgent professional logistics",
-        type: "In-Person",
         image: "/images/busy-butler.png",
         examples: [
             "Pick up passport, deliver to HM Passport Office, wait and return it",
             "Get document notarised and personally deliver to Edinburgh",
             "Emergency pickup and same-day hand delivery",
         ],
-        priceFrom: "£45",
+        priceFrom: "£35",
     },
     {
         id: "baby",
         name: "Baby Butler",
         shortName: "Baby",
         subtitle: "School runs & care checks",
-        type: "In-Person",
-        bodycam: true,
         image: "/images/baby-butler.png",
         examples: [
             "School pick-up when you have an important meeting",
             "Watch your child for a few hours between activities",
             "Check on elderly relative who isn't answering the phone",
         ],
-        priceFrom: "£50",
+        priceFrom: "£35",
     },
     {
         id: "bougie",
         name: "Bougie Butler",
         shortName: "Bougie",
         subtitle: "Luxury sourcing & experiences",
-        type: "In-Person",
-        image: "/images/bougie-butler.png",
+        image: "/images/nano-banana.png",
         examples: [
             "Source rare scotch only sold in a tiny shop in Scotland",
             "Plan and organise a personalised family holiday",
             "Secure VIP reservations and exclusive event access",
         ],
-        priceFrom: "£80",
+        priceFrom: "£35",
     },
     {
         id: "base",
         name: "Base Butler",
         shortName: "Base",
         subtitle: "Property & home waiting",
-        type: "In-Person",
-        bodycam: true,
         image: "/images/base-butler.png",
         examples: [
             "Wait for Sky broadband installation while you're at work",
@@ -76,21 +68,19 @@ export const services: Service[] = [
         name: "Budget Butler",
         shortName: "Budget",
         subtitle: "Flexible timing, best rates",
-        type: "In-Person",
         image: "/images/budget-butler.png",
         examples: [
             "Water plants while you're away",
             "Do a big weekly shop and stock the fridge",
             "Non-urgent errands with flexible timing",
         ],
-        priceFrom: "£20",
+        priceFrom: "£35",
     },
     {
         id: "bespoke",
         name: "Bespoke Butler",
         shortName: "Bespoke",
         subtitle: "Custom requests",
-        type: "In-Person",
         image: "/images/bespoke-butler.png",
         examples: [
             "Plan and execute a dinner party with chefs and personalised menu",
