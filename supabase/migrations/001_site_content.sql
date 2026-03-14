@@ -15,31 +15,39 @@ create policy "Public read access"
   on site_content for select
   using (true);
 
--- Only admin can insert
+-- Only admins can insert
 create policy "Admin insert"
   on site_content for insert
   to authenticated
   with check (
-    (select auth.uid()) = (select id from auth.users where email = 'hello@butlersinc.com' limit 1)
+    (select auth.uid()) in (
+      select id from auth.users where email in ('rob@roberthayford.com', 'hello@butlersinc.com')
+    )
   );
 
--- Only admin can update
+-- Only admins can update
 create policy "Admin update"
   on site_content for update
   to authenticated
   using (
-    (select auth.uid()) = (select id from auth.users where email = 'hello@butlersinc.com' limit 1)
+    (select auth.uid()) in (
+      select id from auth.users where email in ('rob@roberthayford.com', 'hello@butlersinc.com')
+    )
   )
   with check (
-    (select auth.uid()) = (select id from auth.users where email = 'hello@butlersinc.com' limit 1)
+    (select auth.uid()) in (
+      select id from auth.users where email in ('rob@roberthayford.com', 'hello@butlersinc.com')
+    )
   );
 
--- Only admin can delete
+-- Only admins can delete
 create policy "Admin delete"
   on site_content for delete
   to authenticated
   using (
-    (select auth.uid()) = (select id from auth.users where email = 'hello@butlersinc.com' limit 1)
+    (select auth.uid()) in (
+      select id from auth.users where email in ('rob@roberthayford.com', 'hello@butlersinc.com')
+    )
   );
 
 -- Index for fast slug lookups
