@@ -66,12 +66,20 @@ export function Header() {
               Our Butlers
             </Link>
             {loading ? null : user ? (
-              <Link
-                href="/members/dashboard"
-                className="text-sm px-4 py-2 rounded-sm bg-brass text-charcoal hover:bg-brass-muted transition-colors"
-              >
-                Dashboard
-              </Link>
+              <>
+                <Link
+                  href="/admin"
+                  className="text-optical-white/80 hover:text-optical-white transition-colors text-sm"
+                >
+                  Edit Content
+                </Link>
+                <Link
+                  href="/members/dashboard"
+                  className="text-sm px-4 py-2 rounded-sm bg-brass text-charcoal hover:bg-brass-muted transition-colors"
+                >
+                  Dashboard
+                </Link>
+              </>
             ) : (
               <>
                 <Link
@@ -133,13 +141,22 @@ export function Header() {
                   Our Butlers
                 </Link>
                 {loading ? null : user ? (
-                  <Link
-                    href="/members/dashboard"
-                    className="block text-brass-text hover:text-brass-muted py-3"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    Dashboard
-                  </Link>
+                  <>
+                    <Link
+                      href="/admin"
+                      className="block text-optical-white/80 hover:text-optical-white py-3"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Edit Content
+                    </Link>
+                    <Link
+                      href="/members/dashboard"
+                      className="block text-brass-text hover:text-brass-muted py-3"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                  </>
                 ) : (
                   <>
                     <Link
