@@ -31,14 +31,6 @@ export default function Home() {
                 <span className="italic">Shortly.</span>
               </h1>
 
-              <p
-                className="mt-8 text-lg sm:text-xl md:text-2xl text-optical-white/80 leading-relaxed font-sans max-w-xl mx-auto opacity-0"
-                style={{ animation: "fade-up 0.7s ease-out 150ms forwards" }}
-              >
-                The new standard in premium concierge across England is being
-                prepared.
-              </p>
-
               <div
                 className="mt-14 opacity-0"
                 style={{ animation: "fade-up 0.7s ease-out 300ms forwards" }}
@@ -59,8 +51,7 @@ export default function Home() {
             style={{ animation: "fade-in 1s ease-out 600ms forwards" }}
           >
             <p>
-              &copy; {new Date().getFullYear()} Butlers Inc. All rights
-              reserved.
+              &copy; 2025 Butlers Inc. All rights reserved.
             </p>
           </footer>
         </div>

@@ -73,7 +73,7 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t border-primary-foreground/10 text-center">
           <p className="text-warm-gray text-sm">
-            &copy; {new Date().getFullYear()} Butlers Inc. All rights reserved.
+            &copy; 2025 Butlers Inc. All rights reserved.
           </p>
         </div>
       </div>
