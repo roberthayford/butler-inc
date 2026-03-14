@@ -7,7 +7,7 @@ import { services, type ServiceId } from "@/data/services";
 import { butlerPageConfigs } from "@/data/butler-page-configs";
 import type { ButlerTypeKey } from "@/data/butler-tasks";
 import { HeroBackground } from "@/components/ui/hero-background";
-import { ButlerPageSections } from "@/components/butler-page-sections";
+
 
 /**
  * bundle-dynamic-imports: BookingFlow is the heaviest client component.
@@ -115,24 +115,26 @@ export default async function ButlerPage({
             <p className="mt-4 text-lg text-warm-gray max-w-2xl mx-auto leading-relaxed">
               {config.hero.subheading}
             </p>
-
-            {/* Price badge */}
-            {service.priceFrom !== "Quote" ? (
-              <p className="mt-6 text-sm text-brass-text font-medium">
-                From {service.priceFrom}/hr
-              </p>
-            ) : (
-              <p className="mt-6 text-sm text-brass-text font-medium">
-                Custom quote
-              </p>
-            )}
           </div>
         </header>
       </HeroBackground>
 
-      {/* Content sections: How It Works, Trust Indicators, Common Requests */}
-      <div className="px-6 py-20 border-b border-primary-foreground/5">
-        <ButlerPageSections config={config} />
+      {/* Trust Indicators */}
+      <div className="px-6 py-10">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-warm-gray text-sm tracking-wide">
+            {config.trustIndicators.map((indicator, i) => (
+              <span key={i} className="flex items-center gap-2">
+                {i > 0 && (
+                  <span className="text-warm-gray/30" aria-hidden="true">
+                    &mdash;
+                  </span>
+                )}
+                <span>{indicator.text}</span>
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Booking flow */}
@@ -152,6 +154,30 @@ export default async function ButlerPage({
           </Suspense>
         </div>
       </main>
+
+      {/* Common Requests */}
+      <div className="px-6 py-20 border-t border-primary-foreground/5">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-serif font-semibold text-optical-white text-center tracking-tight mb-10">
+            Common requests
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto">
+            {config.commonRequests.map((request, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-3 p-4 rounded-sm bg-primary-foreground/5 border border-primary-foreground/10"
+              >
+                <span className="text-brass-text text-sm font-serif font-semibold mt-0.5 shrink-0">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <p className="text-warm-gray text-sm leading-relaxed">
+                  {request}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* Footer navigation */}
       <div className="text-center pb-12 space-y-3">
