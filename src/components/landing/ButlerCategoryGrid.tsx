@@ -91,15 +91,10 @@ export function ButlerCategoryGrid() {
                     </div>
                   )}
 
-                  <div className="relative z-10 flex items-start justify-between mb-3">
+                  <div className="relative z-10 mb-3">
                     <h3 className="text-xl font-serif font-semibold text-optical-white group-hover:text-brass-text transition-colors">
                       {service.name}
                     </h3>
-                    <span className="text-xs font-medium px-2 py-1 rounded bg-brass/20 text-brass-text shrink-0 ml-2">
-                      {service.priceFrom === "Quote"
-                        ? "Quote"
-                        : `From ${service.priceFrom}`}
-                    </span>
                   </div>
                   <p className="relative z-10 text-warm-gray text-sm leading-relaxed">
                     {service.subtitle}

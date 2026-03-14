@@ -7,17 +7,16 @@ import { LandingHeroBackground } from "@/components/ui/hero-background";
 
 export function Hero() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"non-members" | "members">(
-    "non-members"
+  const [activeTab, setActiveTab] = useState<"members" | "non-members">(
+    "members"
   );
 
-  const handleTabClick = (tab: "non-members" | "members") => {
+  const handleTabClick = (tab: "members" | "non-members") => {
     setActiveTab(tab);
     if (tab === "members") {
       router.push("/members/login");
     } else {
-      const el = document.getElementById("butler-categories");
-      el?.scrollIntoView({ behavior: "smooth" });
+      router.push("/butlers");
     }
   };
 
@@ -34,19 +33,6 @@ export function Hero() {
           Your personal butler, on demand.
         </motion.h1>
 
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 0.6,
-            delay: 0.15,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-          className="mt-6 text-lg sm:text-xl text-optical-white/90 leading-relaxed"
-        >
-          Across England. From &pound;35/hr.
-        </motion.p>
-
         {/* Segmented control */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -59,18 +45,6 @@ export function Hero() {
           className="mt-10 inline-flex gap-8"
         >
           <button
-            onClick={() => handleTabClick("non-members")}
-            className={`
-              px-1 pb-2 text-sm font-medium tracking-wide transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-105 active:scale-95 border-b-2
-              ${activeTab === "non-members"
-                ? "border-optical-white text-optical-white"
-                : "border-transparent text-optical-white/50 hover:text-optical-white"
-              }
-            `}
-          >
-            Non-Members
-          </button>
-          <button
             onClick={() => handleTabClick("members")}
             className={`
               px-1 pb-2 text-sm font-medium tracking-wide transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-105 active:scale-95 border-b-2
@@ -81,6 +55,18 @@ export function Hero() {
             `}
           >
             Members
+          </button>
+          <button
+            onClick={() => handleTabClick("non-members")}
+            className={`
+              px-1 pb-2 text-sm font-medium tracking-wide transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-105 active:scale-95 border-b-2
+              ${activeTab === "non-members"
+                ? "border-optical-white text-optical-white"
+                : "border-transparent text-optical-white/50 hover:text-optical-white"
+              }
+            `}
+          >
+            Non-Members
           </button>
         </motion.div>
       </div>
