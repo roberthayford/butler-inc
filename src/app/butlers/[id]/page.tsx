@@ -7,6 +7,8 @@ import { services, type ServiceId } from "@/data/services";
 import { butlerPageConfigs } from "@/data/butler-page-configs";
 import type { ButlerTypeKey } from "@/data/butler-tasks";
 import { HeroBackground } from "@/components/ui/hero-background";
+import { createClient } from "@/lib/supabase/server";
+import { mergeContent } from "@/lib/content";
 
 
 /**
@@ -76,6 +78,16 @@ export default async function ButlerPage({
   const butlerType = id as ButlerTypeKey;
   const serviceId = id as ServiceId;
   const config = butlerPageConfigs[serviceId];
+
+  const supabase = await createClient();
+  const { data: contentRow } = await supabase
+    .from("site_content")
+    .select("content")
+    .eq("page_slug", serviceId)
+    .single();
+
+  const content = mergeContent(contentRow?.content ?? null, config);
+
   const service = services.find((s) => s.id === id)!;
 
   const priceValue = service.priceFrom.replace(/[^0-9]/g, "");
@@ -110,10 +122,10 @@ export default async function ButlerPage({
         <header className="pt-24 pb-16 px-6">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl sm:text-5xl font-serif font-bold text-optical-white tracking-tight">
-              {config.hero.headline}
+              {content.hero.headline}
             </h1>
             <p className="mt-4 text-lg text-warm-gray max-w-2xl mx-auto leading-relaxed">
-              {config.hero.subheading}
+              {content.hero.subheading}
             </p>
           </div>
         </header>
@@ -123,7 +135,7 @@ export default async function ButlerPage({
       <div className="px-6 py-10">
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-warm-gray text-sm tracking-wide">
-            {config.trustIndicators.map((indicator, i) => (
+            {content.trustIndicators.map((indicator, i) => (
               <span key={i} className="flex items-center gap-2">
                 {i > 0 && (
                   <span className="text-warm-gray/30" aria-hidden="true">
@@ -162,7 +174,7 @@ export default async function ButlerPage({
             Common requests
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto">
-            {config.commonRequests.map((request, i) => (
+            {content.commonRequests.map((request, i) => (
               <div
                 key={i}
                 className="flex items-start gap-3 p-4 rounded-sm bg-primary-foreground/5 border border-primary-foreground/10"
