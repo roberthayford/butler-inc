@@ -13,7 +13,13 @@ function ConfirmationContent() {
   return (
     <div className="min-h-screen bg-charcoal flex items-center justify-center px-6">
       <div className="max-w-md text-center">
-        <div className="w-12 h-px bg-brass mx-auto mb-8" />
+        <Link
+          href="/"
+          className="text-2xl font-serif font-bold text-optical-white hover:text-optical-white/80 transition-colors"
+        >
+          Butlers Inc.
+        </Link>
+        <div className="w-12 h-px bg-brass mx-auto mt-6 mb-8" />
 
         <h1 className="text-3xl font-serif font-bold text-optical-white tracking-tight mb-4">
           Booking Confirmed
