@@ -25,33 +25,41 @@ const CARD_ACCENTS: Record<ServiceId, string> = {
  */
 const STAGGER_DELAY = 0.06;
 
-export function ButlerCategoryGrid() {
+interface ButlerCategoryGridProps {
+  showHeader?: boolean;
+}
+
+export function ButlerCategoryGrid({ showHeader = true }: ButlerCategoryGridProps) {
   return (
     <section id="butler-categories" className="bg-charcoal section-padding relative">
       <div className="bg-noise" />
       <div className="max-w-6xl mx-auto">
-        <motion.h2
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="text-3xl sm:text-4xl font-serif font-bold text-optical-white text-center mb-4 tracking-tight"
-        >
-          Choose Your Butler
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{
-            duration: 0.5,
-            delay: 0.1,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-          className="text-warm-gray text-center mb-12 max-w-2xl mx-auto leading-relaxed"
-        >
-          Six specialist butlers. Each one precisely matched to the task.
-        </motion.p>
+        {showHeader && (
+          <>
+            <motion.h2
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="text-3xl sm:text-4xl font-serif font-bold text-optical-white text-center mb-4 tracking-tight"
+            >
+              Choose Your Butler
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{
+                duration: 0.5,
+                delay: 0.1,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className="text-warm-gray text-center mb-12 max-w-2xl mx-auto leading-relaxed"
+            >
+              Six specialist butlers. Each one precisely matched to the task.
+            </motion.p>
+          </>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {services.map((service, i) => {
