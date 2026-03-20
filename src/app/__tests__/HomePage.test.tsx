@@ -17,6 +17,9 @@ vi.mock("@/components/landing/ButlerCategoryGrid", () => ({
 vi.mock("@/components/landing/Footer", () => ({
   Footer: () => <div data-testid="footer">Footer</div>,
 }));
+vi.mock("@/components/landing/AudienceCTA", () => ({
+  AudienceCTA: () => <div data-testid="audience-cta">AudienceCTA</div>,
+}));
 
 describe("Home page", () => {
   it("renders main landmark", () => {
@@ -38,5 +41,10 @@ describe("Home page", () => {
   it("renders ButlerCategoryGrid section", () => {
     render(<Home />);
     expect(screen.getByTestId("butler-grid")).toBeInTheDocument();
+  });
+
+  it("renders the AudienceCTA section", () => {
+    render(<Home />);
+    expect(screen.getByTestId("audience-cta")).toBeInTheDocument();
   });
 });
