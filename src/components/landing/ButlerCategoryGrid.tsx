@@ -93,6 +93,7 @@ export function ButlerCategoryGrid({ showHeader = true }: ButlerCategoryGridProp
                         src={service.image}
                         alt={`${service.name} background`}
                         fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover scale-105 group-hover:scale-100 transition-transform duration-1000 ease-out"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/80 to-transparent" />
