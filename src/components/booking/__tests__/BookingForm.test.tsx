@@ -106,4 +106,9 @@ describe("BookingForm", () => {
     const label = screen.getByText("Phone number");
     expect(label).toBeVisible();
   });
+
+  it("renders visible label for Additional notes field", () => {
+    const { getByText } = render(<BookingForm onSubmit={vi.fn()} isSubmitting={false} />);
+    expect(getByText(/Additional notes/i)).toBeVisible();
+  });
 });
