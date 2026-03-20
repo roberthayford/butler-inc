@@ -24,7 +24,7 @@ export function AudienceCTA() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-4xl mx-auto border border-primary-foreground/10 rounded-sm p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-l-2 border-l-brass"
+          className="max-w-4xl mx-auto border-l-2 border-l-brass rounded-sm p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
         >
           <div>
             <p className="text-2xl font-serif font-bold text-optical-white">
