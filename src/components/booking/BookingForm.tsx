@@ -231,6 +231,7 @@ export function BookingForm({ onSubmit, isSubmitting }: BookingFormProps) {
               type="tel"
               placeholder="Phone number"
               autoComplete="tel"
+              pattern="[0-9+\s\-()]*"
               className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray focus-visible:ring-brass"
             />
             {errors.phone && (
