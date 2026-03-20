@@ -3,6 +3,10 @@ import { after } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 import { z } from "zod";
+import { render } from "@react-email/components";
+import { BookingConfirmationEmail } from "@/emails/booking-confirmation";
+import { BookingNotificationEmail } from "@/emails/booking-notification";
+import { formatBookingDate, getPriceLabel, getTimeSlotLabel } from "@/lib/utils";
 
 const bookingSchema = z.object({
   butlerType: z.string(),
@@ -83,45 +87,45 @@ export async function POST(request: NextRequest) {
 
       const resend = new Resend(resendKey);
 
-      const priceLabel =
-        data.dayOption === "sameDay"
-          ? "£70/hr"
-          : data.dayOption === "nextDay"
-            ? "£55/hr"
-            : "£35/hr";
+      const emailProps = {
+        reference,
+        butlerType: data.butlerType,
+        serviceOption: data.serviceOption,
+        dayOption: data.dayOption,
+        specificDate: data.specificDate,
+        timeSlot: data.timeSlot,
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        notes: [data.notes, data.customDescription].filter(Boolean).join("\n") || null,
+        formattedDate: formatBookingDate(data.dayOption, data.specificDate),
+        priceLabel: getPriceLabel(data.dayOption),
+        timeSlotLabel: getTimeSlotLabel(data.timeSlot),
+      };
+
+      console.log("[after] Rendering email templates for:", reference);
+      const [confirmHtml, confirmText, notifyHtml, notifyText] = await Promise.all([
+        render(BookingConfirmationEmail(emailProps)),
+        render(BookingConfirmationEmail(emailProps), { plainText: true }),
+        render(BookingNotificationEmail(emailProps)),
+        render(BookingNotificationEmail(emailProps), { plainText: true }),
+      ]);
 
       console.log("[after] Sending emails to:", "hello@butlersinc.com", "and", data.email);
       const results = await Promise.all([
         resend.emails.send({
           from: "Butlers Inc. <bookings@butlersinc.com>",
           to: "hello@butlersinc.com",
-          subject: `New Booking: ${reference} - ${data.butlerType} Butler`,
-          html: `
-            <h2>New Booking Request</h2>
-            <p><strong>Reference:</strong> ${reference}</p>
-            <p><strong>Butler:</strong> ${data.butlerType}</p>
-            <p><strong>Service:</strong> ${data.serviceOption ?? "Bespoke"}</p>
-            <p><strong>When:</strong> ${data.dayOption} (${priceLabel}) - ${data.timeSlot}</p>
-            ${data.specificDate ? `<p><strong>Date:</strong> ${data.specificDate}</p>` : ""}
-            <p><strong>Name:</strong> ${data.name}</p>
-            <p><strong>Email:</strong> ${data.email}</p>
-            <p><strong>Phone:</strong> ${data.phone}</p>
-            ${data.notes ? `<p><strong>Notes:</strong> ${data.notes}</p>` : ""}
-            ${data.customDescription ? `<p><strong>Custom request:</strong> ${data.customDescription}</p>` : ""}
-          `,
+          subject: `New Booking: ${reference} — ${data.butlerType} Butler`,
+          html: notifyHtml,
+          text: notifyText,
         }),
         resend.emails.send({
           from: "Butlers Inc. <bookings@butlersinc.com>",
           to: data.email,
-          subject: `Booking Confirmed: ${reference} - Butlers Inc.`,
-          html: `
-            <h2>Your Booking is Confirmed</h2>
-            <p>Thank you, ${data.name}! We've received your booking request.</p>
-            <p><strong>Reference:</strong> ${reference}</p>
-            <p><strong>Service:</strong> ${data.butlerType} Butler</p>
-            <p>We'll be in touch within 30 minutes to confirm the details.</p>
-            <p>If you have any questions, reply to this email or contact us at <a href="mailto:bookings@butlersinc.com">bookings@butlersinc.com</a>.</p>
-          `,
+          subject: `Booking Confirmed: ${reference} — Butlers Inc.`,
+          html: confirmHtml,
+          text: confirmText,
         }),
       ]);
       console.log("[after] Email results:", JSON.stringify(results));
