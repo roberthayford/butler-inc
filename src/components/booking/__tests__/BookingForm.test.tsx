@@ -47,43 +47,36 @@ describe("BookingForm", () => {
   it("renders contact detail inputs", () => {
     render(<BookingForm {...defaultProps} />);
 
-    expect(screen.getByPlaceholderText("Full name")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Jane Smith")).toBeInTheDocument();
     expect(
-      screen.getByPlaceholderText("Email address")
+      screen.getByPlaceholderText("you@example.com")
     ).toBeInTheDocument();
     expect(
-      screen.getByPlaceholderText("Phone number")
+      screen.getByPlaceholderText("07700 900000")
     ).toBeInTheDocument();
     expect(
-      screen.getByPlaceholderText("Additional notes (optional)")
+      screen.getByPlaceholderText("Any specific requirements or details...")
     ).toBeInTheDocument();
   });
 
   it("renders submit button", () => {
     render(<BookingForm {...defaultProps} />);
-
-    expect(
-      screen.getByText("Submit Booking Request")
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Request Your Butler/i })).toBeInTheDocument();
   });
 
-  it("shows 'Submitting...' when isSubmitting is true", () => {
+  it("shows loading text when isSubmitting is true", () => {
     render(<BookingForm {...defaultProps} isSubmitting={true} />);
-
-    expect(screen.getByText("Submitting...")).toBeInTheDocument();
+    expect(screen.getByText("Sending your request...")).toBeInTheDocument();
   });
 
   it("disables submit button when isSubmitting", () => {
     render(<BookingForm {...defaultProps} isSubmitting={true} />);
-
-    expect(screen.getByText("Submitting...")).toBeDisabled();
+    expect(screen.getByText("Sending your request...")).toBeDisabled();
   });
 
   it("shows validation errors when submitting empty form", async () => {
     render(<BookingForm {...defaultProps} />);
-
-    fireEvent.click(screen.getByText("Submit Booking Request"));
-
+    fireEvent.click(screen.getByRole("button", { name: /Request Your Butler/i }));
     await waitFor(() => {
       expect(screen.getByText("Name is required")).toBeInTheDocument();
     });
@@ -94,5 +87,23 @@ describe("BookingForm", () => {
 
     const radiogroups = screen.getAllByRole("radiogroup");
     expect(radiogroups.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("renders visible label for Full name field", () => {
+    render(<BookingForm {...defaultProps} />);
+    const label = screen.getByText("Full name");
+    expect(label).toBeVisible();
+  });
+
+  it("renders visible label for Email address field", () => {
+    render(<BookingForm {...defaultProps} />);
+    const label = screen.getByText("Email address");
+    expect(label).toBeVisible();
+  });
+
+  it("renders visible label for Phone number field", () => {
+    render(<BookingForm {...defaultProps} />);
+    const label = screen.getByText("Phone number");
+    expect(label).toBeVisible();
   });
 });
