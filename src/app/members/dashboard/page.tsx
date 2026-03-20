@@ -5,6 +5,14 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { services } from "@/data/services";
+import { DAY_OPTIONS, TIME_SLOTS } from "@/data/booking-config";
+import { format } from "date-fns";
+
+// Display label lookups derived from existing data constants
+const BUTLER_LABELS = Object.fromEntries(services.map((s) => [s.id, s.name]));
+const DAY_LABELS = Object.fromEntries(DAY_OPTIONS.map((d) => [d.key, d.label]));
+const TIME_LABELS = Object.fromEntries(TIME_SLOTS.map((t) => [t.key, t.label]));
 
 interface Booking {
   id: string;
@@ -99,11 +107,15 @@ export default function MemberDashboard() {
                 >
                   <div>
                     <p className="text-optical-white font-medium">
-                      {booking.butler_type} Butler &mdash; {booking.reference}
+                      {BUTLER_LABELS[booking.butler_type] ?? booking.butler_type} &mdash; {booking.reference}
                     </p>
                     <p className="text-warm-gray text-sm">
                       {booking.service_option ?? "Custom request"} &bull;{" "}
-                      {booking.day_option} &bull; {booking.time_slot}
+                      {DAY_LABELS[booking.day_option] ?? booking.day_option} &bull;{" "}
+                      {TIME_LABELS[booking.time_slot] ?? booking.time_slot}
+                    </p>
+                    <p className="text-warm-gray text-xs mt-0.5">
+                      {format(new Date(booking.created_at), "d MMM yyyy")}
                     </p>
                   </div>
                   <span className="text-xs font-medium px-2 py-1 rounded bg-brass/20 text-brass-text">
