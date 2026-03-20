@@ -1,29 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion } from "motion/react";
 import { LandingHeroBackground } from "@/components/ui/hero-background";
 
 export function Hero() {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"members" | "non-members">(
-    "members"
-  );
-
-  const handleTabClick = (tab: "members" | "non-members") => {
-    setActiveTab(tab);
-    if (tab === "members") {
-      router.push("/members/login");
-    } else {
-      router.push("/butlers");
-    }
-  };
-
   return (
     <LandingHeroBackground className="min-h-screen flex items-center justify-center">
       <div className="text-center px-6 max-w-4xl mx-auto">
-        {/* Staggered entrance: headline -> subtitle -> CTA */}
         <motion.h1
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -33,41 +17,33 @@ export function Hero() {
           Your personal butler, on demand.
         </motion.h1>
 
-        {/* Segmented control */}
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-4 text-warm-gray text-lg"
+        >
+          Premium concierge across England. From £35/hr.
+        </motion.p>
+
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 0.5,
-            delay: 0.3,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-          className="mt-10 inline-flex gap-8"
+          transition={{ duration: 0.5, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <button
-            onClick={() => handleTabClick("members")}
-            className={`
-              px-1 pb-2 text-sm font-medium tracking-wide transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-105 active:scale-95 border-b-2
-              ${activeTab === "members"
-                ? "border-optical-white text-optical-white"
-                : "border-transparent text-optical-white/50 hover:text-optical-white"
-              }
-            `}
+          <Link
+            href="/butlers"
+            className="px-8 py-3 rounded-sm bg-brass text-charcoal font-medium hover:bg-brass-muted transition-colors text-sm tracking-wide"
           >
-            Members
-          </button>
-          <button
-            onClick={() => handleTabClick("non-members")}
-            className={`
-              px-1 pb-2 text-sm font-medium tracking-wide transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-105 active:scale-95 border-b-2
-              ${activeTab === "non-members"
-                ? "border-optical-white text-optical-white"
-                : "border-transparent text-optical-white/50 hover:text-optical-white"
-              }
-            `}
+            Browse Our Butlers
+          </Link>
+          <Link
+            href="/members/login"
+            className="px-8 py-3 rounded-sm border border-optical-white/40 text-optical-white font-medium hover:border-optical-white hover:bg-optical-white/10 transition-colors text-sm tracking-wide"
           >
-            Non-Members
-          </button>
+            Sign In
+          </Link>
         </motion.div>
       </div>
     </LandingHeroBackground>
