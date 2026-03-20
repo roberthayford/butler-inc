@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "motion/react";
 import { LandingHeroBackground } from "@/components/ui/hero-background";
+import { AudienceCTA } from "@/components/landing/AudienceCTA";
 
 export function Hero() {
   return (
@@ -30,20 +30,9 @@ export function Hero() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
+          className="mt-10 w-full"
         >
-          <Link
-            href="/butlers"
-            className="px-8 py-3 rounded-sm bg-brass text-charcoal font-medium hover:bg-brass-muted transition-colors text-sm tracking-wide"
-          >
-            Browse Our Butlers
-          </Link>
-          <Link
-            href="/members/login"
-            className="px-8 py-3 rounded-sm border border-optical-white/40 text-optical-white font-medium hover:border-optical-white hover:bg-optical-white/10 transition-colors text-sm tracking-wide"
-          >
-            Sign In
-          </Link>
+          <AudienceCTA className="w-full" />
         </motion.div>
       </div>
     </LandingHeroBackground>

@@ -22,6 +22,11 @@ vi.mock("@/components/ui/hero-background", () => ({
   ),
 }));
 
+// AudienceCTA is rendered inside Hero — mock it to keep Hero tests focused
+vi.mock("@/components/landing/AudienceCTA", () => ({
+  AudienceCTA: () => <div data-testid="audience-cta-stub" />,
+}));
+
 describe("Hero", () => {
   it("renders the headline", () => {
     render(<Hero />);
@@ -35,18 +40,9 @@ describe("Hero", () => {
     expect(screen.getByText(/From £35\/hr/)).toBeInTheDocument();
   });
 
-  it("renders a 'Browse Our Butlers' CTA link to /butlers", () => {
+  it("renders the AudienceCTA inside the hero", () => {
     render(<Hero />);
-    const link = screen.getByRole("link", { name: /Browse Our Butlers/i });
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute("href", "/butlers");
-  });
-
-  it("renders a 'Sign In' CTA link to /members/login", () => {
-    render(<Hero />);
-    const link = screen.getByRole("link", { name: /Sign In/i });
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute("href", "/members/login");
+    expect(screen.getByTestId("audience-cta-stub")).toBeInTheDocument();
   });
 
   it("does NOT render the old Members/Non-Members tab buttons", () => {

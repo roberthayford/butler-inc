@@ -11,14 +11,14 @@ function getFirstName(user: User): string {
   return user.email?.split("@")[0] ?? "there";
 }
 
-export function AudienceCTA() {
+export function AudienceCTA({ className }: { className?: string }) {
   const { user, loading } = useAuth();
 
   if (loading) return null;
 
   if (user) {
     return (
-      <section className="bg-charcoal py-12 px-6">
+      <section className={className ?? "bg-charcoal py-12 px-6"}>
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -46,7 +46,7 @@ export function AudienceCTA() {
   }
 
   return (
-    <section className="bg-charcoal py-12 px-6">
+    <section className={className ?? "bg-charcoal py-12 px-6"}>
       <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
