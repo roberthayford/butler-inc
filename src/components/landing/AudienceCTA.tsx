@@ -53,14 +53,11 @@ export function AudienceCTA({ className }: { className?: string }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="border border-primary-foreground/10 rounded-sm p-8 flex flex-col gap-4"
+          className="p-8 flex flex-col justify-between border-r border-optical-white/15"
         >
           <h2 className="text-xl font-serif font-bold text-optical-white">
             New to Butlers Inc.?
           </h2>
-          <p className="text-warm-gray text-sm leading-relaxed">
-            Premium concierge across England from £35/hr. No contract.
-          </p>
           <Link
             href="/butlers"
             className="self-start px-6 py-3 rounded-sm bg-brass text-charcoal font-medium hover:bg-brass-muted transition-colors text-sm tracking-wide"
@@ -74,7 +71,7 @@ export function AudienceCTA({ className }: { className?: string }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.45, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-          className="border border-primary-foreground/10 rounded-sm p-8 flex flex-col gap-4"
+          className="p-8 flex flex-col justify-between"
         >
           <h2 className="text-xl font-serif font-bold text-optical-white">
             Already a member?
