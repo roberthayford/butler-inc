@@ -48,6 +48,9 @@ describe("AudienceCTA", () => {
       "href",
       "/members/login"
     );
+    expect(
+      screen.queryByText(/Premium concierge across England from £35\/hr/i)
+    ).not.toBeInTheDocument();
   });
 
   it("renders personalised welcome card when authenticated", () => {
