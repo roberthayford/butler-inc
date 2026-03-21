@@ -53,7 +53,7 @@ export function AudienceCTA({ className }: { className?: string }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="p-8 flex flex-col justify-between border-r border-optical-white/15"
+          className="p-8 flex flex-col gap-6 border-r border-optical-white/15"
         >
           <h2 className="text-xl font-serif font-bold text-optical-white">
             New to Butlers Inc.?
@@ -71,7 +71,7 @@ export function AudienceCTA({ className }: { className?: string }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.45, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-          className="p-8 flex flex-col justify-between"
+          className="p-8 flex flex-col gap-6"
         >
           <h2 className="text-xl font-serif font-bold text-optical-white">
             Already a member?
