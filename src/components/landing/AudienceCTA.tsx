@@ -47,15 +47,15 @@ export function AudienceCTA({ className }: { className?: string }) {
 
   return (
     <section className={className ?? "bg-charcoal py-12 px-6"}>
-      <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-6">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="p-8 flex flex-col gap-6 border-r border-optical-white/15"
+          className="p-8 flex flex-col gap-6 sm:border-r sm:border-optical-white/15"
         >
-          <h2 className="text-xl font-serif font-bold text-optical-white">
+          <h2 className="text-2xl font-serif font-bold text-optical-white">
             New to Butlers Inc.?
           </h2>
           <Link
@@ -73,7 +73,7 @@ export function AudienceCTA({ className }: { className?: string }) {
           transition={{ duration: 0.45, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
           className="p-8 flex flex-col gap-6"
         >
-          <h2 className="text-xl font-serif font-bold text-optical-white">
+          <h2 className="text-2xl font-serif font-bold text-optical-white">
             Already a member?
           </h2>
           <Link

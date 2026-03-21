@@ -86,7 +86,7 @@ export function Header() {
                   href="/members/login"
                   className="text-optical-white/80 hover:text-optical-white transition-colors text-sm"
                 >
-                  Log in
+                  Sign In
                 </Link>
                 <Link
                   href="/members/signup"
@@ -164,7 +164,7 @@ export function Header() {
                       className="block text-optical-white/80 hover:text-optical-white py-3"
                       onClick={() => setMobileOpen(false)}
                     >
-                      Log in
+                      Sign In
                     </Link>
                     <Link
                       href="/members/signup"

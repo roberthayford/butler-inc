@@ -11,7 +11,7 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <section className="py-16 px-6">
+    <section className="py-20 md:py-24 px-6 bg-charcoal">
       <div className="max-w-4xl mx-auto">
         <motion.h2
           initial={{ opacity: 0, y: 16 }}

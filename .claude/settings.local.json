@@ -20,7 +20,23 @@
       "mcp__plugin_playwright_playwright__browser_resize",
       "mcp__plugin_playwright_playwright__browser_evaluate",
       "mcp__plugin_playwright_playwright__browser_take_screenshot",
-      "Bash(git status:*)"
+      "Bash(git status:*)",
+      "WebFetch(domain:registry.npmjs.org)",
+      "WebSearch",
+      "Bash(npm install:*)",
+      "Bash(npx tsx:*)",
+      "Bash(git push:*)",
+      "Bash(vercel:*)",
+      "WebFetch(domain:react.email)",
+      "WebFetch(domain:resend.com)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__plugin_context7_context7__get-library-docs",
+      "Bash(npm run:*)",
+      "Bash(git -C /Users/roberthayford/Git/BlueOcean/_faridah/Ohmybutler-premium-concierge add src/components/booking/__tests__/BookingForm.test.tsx)",
+      "Bash(git -C:*)",
+      "Bash(kill 52626)",
+      "Bash(git stash:*)",
+      "Bash(find /Users/roberthayford/Git/BlueOcean/_faridah/Ohmybutler-premium-concierge/src/components/landing -type f -name *.tsx -o -name *.ts -o -name *.css)"
     ]
   }
 }
