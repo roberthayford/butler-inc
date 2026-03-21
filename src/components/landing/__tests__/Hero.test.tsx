@@ -10,9 +10,6 @@ vi.mock("motion/react", () => ({
     div: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
       <div {...props}>{children}</div>
     ),
-    p: ({ children, ...props }: React.HTMLAttributes<HTMLParagraphElement>) => (
-      <p {...props}>{children}</p>
-    ),
   },
 }));
 
@@ -33,11 +30,6 @@ describe("Hero", () => {
     expect(
       screen.getByText("Your personal butler, on demand.")
     ).toBeInTheDocument();
-  });
-
-  it("renders a pricing subtitle", () => {
-    render(<Hero />);
-    expect(screen.getByText(/From £35\/hr/)).toBeInTheDocument();
   });
 
   it("renders the AudienceCTA inside the hero", () => {

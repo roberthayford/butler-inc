@@ -76,12 +76,9 @@ export function AudienceCTA({ className }: { className?: string }) {
           <h2 className="text-xl font-serif font-bold text-optical-white">
             Already a member?
           </h2>
-          <p className="text-warm-gray text-sm leading-relaxed">
-            Pick up where you left off.
-          </p>
           <Link
             href="/members/login"
-            className="self-start px-6 py-3 rounded-sm border border-optical-white/40 text-optical-white font-medium hover:border-optical-white hover:bg-optical-white/10 transition-colors text-sm tracking-wide"
+            className="px-6 py-3 rounded-sm border border-optical-white/40 text-optical-white font-medium hover:border-optical-white hover:bg-optical-white/10 transition-colors text-sm tracking-wide"
           >
             Sign In
           </Link>
