@@ -60,7 +60,7 @@ export function AudienceCTA({ className }: { className?: string }) {
           </h2>
           <Link
             href="/butlers"
-            className="self-start px-6 py-3 rounded-sm bg-brass text-charcoal font-medium hover:bg-brass-muted transition-colors text-sm tracking-wide"
+            className="px-6 py-3 rounded-sm bg-brass text-charcoal font-medium hover:bg-brass-muted transition-colors text-sm tracking-wide"
           >
             Browse Our Butlers
           </Link>
