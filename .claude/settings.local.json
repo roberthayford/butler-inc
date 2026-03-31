@@ -49,7 +49,12 @@
       "Bash(npm list:*)",
       "Bash(xargs grep:*)",
       "Bash(git log:*)",
-      "Bash(source /Users/roberthayford/Git/BlueOcean/_faridah/Ohmybutler-premium-concierge/.env.local)"
+      "Bash(source /Users/roberthayford/Git/BlueOcean/_faridah/Ohmybutler-premium-concierge/.env.local)",
+      "Bash(python3 -c \":*)",
+      "Bash(find /Users/roberthayford/Git/BlueOcean/_faridah/Ohmybutler-premium-concierge/src -type f \\\\\\(-name *.ts -o -name *.tsx -o -name *.js -o -name *.jsx \\\\\\))",
+      "Bash(/tmp/trace_summary.txt:*)",
+      "Read(//tmp/**)",
+      "Bash(grep -rn \"DEV_BYPASS_DB\" /Users/roberthayford/Git/BlueOcean/_faridah/Ohmybutler-premium-concierge/.env*)"
     ]
   }
 }
