@@ -39,8 +39,7 @@ export function ButlerCategoryGrid({ showHeader = true }: ButlerCategoryGridProp
           <>
             <motion.h2
               initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="text-3xl sm:text-4xl font-serif font-bold text-optical-white text-center mb-4 tracking-tight"
             >
@@ -48,8 +47,7 @@ export function ButlerCategoryGrid({ showHeader = true }: ButlerCategoryGridProp
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{
                 duration: 0.5,
                 delay: 0.1,
@@ -72,8 +70,7 @@ export function ButlerCategoryGrid({ showHeader = true }: ButlerCategoryGridProp
               <motion.div
                 key={service.id}
                 initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{
                   duration: 0.45,
                   delay: i * STAGGER_DELAY,
