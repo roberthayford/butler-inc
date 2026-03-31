@@ -4,9 +4,15 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
+import { format } from "date-fns";
 import { ServiceOptionSelector } from "./ServiceOptionSelector";
+import {
+  PricedBookingForm,
+  type PricedBookingFormData,
+} from "./PricedBookingForm";
 import { BookingForm, type BookingFormData } from "./BookingForm";
 import { BUTLER_TASKS, type ButlerTypeKey } from "@/data/butler-tasks";
+import { BUTLER_PRICING } from "@/data/pricing-config";
 
 interface BookingFlowProps {
   butlerType: ButlerTypeKey;
@@ -14,6 +20,9 @@ interface BookingFlowProps {
 
 export function BookingFlow({ butlerType }: BookingFlowProps) {
   const router = useRouter();
+  const pricing = BUTLER_PRICING[butlerType];
+  const isSelfService = pricing.bookingType === "self_service";
+
   const [phase, setPhase] = useState<"service" | "form">("service");
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [customDescription, setCustomDescription] = useState<string>("");
@@ -22,7 +31,6 @@ export function BookingFlow({ butlerType }: BookingFlowProps) {
 
   useEffect(() => {
     if (phase === "form") {
-      // Small delay to let AnimatePresence finish the swap
       const timer = setTimeout(() => {
         formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 250);
@@ -42,7 +50,41 @@ export function BookingFlow({ butlerType }: BookingFlowProps) {
     setCustomDescription("");
   };
 
-  const handleSubmit = async (data: BookingFormData) => {
+  const handlePricedSubmit = async (data: PricedBookingFormData) => {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          butlerType,
+          serviceOption: selectedService,
+          customDescription: customDescription || undefined,
+          serviceDate: format(data.serviceDate, "yyyy-MM-dd"),
+          startTime: data.startTime,
+          endTime: data.endTime,
+          customerName: data.name,
+          customerEmail: data.email,
+          customerPhone: data.phone,
+          additionalNotes: data.notes || undefined,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error ?? "Booking failed");
+      }
+
+      const { url } = await res.json();
+      router.push(url);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleConsultationSubmit = async (data: BookingFormData) => {
     setIsSubmitting(true);
     try {
       const res = await fetch("/api/bookings", {
@@ -77,7 +119,11 @@ export function BookingFlow({ butlerType }: BookingFlowProps) {
       : BUTLER_TASKS[butlerType].find((t) => t.id === selectedService)?.label;
 
   return (
-    <div className="max-w-2xl mx-auto" aria-live="polite" aria-atomic="false">
+    <div
+      className={isSelfService ? "max-w-4xl mx-auto" : "max-w-2xl mx-auto"}
+      aria-live="polite"
+      aria-atomic="false"
+    >
       <AnimatePresence mode="wait">
         {phase === "service" ? (
           <motion.div
@@ -115,7 +161,20 @@ export function BookingFlow({ butlerType }: BookingFlowProps) {
               </button>
             </div>
 
-            <BookingForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+            {isSelfService ? (
+              <PricedBookingForm
+                butlerType={butlerType}
+                pricing={pricing}
+                serviceName={selectedTaskLabel}
+                onSubmit={handlePricedSubmit}
+                isSubmitting={isSubmitting}
+              />
+            ) : (
+              <BookingForm
+                onSubmit={handleConsultationSubmit}
+                isSubmitting={isSubmitting}
+              />
+            )}
           </motion.div>
         )}
       </AnimatePresence>

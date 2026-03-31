@@ -4,13 +4,19 @@ export interface BookingEmailProps {
   serviceOption: string | null
   dayOption: "sameDay" | "nextDay" | "advance"
   specificDate?: string
-  timeSlot: "morning" | "noon" | "evening"
+  timeSlot: "morning" | "noon" | "evening" | string
   name: string
   email: string
   phone: string
   notes?: string | null
-  // Pre-formatted — computed in route.ts before passing to templates
-  formattedDate: string   // "Wednesday, 25 March 2026"
-  priceLabel: string      // "from £55/hr"
-  timeSlotLabel: string   // "Morning (7:00 - 11:59)"
+  formattedDate: string
+  priceLabel: string
+  timeSlotLabel: string
+  hourlyRate?: number
+  durationHours?: number
+  urgencyMultiplier?: number
+  urgencyLabel?: string | null
+  subtotal?: number
+  totalPrice?: number
+  isPaid?: boolean
 }

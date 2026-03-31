@@ -23,7 +23,15 @@ export function BookingConfirmationEmail({
   priceLabel,
   timeSlotLabel,
   name,
+  hourlyRate,
+  durationHours,
+  urgencyMultiplier,
+  urgencyLabel,
+  subtotal,
+  totalPrice,
+  isPaid,
 }: BookingEmailProps) {
+  const hasPricing = totalPrice != null && hourlyRate != null;
   return (
     <Html lang="en">
       <Head>
@@ -114,9 +122,59 @@ export function BookingConfirmationEmail({
             {/* Detail rows */}
             <DetailRow label="Service" value={`${butlerType} Butler`} />
             <DetailRow label="Booking" value={serviceOption ?? "Bespoke"} />
-            <DetailRow label="Pricing" value={priceLabel} />
             <DetailRow label="Date" value={formattedDate} />
             <DetailRow label="Time" value={timeSlotLabel} />
+
+            {hasPricing ? (
+              <Section
+                style={{
+                  backgroundColor: "#F7F5F0",
+                  borderRadius: "4px",
+                  padding: "16px 20px",
+                  marginTop: "16px",
+                  marginBottom: "8px",
+                }}
+              >
+                <Text
+                  style={{
+                    fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                    fontSize: "11px",
+                    color: "#9E9893",
+                    textTransform: "uppercase" as const,
+                    letterSpacing: "0.08em",
+                    margin: "0 0 10px",
+                  }}
+                >
+                  Price Breakdown
+                </Text>
+                <DetailRow
+                  label="Rate"
+                  value={`£${hourlyRate!.toFixed(2)}/hr × ${durationHours} hrs`}
+                />
+                {urgencyMultiplier != null && urgencyMultiplier !== 1.0 && (
+                  <DetailRow
+                    label={urgencyLabel ?? "Urgency"}
+                    value={`${urgencyMultiplier}×`}
+                  />
+                )}
+                <DetailRow label="Total" value={`£${totalPrice!.toFixed(2)}`} />
+                {isPaid && (
+                  <Text
+                    style={{
+                      fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                      fontSize: "12px",
+                      color: "#5B9473",
+                      margin: "8px 0 0",
+                      fontWeight: "600",
+                    }}
+                  >
+                    ✓ Payment received
+                  </Text>
+                )}
+              </Section>
+            ) : (
+              <DetailRow label="Pricing" value={priceLabel} />
+            )}
 
             <Hr style={{ borderColor: "#E8E4DC", margin: "28px 0 24px" }} />
 

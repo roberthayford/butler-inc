@@ -24,7 +24,14 @@ export function BookingNotificationEmail({
   email,
   phone,
   notes,
+  hourlyRate,
+  durationHours,
+  urgencyMultiplier,
+  urgencyLabel,
+  totalPrice,
+  isPaid,
 }: BookingEmailProps) {
+  const hasPricing = totalPrice != null && hourlyRate != null;
   const receivedAt = new Date().toLocaleString("en-GB", {
     weekday: "long",
     day: "numeric",
@@ -100,9 +107,44 @@ export function BookingNotificationEmail({
             <DetailRow label="Reference" value={reference} />
             <DetailRow label="Butler" value={`${butlerType} Butler`} />
             <DetailRow label="Service" value={serviceOption ?? "Bespoke"} />
-            <DetailRow label="Pricing" value={priceLabel} />
             <DetailRow label="Date" value={formattedDate} />
             <DetailRow label="Time" value={timeSlotLabel} />
+
+            {hasPricing ? (
+              <Section
+                style={{
+                  backgroundColor: "#F7F5F0",
+                  borderRadius: "4px",
+                  padding: "12px 16px",
+                  marginTop: "12px",
+                }}
+              >
+                <DetailRow
+                  label="Rate"
+                  value={`£${hourlyRate!.toFixed(2)}/hr × ${durationHours} hrs`}
+                />
+                {urgencyMultiplier != null && urgencyMultiplier !== 1.0 && (
+                  <DetailRow
+                    label={urgencyLabel ?? "Urgency"}
+                    value={`${urgencyMultiplier}×`}
+                  />
+                )}
+                <DetailRow label="Total" value={`£${totalPrice!.toFixed(2)}`} />
+                <Text
+                  style={{
+                    fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                    fontSize: "12px",
+                    color: isPaid ? "#5B9473" : "#CC6600",
+                    margin: "6px 0 0",
+                    fontWeight: "600",
+                  }}
+                >
+                  {isPaid ? "✓ Payment received" : "⏳ Payment pending"}
+                </Text>
+              </Section>
+            ) : (
+              <DetailRow label="Pricing" value={priceLabel} />
+            )}
 
             <Hr style={{ borderColor: "#E8E4DC", margin: "28px 0" }} />
 

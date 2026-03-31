@@ -32,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${serif.variable} ${sans.variable}`}>
+    <html lang="en" className={`${serif.variable} ${sans.variable} dark`} suppressHydrationWarning>
       <body className="antialiased">
           <Providers>{children}</Providers>
         </body>

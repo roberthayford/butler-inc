@@ -149,7 +149,7 @@ export function LandingHeroBackground({
       />
 
       {/* Atmospheric Image Layer */}
-      <div className="absolute inset-0 z-0 overflow-hidden opacity-30 mix-blend-luminosity pointer-events-none">
+      <div className="absolute inset-0 z-0 overflow-hidden opacity-35 mix-blend-luminosity pointer-events-none">
         <Image
           src="/images/hero-butler.png"
           alt="Premium concierge background"
@@ -157,7 +157,7 @@ export function LandingHeroBackground({
           priority
           className="object-cover object-center"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/80 to-charcoal/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-charcoal/95 via-charcoal/70 to-charcoal/35" />
       </div>
 
       {/* Noise texture overlay on top of everything for cinematic grain */}

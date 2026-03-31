@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "motion/react";
 import { services, type ServiceId } from "@/data/services";
 import { butlerPageConfigs } from "@/data/butler-page-configs";
+import { BUTLER_PRICING } from "@/data/pricing-config";
 
 /**
  * Per-butler accent colours for the top border gradient.
@@ -65,6 +66,7 @@ export function ButlerCategoryGrid({ showHeader = true }: ButlerCategoryGridProp
           {services.map((service, i) => {
             const config = butlerPageConfigs[service.id];
             const accent = CARD_ACCENTS[service.id];
+            const pricing = BUTLER_PRICING[service.id];
 
             return (
               <motion.div
@@ -104,6 +106,11 @@ export function ButlerCategoryGrid({ showHeader = true }: ButlerCategoryGridProp
                     <h3 className="text-xl font-serif font-semibold text-optical-white group-hover:text-brass-text transition-colors">
                       {service.name}
                     </h3>
+                    <p className="text-brass-text text-sm mt-1 font-medium">
+                      {pricing.bookingType === "consultation"
+                        ? "Consultation"
+                        : `From £${pricing.hourlyRate}/hour`}
+                    </p>
                   </div>
                   <p className="relative z-10 text-warm-gray text-sm leading-relaxed">
                     {service.subtitle}

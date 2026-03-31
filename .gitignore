@@ -38,3 +38,10 @@ next-env.d.ts
 # playwright
 playwright-report/
 test-results/
+
+# IDE / tool-specific
+.cursor/
+.playwright-mcp/
+
+# Claude Code local settings
+.claude/settings.local.json
