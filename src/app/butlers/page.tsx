@@ -5,7 +5,7 @@ import { services } from "@/data/services";
 export const metadata: Metadata = {
   title: "Our Butlers | Premium Concierge Services",
   description:
-    "Six specialist butlers for every need. Same-day courier, childcare, luxury sourcing, property management, budget errands, and bespoke requests. From £35/hr.",
+    "Six specialist butlers for every need. Same-day courier, childcare, luxury sourcing, property management, budget errands, and bespoke requests.",
 };
 
 export default function ButlersPage() {
@@ -39,11 +39,11 @@ export default function ButlersPage() {
                     {service.subtitle}
                   </p>
                 </div>
-                <span className="text-sm font-medium px-3 py-1 rounded bg-brass/20 text-brass-text shrink-0 ml-4">
-                  {service.priceFrom === "Quote"
-                    ? "Quote"
-                    : `From ${service.priceFrom}`}
-                </span>
+                {service.priceFrom && (
+                  <span className="text-sm font-medium px-3 py-1 rounded bg-brass/20 text-brass-text shrink-0 ml-4">
+                    {service.priceFrom}
+                  </span>
+                )}
               </div>
             </Link>
           ))}

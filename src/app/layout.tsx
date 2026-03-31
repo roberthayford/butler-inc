@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     template: "%s | Butlers Inc.",
   },
   description:
-    "Your personal butler, on demand. Across England. From £35/hr.",
+    "Your personal butler, on demand. Across England.",
 };
 
 export default function RootLayout({

@@ -78,7 +78,6 @@ export default async function ButlerPage({
   const config = butlerPageConfigs[serviceId];
   const service = services.find((s) => s.id === id)!;
 
-  const priceValue = service.priceFrom.replace(/[^0-9]/g, "");
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -93,8 +92,7 @@ export default async function ButlerPage({
     offers: {
       "@type": "Offer",
       priceCurrency: "GBP",
-      price: priceValue || "Contact for quote",
-      priceValidUntil: "2027-12-31",
+      price: "Contact us",
     },
   };
 
@@ -116,14 +114,9 @@ export default async function ButlerPage({
               {config.hero.subheading}
             </p>
 
-            {/* Price badge */}
-            {service.priceFrom !== "Quote" ? (
+            {service.priceFrom && (
               <p className="mt-6 text-sm text-brass-text font-medium">
-                From {service.priceFrom}/hr
-              </p>
-            ) : (
-              <p className="mt-6 text-sm text-brass-text font-medium">
-                Custom quote
+                {service.priceFrom}
               </p>
             )}
           </div>

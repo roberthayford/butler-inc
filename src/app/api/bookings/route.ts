@@ -77,13 +77,6 @@ export async function POST(request: NextRequest) {
 
       const resend = new Resend(resendKey);
 
-      const priceLabel =
-        data.dayOption === "sameDay"
-          ? "£70/hr"
-          : data.dayOption === "nextDay"
-            ? "£55/hr"
-            : "£35/hr";
-
       await Promise.all([
         resend.emails.send({
           from: "Butlers Inc. <bookings@butlersinc.co.uk>",
@@ -94,7 +87,7 @@ export async function POST(request: NextRequest) {
             <p><strong>Reference:</strong> ${reference}</p>
             <p><strong>Butler:</strong> ${data.butlerType}</p>
             <p><strong>Service:</strong> ${data.serviceOption ?? "Bespoke"}</p>
-            <p><strong>When:</strong> ${data.dayOption} (${priceLabel}) - ${data.timeSlot}</p>
+            <p><strong>When:</strong> ${data.dayOption} - ${data.timeSlot}</p>
             ${data.specificDate ? `<p><strong>Date:</strong> ${data.specificDate}</p>` : ""}
             <p><strong>Name:</strong> ${data.name}</p>
             <p><strong>Email:</strong> ${data.email}</p>
