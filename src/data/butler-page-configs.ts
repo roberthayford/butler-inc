@@ -158,7 +158,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             'Emergency childcare when regular arrangements fall through',
         ],
         trustIndicators: [
-            { text: 'Enhanced DBS checked' },
+            { text: 'Enhanced DBS check verified Butlers' },
             { text: 'Body-cam equipped for your peace of mind' },
             { text: 'Real-time photo updates sent to you' },
         ],
