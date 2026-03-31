@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { AdminEditor } from "@/components/admin/AdminEditor";
+import { AdminTabs } from "@/components/admin/AdminTabs";
 
 export default async function AdminPage() {
   const supabase = await createClient();
@@ -17,16 +17,16 @@ export default async function AdminPage() {
       <header className="pt-8 pb-6 px-6 border-b border-primary-foreground/10">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-2xl font-serif font-bold text-optical-white">
-            Content Editor
+            Admin
           </h1>
           <p className="text-warm-gray text-sm mt-1">
-            Edit butler page headlines, descriptions, and details.
+            Manage members and edit site content.
           </p>
         </div>
       </header>
       <main className="px-6 py-8">
         <div className="max-w-3xl mx-auto">
-          <AdminEditor />
+          <AdminTabs />
         </div>
       </main>
     </div>
