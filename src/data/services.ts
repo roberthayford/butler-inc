@@ -67,7 +67,7 @@ export const services: Service[] = [
         id: "budget",
         name: "Budget Butler",
         shortName: "Budget",
-        subtitle: "Flexible timing, best rates",
+        subtitle: "For when you can be flexible on timing",
         image: "/images/budget-butler.png",
         examples: [
             "Water plants while you're away",

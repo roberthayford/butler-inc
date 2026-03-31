@@ -292,7 +292,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             ],
         },
         hero: {
-            headline: 'For the more flexible client.',
+            headline: 'For the more flexible client\u2026',
             subheading:
                 'For tasks that need doing, but don\'t need doing today.',
             useCases: [
