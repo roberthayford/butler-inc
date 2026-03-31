@@ -32,6 +32,7 @@ export function BookingConfirmationEmail({
   isPaid,
 }: BookingEmailProps) {
   const hasPricing = totalPrice != null && hourlyRate != null;
+  const isGenie = serviceOption === "genie";
   return (
     <Html lang="en">
       <Head>
@@ -69,7 +70,7 @@ export function BookingConfirmationEmail({
                 lineHeight: "1.3",
               }}
             >
-              Your booking is confirmed
+              {isGenie ? "Your wish has been received" : "Your booking is confirmed"}
             </Text>
             <Text
               style={{
@@ -80,7 +81,9 @@ export function BookingConfirmationEmail({
                 lineHeight: "1.6",
               }}
             >
-              Thank you, {name}. We&apos;ve received your request and our team is reviewing the details now.
+              {isGenie
+                ? `Thank you, ${name}. We've received your wish and our team is already on it.`
+                : `Thank you, ${name}. We've received your request and our team is reviewing the details now.`}
             </Text>
 
             {/* Reference card */}
@@ -121,7 +124,7 @@ export function BookingConfirmationEmail({
 
             {/* Detail rows */}
             <DetailRow label="Service" value={`${butlerType} Butler`} />
-            <DetailRow label="Booking" value={serviceOption ?? "Bespoke"} />
+            <DetailRow label="Booking" value={isGenie ? "Genie — Urgent Request" : (serviceOption ?? "Bespoke")} />
             <DetailRow label="Date" value={formattedDate} />
             <DetailRow label="Time" value={timeSlotLabel} />
 

@@ -111,19 +111,27 @@ export async function POST(request: NextRequest) {
         render(BookingNotificationEmail(emailProps), { plainText: true }),
       ]);
 
+      const isGenie = data.serviceOption === "genie";
+      const adminSubject = isGenie
+        ? `URGENT: Genie Wish ${reference} — Immediate Attention`
+        : `New Booking: ${reference} — ${data.butlerType} Butler`;
+      const customerSubject = isGenie
+        ? `Wish Received: ${reference} — Butlers Inc.`
+        : `Booking Confirmed: ${reference} — Butlers Inc.`;
+
       console.log("[after] Sending emails to:", "hello@butlersinc.com", "and", data.email);
       const results = await Promise.all([
         resend.emails.send({
           from: "Butlers Inc. <bookings@butlersinc.com>",
           to: "hello@butlersinc.com",
-          subject: `New Booking: ${reference} — ${data.butlerType} Butler`,
+          subject: adminSubject,
           html: notifyHtml,
           text: notifyText,
         }),
         resend.emails.send({
           from: "Butlers Inc. <bookings@butlersinc.com>",
           to: data.email,
-          subject: `Booking Confirmed: ${reference} — Butlers Inc.`,
+          subject: customerSubject,
           html: confirmHtml,
           text: confirmText,
         }),

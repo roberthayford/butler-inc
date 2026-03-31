@@ -32,6 +32,7 @@ export function BookingNotificationEmail({
   isPaid,
 }: BookingEmailProps) {
   const hasPricing = totalPrice != null && hourlyRate != null;
+  const isGenie = serviceOption === "genie";
   const receivedAt = new Date().toLocaleString("en-GB", {
     weekday: "long",
     day: "numeric",
@@ -66,7 +67,7 @@ export function BookingNotificationEmail({
             <Text
               style={{
                 display: "inline-block",
-                backgroundColor: "#5B9473",
+                backgroundColor: isGenie ? "#CC3333" : "#5B9473",
                 color: "#FDFDFD",
                 fontFamily: "'Helvetica Neue', Arial, sans-serif",
                 fontSize: "11px",
@@ -78,7 +79,7 @@ export function BookingNotificationEmail({
                 margin: "0 0 16px",
               }}
             >
-              New Booking
+              {isGenie ? "URGENT — Genie Request" : "New Booking"}
             </Text>
 
             <Text
@@ -90,7 +91,7 @@ export function BookingNotificationEmail({
                 fontWeight: "normal",
               }}
             >
-              New Booking Request
+              {isGenie ? "Urgent Genie Request" : "New Booking Request"}
             </Text>
             <Text
               style={{
@@ -102,6 +103,44 @@ export function BookingNotificationEmail({
             >
               Received: {receivedAt}
             </Text>
+
+            {isGenie && notes && (
+              <Section
+                style={{
+                  backgroundColor: "#FFF5F5",
+                  borderLeft: "3px solid #CC3333",
+                  borderRadius: "4px",
+                  padding: "12px 16px",
+                  marginBottom: "20px",
+                }}
+              >
+                <Text
+                  style={{
+                    fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                    fontSize: "11px",
+                    color: "#CC3333",
+                    textTransform: "uppercase" as const,
+                    letterSpacing: "0.08em",
+                    margin: "0 0 6px",
+                    fontWeight: "600",
+                  }}
+                >
+                  Customer&apos;s Wish
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: "Georgia, 'Times New Roman', serif",
+                    fontSize: "14px",
+                    color: "#262F3D",
+                    margin: 0,
+                    lineHeight: "1.5",
+                    fontStyle: "italic",
+                  }}
+                >
+                  {notes}
+                </Text>
+              </Section>
+            )}
 
             {/* Booking details */}
             <DetailRow label="Reference" value={reference} />

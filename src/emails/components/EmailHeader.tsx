@@ -1,4 +1,4 @@
-import { Img, Section, Text } from "@react-email/components"
+import { Section, Text } from "@react-email/components"
 
 export function EmailHeader() {
   return (
@@ -9,12 +9,18 @@ export function EmailHeader() {
         textAlign: "center" as const,
       }}
     >
-      <Img
-        src="https://butlersinc.com/images/butlers-inc-logo.webp"
-        alt="Butlers Inc."
-        width={140}
-        style={{ display: "inline-block", margin: "0 auto 10px" }}
-      />
+      <Text
+        style={{
+          fontFamily: "Georgia, 'Times New Roman', serif",
+          fontSize: "22px",
+          fontWeight: "bold",
+          color: "#FDFDFD",
+          margin: "0 0 6px",
+          letterSpacing: "0.02em",
+        }}
+      >
+        Butlers Inc.
+      </Text>
       <Text
         style={{
           fontFamily: "Georgia, 'Times New Roman', serif",
