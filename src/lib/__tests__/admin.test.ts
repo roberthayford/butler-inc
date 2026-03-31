@@ -5,6 +5,7 @@ describe("isAdmin", () => {
   it("returns true for admin emails", () => {
     expect(isAdmin("rob@roberthayford.com")).toBe(true);
     expect(isAdmin("hello@butlersinc.com")).toBe(true);
+    expect(isAdmin("roberthayford@gmail.com")).toBe(true);
   });
 
   it("returns false for non-admin emails", () => {

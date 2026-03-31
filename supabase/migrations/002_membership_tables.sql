@@ -80,7 +80,7 @@ CREATE POLICY "Users read own membership"
 
 CREATE POLICY "Admins manage memberships"
   ON memberships FOR ALL
-  USING (auth.jwt() ->> 'email' IN ('rob@roberthayford.com', 'hello@butlersinc.com'));
+  USING (auth.jwt() ->> 'email' IN ('rob@roberthayford.com', 'hello@butlersinc.com', 'roberthayford@gmail.com'));
 
 -- Virtual requests: users read/insert own, admins manage all
 CREATE POLICY "Users read own virtual requests"
@@ -93,4 +93,4 @@ CREATE POLICY "Users create own virtual requests"
 
 CREATE POLICY "Admins manage virtual requests"
   ON virtual_butler_requests FOR ALL
-  USING (auth.jwt() ->> 'email' IN ('rob@roberthayford.com', 'hello@butlersinc.com'));
+  USING (auth.jwt() ->> 'email' IN ('rob@roberthayford.com', 'hello@butlersinc.com', 'roberthayford@gmail.com'));
