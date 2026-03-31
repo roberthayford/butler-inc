@@ -7,7 +7,7 @@ import {
 } from "@/lib/pricing/calculate-price";
 import { generateBookingReference } from "@/lib/pricing/booking-reference";
 import { getPaymentGateway } from "@/lib/payment/gateway";
-import { createServiceClient } from "@/lib/supabase/server";
+import { getBookingRepository } from "@/lib/payment/booking-repository";
 import type { ButlerTypeKey } from "@/data/butler-tasks";
 
 const checkoutSchema = z.object({
@@ -71,11 +71,11 @@ export async function POST(request: NextRequest) {
   });
 
   const bookingReference = generateBookingReference();
-  const admin = createServiceClient();
+  const repo = getBookingRepository();
 
-  const { data: booking, error: insertError } = await admin
-    .from("priced_bookings")
-    .insert({
+  let bookingId: string;
+  try {
+    const result = await repo.insertBooking({
       booking_reference: bookingReference,
       butler_type: data.butlerType,
       service_option: data.serviceOption,
@@ -98,12 +98,9 @@ export async function POST(request: NextRequest) {
           .join("\n") || null,
       status: "pending",
       payment_status: "pending",
-    })
-    .select("id")
-    .single();
-
-  if (insertError) {
-    console.error("Booking insert failed:", insertError);
+    });
+    bookingId = result.id;
+  } catch {
     return NextResponse.json(
       { error: "Failed to create booking" },
       { status: 500 }
@@ -112,14 +109,14 @@ export async function POST(request: NextRequest) {
 
   const gateway = getPaymentGateway();
   const session = await gateway.createCheckoutSession({
-    bookingId: booking.id,
+    bookingId,
     bookingReference,
     amount: priceResult.total,
     currency: "gbp",
     description: `${pricing.name} — ${data.serviceDate}, ${data.startTime}–${data.endTime} (${priceResult.durationHours} hours)`,
     customerEmail: data.customerEmail,
     metadata: {
-      booking_id: booking.id,
+      booking_id: bookingId,
       booking_reference: bookingReference,
       butler_type: data.butlerType,
       service_date: data.serviceDate,
@@ -130,10 +127,7 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  await admin
-    .from("priced_bookings")
-    .update({ checkout_session_id: session.sessionId })
-    .eq("id", booking.id);
+  await repo.updateCheckoutSession(bookingId, session.sessionId);
 
   return NextResponse.json({
     url: session.url,

@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { after } from "next/server";
 import { z } from "zod";
 import { getPaymentGateway } from "@/lib/payment/gateway";
-import { createServiceClient } from "@/lib/supabase/server";
+import { getBookingRepository } from "@/lib/payment/booking-repository";
 import { Resend } from "resend";
 import { render } from "@react-email/components";
 import { BookingConfirmationEmail } from "@/emails/booking-confirmation";
@@ -34,16 +34,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const admin = createServiceClient();
+  const repo = getBookingRepository();
 
-  const { data: booking, error: fetchError } = await admin
-    .from("priced_bookings")
-    .select("*")
-    .eq("checkout_session_id", session_id)
-    .single();
-
-  if (fetchError || !booking) {
-    console.error("Booking lookup failed:", fetchError);
+  const booking = await repo.findByCheckoutSession(session_id);
+  if (!booking) {
     return NextResponse.json(
       { error: "Booking not found" },
       { status: 404 }
@@ -54,18 +48,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, already_processed: true });
   }
 
-  const { error: updateError } = await admin
-    .from("priced_bookings")
-    .update({
-      status: "confirmed",
-      payment_status: "paid",
-      payment_intent_id: verification.paymentIntentId ?? null,
-      confirmed_at: new Date().toISOString(),
-    })
-    .eq("id", booking.id);
-
-  if (updateError) {
-    console.error("Booking update failed:", updateError);
+  try {
+    await repo.confirmPayment(
+      booking.id,
+      verification.paymentIntentId ?? null
+    );
+  } catch {
     return NextResponse.json(
       { error: "Failed to confirm booking" },
       { status: 500 }
