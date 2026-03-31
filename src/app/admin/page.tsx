@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AdminTabs } from "@/components/admin/AdminTabs";
+import { isAdmin } from "@/lib/admin";
 
 export default async function AdminPage() {
   const supabase = await createClient();
@@ -10,6 +11,10 @@ export default async function AdminPage() {
 
   if (!user) {
     redirect("/members/login");
+  }
+
+  if (!isAdmin(user.email)) {
+    redirect("/members/dashboard");
   }
 
   return (
