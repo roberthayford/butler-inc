@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
+import { useMembership } from "@/hooks/useMembership";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -8,8 +9,9 @@ import Link from "next/link";
 import { services } from "@/data/services";
 import { DAY_OPTIONS, TIME_SLOTS } from "@/data/booking-config";
 import { format } from "date-fns";
+import { TierBadge } from "@/components/membership/TierBadge";
+import { UsageGauge } from "@/components/membership/UsageGauge";
 
-// Display label lookups derived from existing data constants
 const BUTLER_LABELS = Object.fromEntries(services.map((s) => [s.id, s.name]));
 const DAY_LABELS = Object.fromEntries(DAY_OPTIONS.map((d) => [d.key, d.label]));
 const TIME_LABELS = Object.fromEntries(TIME_SLOTS.map((t) => [t.key, t.label]));
@@ -27,6 +29,7 @@ interface Booking {
 
 export default function MemberDashboard() {
   const { user, loading, signOut, supabase } = useAuth();
+  const { membership, isLoading: memberLoading, isMember } = useMembership();
   const router = useRouter();
 
   const { data: bookings, isLoading: bookingsLoading } = useQuery({
@@ -48,7 +51,7 @@ export default function MemberDashboard() {
     router.push("/");
   };
 
-  if (loading) {
+  if (loading || memberLoading) {
     return (
       <div className="min-h-screen bg-charcoal flex items-center justify-center">
         <p className="text-warm-gray">Loading...</p>
@@ -78,10 +81,70 @@ export default function MemberDashboard() {
       </header>
 
       <main className="max-w-4xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-serif font-bold text-optical-white tracking-tight mb-8">
-          Your Dashboard
-        </h1>
+        {/* Welcome + Tier */}
+        <div className="flex items-center gap-3 mb-8">
+          <h1 className="text-3xl font-serif font-bold text-optical-white tracking-tight">
+            Welcome back, {user?.user_metadata?.name ?? "Member"}
+          </h1>
+          {isMember && membership && <TierBadge tier={membership.tier.slug} size="lg" />}
+        </div>
 
+        {/* Two-card chooser (members only) */}
+        {isMember && membership ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            {/* Personal Butler Card */}
+            <Link
+              href="/members/personal-butler"
+              className="block bg-primary-foreground/5 border border-primary-foreground/10 rounded-sm p-6 hover:border-brass/40 transition-colors"
+            >
+              <h2 className="text-xl font-serif font-semibold text-optical-white mb-4">
+                Personal Butler
+              </h2>
+              <p className="text-warm-gray text-sm mb-4">
+                Book butler services at your member rate
+              </p>
+              <UsageGauge
+                label="Hours"
+                used={membership.personalHoursUsed}
+                total={membership.personalHoursTotal}
+                unit="hrs"
+              />
+            </Link>
+
+            {/* Virtual Butler Card */}
+            <Link
+              href="/members/virtual-butler"
+              className="block bg-primary-foreground/5 border border-primary-foreground/10 rounded-sm p-6 hover:border-brass/40 transition-colors"
+            >
+              <h2 className="text-xl font-serif font-semibold text-optical-white mb-4">
+                Virtual Butler
+              </h2>
+              <p className="text-warm-gray text-sm mb-4">
+                Appointments, taxis, reservations and more
+              </p>
+              <UsageGauge
+                label="Tasks"
+                used={membership.virtualTasksUsed}
+                total={membership.virtualTasksTotal}
+                unit="tasks"
+              />
+            </Link>
+          </div>
+        ) : (
+          <div className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-sm p-8 text-center mb-12">
+            <p className="text-optical-white font-serif text-lg mb-2">Become a Member</p>
+            <p className="text-warm-gray text-sm mb-4">
+              Get discounted butler rates and virtual concierge tasks with a membership.
+            </p>
+            <Link href="/butlers">
+              <Button className="bg-brass text-charcoal hover:bg-brass-muted">
+                View Butler Services
+              </Button>
+            </Link>
+          </div>
+        )}
+
+        {/* Booking History */}
         <section>
           <h2 className="text-xl font-serif font-semibold text-optical-white mb-4">
             Booking History
