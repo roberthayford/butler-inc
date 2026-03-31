@@ -69,6 +69,12 @@ export default function MemberDashboard() {
           <span className="text-warm-gray text-sm">
             {user?.user_metadata?.name ?? user?.email}
           </span>
+          <Link
+            href="/members/settings"
+            className="text-warm-gray text-sm hover:text-optical-white transition-colors"
+          >
+            Settings
+          </Link>
           <Button
             variant="outline"
             size="sm"
