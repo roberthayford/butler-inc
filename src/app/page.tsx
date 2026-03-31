@@ -1,7 +1,6 @@
 import { Header } from "@/components/landing/Header";
 import { Hero } from "@/components/landing/Hero";
 import { HowItWorks } from "@/components/landing/HowItWorks";
-import { GenieSection } from "@/components/landing/GenieSection";
 import { ButlerCategoryGrid } from "@/components/landing/ButlerCategoryGrid";
 import { Footer } from "@/components/landing/Footer";
 
@@ -12,7 +11,6 @@ export default function Home() {
       <main id="main-content">
         <Hero />
         <HowItWorks />
-        <GenieSection />
         <ButlerCategoryGrid />
       </main>
       <Footer />

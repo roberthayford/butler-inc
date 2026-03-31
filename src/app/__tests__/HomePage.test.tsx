@@ -11,9 +11,6 @@ vi.mock("@/components/landing/Hero", () => ({
 vi.mock("@/components/landing/HowItWorks", () => ({
   HowItWorks: () => <div data-testid="how-it-works">HowItWorks</div>,
 }));
-vi.mock("@/components/landing/GenieSection", () => ({
-  GenieSection: () => <div data-testid="genie-section">GenieSection</div>,
-}));
 vi.mock("@/components/landing/ButlerCategoryGrid", () => ({
   ButlerCategoryGrid: () => <div data-testid="butler-grid">ButlerCategoryGrid</div>,
 }));
@@ -46,10 +43,5 @@ describe("Home page", () => {
   it("renders Hero section", () => {
     render(<Home />);
     expect(screen.getByTestId("hero")).toBeInTheDocument();
-  });
-
-  it("renders GenieSection", () => {
-    render(<Home />);
-    expect(screen.getByTestId("genie-section")).toBeInTheDocument();
   });
 });

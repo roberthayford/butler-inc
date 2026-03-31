@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import { Providers } from "@/components/providers";
+import { GenieStickyBar } from "@/components/genie/GenieStickyBar";
 import "./globals.css";
 
 const serif = Cormorant_Garamond({
@@ -34,7 +35,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${serif.variable} ${sans.variable} dark`} suppressHydrationWarning>
       <body className="antialiased">
-          <Providers>{children}</Providers>
+          <Providers>
+            {children}
+            <GenieStickyBar />
+          </Providers>
         </body>
     </html>
   );
