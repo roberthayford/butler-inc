@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -11,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { addDays } from "date-fns";
+import { useAuth } from "@/context/AuthContext";
 
 const bookingFormSchema = z
   .object({
@@ -41,6 +43,7 @@ export function BookingForm({ onSubmit, isSubmitting }: BookingFormProps) {
     watch,
     control,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<BookingFormData>({
     resolver: zodResolver(bookingFormSchema),
@@ -53,6 +56,24 @@ export function BookingForm({ onSubmit, isSubmitting }: BookingFormProps) {
       notes: "",
     },
   });
+
+  const { user, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      reset(
+        {
+          dayOption: "advance",
+          timeSlot: "morning",
+          name: (user.user_metadata?.name as string) ?? "",
+          email: user.email ?? "",
+          phone: (user.user_metadata?.phone as string) ?? "",
+          notes: "",
+        },
+        { keepDirtyValues: true }
+      );
+    }
+  }, [user, authLoading, reset]);
 
   const selectedDay = watch("dayOption");
   const selectedTime = watch("timeSlot");

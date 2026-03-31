@@ -20,7 +20,8 @@ interface AuthContextType {
   signUp: (
     email: string,
     password: string,
-    name: string
+    name: string,
+    phone: string
   ) => Promise<{ error: Error | null }>;
   signIn: (
     email: string,
@@ -58,11 +59,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const signUp = async (email: string, password: string, name: string) => {
+  const signUp = async (email: string, password: string, name: string, phone: string) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { name } },
+      options: { data: { name, phone } },
     });
     return { error: error ? new Error(error.message) : null };
   };

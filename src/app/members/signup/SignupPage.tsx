@@ -37,7 +37,7 @@ export function SignupPage() {
   });
 
   const onSubmit = async (data: SignupForm) => {
-    const { error } = await signUp(data.email, data.password, data.name);
+    const { error } = await signUp(data.email, data.password, data.name, data.phone);
     if (error) {
       toast.error(error.message);
       return;

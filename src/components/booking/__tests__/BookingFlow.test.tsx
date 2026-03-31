@@ -2,6 +2,18 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@/test/test-utils";
 import { BookingFlow } from "../BookingFlow";
 
+vi.mock("@/context/AuthContext", () => ({
+  useAuth: () => ({
+    user: null,
+    session: null,
+    loading: false,
+    supabase: {},
+    signUp: vi.fn(),
+    signIn: vi.fn(),
+    signOut: vi.fn(),
+  }),
+}));
+
 vi.mock("motion/react", () => ({
   motion: {
     button: ({

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -22,6 +22,7 @@ import { calculatePricePreview } from "@/lib/pricing/calculate-price";
 import { URGENCY_MULTIPLIERS } from "@/data/pricing-config";
 import type { ButlerPricing } from "@/lib/pricing/types";
 import type { ButlerTypeKey } from "@/data/butler-tasks";
+import { useAuth } from "@/context/AuthContext";
 
 const pricedBookingSchema = z.object({
   serviceDate: z.date({ error: "Please select a date" }),
@@ -56,6 +57,7 @@ export function PricedBookingForm({
     watch,
     control,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<PricedBookingFormData>({
     resolver: zodResolver(pricedBookingSchema),
@@ -68,6 +70,24 @@ export function PricedBookingForm({
       notes: "",
     },
   });
+
+  const { user, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      reset(
+        {
+          startTime: "",
+          endTime: "",
+          name: (user.user_metadata?.name as string) ?? "",
+          email: user.email ?? "",
+          phone: (user.user_metadata?.phone as string) ?? "",
+          notes: "",
+        },
+        { keepDirtyValues: true }
+      );
+    }
+  }, [user, authLoading, reset]);
 
   const selectedDate = watch("serviceDate");
   const startTime = watch("startTime");
