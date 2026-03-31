@@ -36,7 +36,11 @@
       "Bash(git -C:*)",
       "Bash(kill 52626)",
       "Bash(git stash:*)",
-      "Bash(find /Users/roberthayford/Git/BlueOcean/_faridah/Ohmybutler-premium-concierge/src/components/landing -type f -name *.tsx -o -name *.ts -o -name *.css)"
+      "Bash(find /Users/roberthayford/Git/BlueOcean/_faridah/Ohmybutler-premium-concierge/src/components/landing -type f -name *.tsx -o -name *.ts -o -name *.css)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(pkill -f \"npm run dev\")",
+      "Bash(grep -r \"Genie\\\\|genie\\\\|Life Handled\\\\|life handled\\\\|tagline\\\\|Non-Member\\\\|Browse to Book\" /Users/roberthayford/Git/BlueOcean/_faridah/Ohmybutler-premium-concierge/src --include=*.tsx --include=*.ts --include=*.md -rl)",
+      "Bash(find /Users/roberthayford/Git/BlueOcean/_faridah/Ohmybutler-premium-concierge/docs -name *.md)"
     ]
   }
 }
