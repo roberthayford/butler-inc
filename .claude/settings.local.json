@@ -54,7 +54,8 @@
       "Bash(find /Users/roberthayford/Git/BlueOcean/_faridah/Ohmybutler-premium-concierge/src -type f \\\\\\(-name *.ts -o -name *.tsx -o -name *.js -o -name *.jsx \\\\\\))",
       "Bash(/tmp/trace_summary.txt:*)",
       "Read(//tmp/**)",
-      "Bash(grep -rn \"DEV_BYPASS_DB\" /Users/roberthayford/Git/BlueOcean/_faridah/Ohmybutler-premium-concierge/.env*)"
+      "Bash(grep -rn \"DEV_BYPASS_DB\" /Users/roberthayford/Git/BlueOcean/_faridah/Ohmybutler-premium-concierge/.env*)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('\\\\n'.join\\(sorted\\(list\\(d.get\\('dependencies',{}\\).keys\\(\\)\\) + list\\(d.get\\('devDependencies',{}\\).keys\\(\\)\\)\\)\\)\\)\")"
     ]
   }
 }
