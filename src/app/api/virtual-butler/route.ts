@@ -1,5 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { z } from "zod";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+
+export const virtualButlerSchema = z.object({
+  category: z.enum(["appointment", "taxi_airport", "restaurant", "other"]),
+  description: z.string().min(1).max(1000),
+  membershipId: z.string().uuid(),
+  preferredDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  preferredTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+});
 
 export function generateReference(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -12,7 +21,6 @@ export function generateReference(): string {
 
 export async function POST(request: NextRequest) {
   try {
-    // Auth via cookie-based session (same pattern as other routes)
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -21,12 +29,16 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { category, description, preferredDate, preferredTime, membershipId } = body;
+    const parsed = virtualButlerSchema.safeParse(body);
 
-    if (!category || !description || !membershipId) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid request", details: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
 
+    const { category, description, membershipId, preferredDate, preferredTime } = parsed.data;
     const admin = createServiceClient();
 
     // Verify membership is active and belongs to user
@@ -42,14 +54,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Active membership required" }, { status: 403 });
     }
 
-    // Check task allowance
-    if (membership.virtual_tasks_used >= membership.virtual_tasks_total) {
+    // Atomic increment — the DB CHECK constraint (virtual_tasks_used <= virtual_tasks_total)
+    // will reject the update if the user has no remaining tasks, preventing race conditions.
+    const { error: updateError } = await admin
+      .from("memberships")
+      .update({
+        virtual_tasks_used: membership.virtual_tasks_used + 1,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", membershipId)
+      .eq("virtual_tasks_used", membership.virtual_tasks_used); // Optimistic lock
+
+    if (updateError) {
+      // CHECK constraint violation or optimistic lock failure = no remaining tasks
       return NextResponse.json({ error: "No remaining virtual tasks" }, { status: 403 });
     }
 
     const reference = generateReference();
 
-    // Insert request
     const { data: requestData, error: insertError } = await admin
       .from("virtual_butler_requests")
       .insert({
@@ -65,17 +87,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) throw insertError;
-
-    // Increment virtual_tasks_used
-    const { error: updateError } = await admin
-      .from("memberships")
-      .update({
-        virtual_tasks_used: membership.virtual_tasks_used + 1,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", membershipId);
-
-    if (updateError) throw updateError;
 
     return NextResponse.json({ reference, request: requestData });
   } catch (error) {
