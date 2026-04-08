@@ -5,9 +5,14 @@ export function getPaymentGateway(): PaymentGateway {
   const provider = process.env.PAYMENT_GATEWAY ?? "mock";
 
   if (provider === "stripe") {
-    // Future: return new StripePaymentGateway()
     throw new Error(
       "Stripe gateway not yet implemented. Set PAYMENT_GATEWAY=mock or add Stripe credentials."
+    );
+  }
+
+  if (provider === "mock" && process.env.NODE_ENV === "production") {
+    throw new Error(
+      "Mock payment gateway cannot be used in production. Set PAYMENT_GATEWAY=stripe and configure Stripe credentials."
     );
   }
 

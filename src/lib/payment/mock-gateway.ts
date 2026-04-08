@@ -31,9 +31,12 @@ export class MockPaymentGateway implements PaymentGateway {
   async verifyPayment(
     sessionId: string
   ): Promise<{ verified: boolean; paymentIntentId?: string }> {
-    if (!sessionId || !sessionId.startsWith("mock_session_")) {
+    if (!sessionId || !this.sessions.has(sessionId)) {
       return { verified: false };
     }
+
+    // Consume the session — prevents replay attacks
+    this.sessions.delete(sessionId);
 
     return {
       verified: true,

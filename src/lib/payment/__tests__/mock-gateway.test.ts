@@ -93,4 +93,24 @@ describe("MockPaymentGateway", () => {
     const result = await gateway.verifyPayment("");
     expect(result.verified).toBe(false);
   });
+
+  it("rejects fabricated mock session IDs not created by this gateway", async () => {
+    const gateway = new MockPaymentGateway();
+    // This ID has the right prefix but was never created via createCheckoutSession
+    const result = await gateway.verifyPayment("mock_session_999_fabricated");
+    expect(result.verified).toBe(false);
+  });
+
+  it("rejects replaying a session that was already verified", async () => {
+    const gateway = new MockPaymentGateway();
+    const session = await gateway.createCheckoutSession(SAMPLE_REQUEST);
+
+    // First verification should succeed
+    const first = await gateway.verifyPayment(session.sessionId);
+    expect(first.verified).toBe(true);
+
+    // Second verification (replay) should fail
+    const second = await gateway.verifyPayment(session.sessionId);
+    expect(second.verified).toBe(false);
+  });
 });
