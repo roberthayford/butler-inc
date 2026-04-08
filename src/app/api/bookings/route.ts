@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { after } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { bookingLimiter } from "@/lib/rate-limit";
 import { Resend } from "resend";
 import { z } from "zod";
 import { render } from "@react-email/components";
@@ -31,6 +32,15 @@ function generateReference(): string {
 }
 
 export async function POST(request: NextRequest) {
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const limit = bookingLimiter.check(ip);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 }
+    );
+  }
+
   const body = await request.json();
   const parsed = bookingSchema.safeParse(body);
 

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
+import { priceLimiter } from "@/lib/rate-limit";
 import { BUTLER_PRICING, URGENCY_MULTIPLIERS } from "@/data/pricing-config";
 import {
   calculatePricePreview,
@@ -15,6 +16,15 @@ const priceRequestSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const limit = priceLimiter.check(ip);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 }
+    );
+  }
+
   const body = await request.json();
   const parsed = priceRequestSchema.safeParse(body);
 

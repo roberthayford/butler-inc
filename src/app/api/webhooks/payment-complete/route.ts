@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { after } from "next/server";
 import { z } from "zod";
+import { webhookLimiter } from "@/lib/rate-limit";
 import { getPaymentGateway } from "@/lib/payment/gateway";
 import { getBookingRepository } from "@/lib/payment/booking-repository";
 import { Resend } from "resend";
@@ -13,6 +14,15 @@ const webhookSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const limit = webhookLimiter.check(ip);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429 }
+    );
+  }
+
   const body = await request.json();
   const parsed = webhookSchema.safeParse(body);
 
