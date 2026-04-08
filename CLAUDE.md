@@ -106,6 +106,7 @@ src/lib/
   supabase/                     # client.ts, server.ts
   payment/                      # gateway.ts (provider pattern), mock-gateway.ts, booking-repository.ts
   pricing/                      # calculate-price.ts, time-slots.ts, booking-reference.ts
+  rate-limit.ts                 # In-memory per-IP rate limiting for API routes
   admin.ts                      # Admin email allowlist + isAdmin()
   content.ts                    # Content merge utilities
   utils.ts                      # Shared utilities
@@ -125,9 +126,11 @@ docs/plans/                     # Design docs and implementation plans
 
 ## Key Patterns
 
-- **Payment gateway:** Provider pattern in `src/lib/payment/gateway.ts` — currently uses `MockPaymentGateway`; Stripe integration is stubbed but not implemented. Set `PAYMENT_GATEWAY=mock` (default).
-- **Membership tiers:** Three tiers (Lite $49, Essential, Premium) defined in `src/data/membership-config.ts`. Tier data stored in Supabase with RLS policies.
-- **Admin:** Tabbed layout (`AdminTabs`) with content editor and member manager. Access controlled by email allowlist.
+- **Payment gateway:** Provider pattern in `src/lib/payment/gateway.ts` — currently uses `MockPaymentGateway`; Stripe integration is stubbed but not implemented. Set `PAYMENT_GATEWAY=mock` (default). Mock gateway blocked in `NODE_ENV=production`.
+- **Membership tiers:** Three tiers (Lite £49, Essential, Premium) defined in `src/data/membership-config.ts`. Tier data stored in Supabase with RLS policies. DB CHECK constraints enforce usage limits.
+- **Admin:** Tabbed layout (`AdminTabs`) with content editor and member manager. Access controlled by email allowlist in `src/lib/admin.ts` and `admin_users` table (RLS policies reference this table).
+- **Rate limiting:** In-memory per-IP rate limiting via `src/lib/rate-limit.ts` on public API endpoints (bookings, checkout, pricing, webhooks).
+- **RLS:** Booking tables (priced_bookings, bespoke_consultations) are user-scoped SELECT only; all writes via service role. Membership tables scoped to user_id. Admin actions scoped to admin_users table.
 - **Genie:** Sticky bottom bar + drawer CTA that appears after scrolling, used across butler pages.
 - **Content system:** Static defaults in `src/data/` merged with Supabase-stored overrides via `src/lib/content.ts`.
 
