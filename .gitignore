@@ -42,3 +42,4 @@ test-results/
 
 # editor / IDE
 .cursor/
+.claude/settings.local.json
