@@ -98,7 +98,7 @@ src/data/                       # Static config
   booking-config.ts             # Booking options
   butler-page-configs.ts        # Butler page content
   butler-tasks.ts               # Task definitions per butler
-  membership-config.ts          # Tier definitions (Lite/Essential/Premium)
+  membership-config.ts          # Tier definitions (Lite/Essential/Heavy)
   pricing-config.ts             # Pricing rules
   content-schema.ts             # CMS content schema
 
@@ -127,7 +127,7 @@ docs/plans/                     # Design docs and implementation plans
 ## Key Patterns
 
 - **Payment gateway:** Provider pattern in `src/lib/payment/gateway.ts` — currently uses `MockPaymentGateway`; Stripe integration is stubbed but not implemented. Set `PAYMENT_GATEWAY=mock` (default). Mock gateway blocked in `NODE_ENV=production`.
-- **Membership tiers:** Three tiers (Lite £49, Essential, Premium) defined in `src/data/membership-config.ts`. Tier data stored in Supabase with RLS policies. DB CHECK constraints enforce usage limits.
+- **Membership tiers:** Three tiers — Lite (£49, 5h / 3 tasks), Essential (£99, 15h / 8 tasks), Heavy (£199, 30h / 15 tasks) — defined in `src/data/membership-config.ts`. Tier data stored in Supabase with RLS policies. DB CHECK constraints enforce usage limits.
 - **Admin:** Tabbed layout (`AdminTabs`) with content editor and member manager. Access controlled by email allowlist in `src/lib/admin.ts` and `admin_users` table (RLS policies reference this table).
 - **Rate limiting:** In-memory per-IP rate limiting via `src/lib/rate-limit.ts` on public API endpoints (bookings, checkout, pricing, webhooks).
 - **RLS:** Booking tables (priced_bookings, bespoke_consultations) are user-scoped SELECT only; all writes via service role. Membership tables scoped to user_id. Admin actions scoped to admin_users table.
