@@ -58,7 +58,7 @@ export function VirtualRequestForm({ onSubmit, isSubmitting }: VirtualRequestFor
       {/* Description */}
       <div>
         <label htmlFor="vb-description" className="block text-sm font-medium text-optical-white mb-1">
-          What do you need?
+          Click to book?
         </label>
         <textarea
           id="vb-description"
