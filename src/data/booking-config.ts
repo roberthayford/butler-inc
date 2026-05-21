@@ -2,20 +2,20 @@ export const DAY_OPTIONS = [
   {
     key: "sameDay",
     label: "Same Day",
-    priceLabel: "from £70/hr",
-    priceFrom: 70,
+    priceLabel: "",
+    priceFrom: 0,
   },
   {
     key: "nextDay",
     label: "Next Day",
-    priceLabel: "from £55/hr",
-    priceFrom: 55,
+    priceLabel: "",
+    priceFrom: 0,
   },
   {
     key: "advance",
     label: "72+ Hours Notice",
-    priceLabel: "from £35/hr",
-    priceFrom: 35,
+    priceLabel: "",
+    priceFrom: 0,
     requiresDatePicker: true,
   },
 ] as const;

@@ -90,7 +90,7 @@ export function BookingForm({ onSubmit, isSubmitting }: BookingFormProps) {
         </Label>
         <div
           role="radiogroup"
-          aria-label="Urgency and pricing"
+          aria-label="Urgency options"
           className="grid grid-cols-1 sm:grid-cols-3 gap-3"
         >
           {DAY_OPTIONS.map((opt) => (
@@ -116,9 +116,11 @@ export function BookingForm({ onSubmit, isSubmitting }: BookingFormProps) {
               `}
             >
               <span className="block font-medium">{opt.label}</span>
-              <span className="block text-sm mt-1 text-brass-text">
-                {opt.priceLabel}
-              </span>
+              {opt.priceLabel && (
+                <span className="block text-sm mt-1 text-brass-text">
+                  {opt.priceLabel}
+                </span>
+              )}
             </motion.button>
           ))}
         </div>

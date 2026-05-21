@@ -90,7 +90,6 @@ export default async function ButlerPage({
 
   const service = services.find((s) => s.id === id)!;
 
-  const priceValue = service.priceFrom.replace(/[^0-9]/g, "");
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -105,8 +104,7 @@ export default async function ButlerPage({
     offers: {
       "@type": "Offer",
       priceCurrency: "GBP",
-      price: priceValue || "Contact for quote",
-      priceValidUntil: "2027-12-31",
+      price: "Contact us",
     },
   };
 
@@ -127,6 +125,12 @@ export default async function ButlerPage({
             <p className="mt-4 text-lg text-warm-gray max-w-2xl mx-auto leading-relaxed">
               {content.hero.subheading}
             </p>
+
+            {service.priceFrom && (
+              <p className="mt-6 text-sm text-brass-text font-medium">
+                {service.priceFrom}
+              </p>
+            )}
           </div>
         </header>
       </HeroBackground>

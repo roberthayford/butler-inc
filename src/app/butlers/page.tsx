@@ -6,7 +6,7 @@ import { ButlerCategoryGrid } from "@/components/landing/ButlerCategoryGrid";
 export const metadata: Metadata = {
   title: "Our Butlers | Premium Concierge Services",
   description:
-    "Six specialist butlers for every need. Same-day courier, childcare, luxury sourcing, property management, budget errands, and bespoke requests. From £35/hr.",
+    "Six specialist butlers for every need. Same-day courier, childcare, luxury sourcing, property management, budget errands, and bespoke requests.",
 };
 
 export default function ButlersPage() {
@@ -26,6 +26,33 @@ export default function ButlersPage() {
       </LandingHeroBackground>
 
       <HowItWorks />
+      <main className="max-w-4xl mx-auto px-6 pb-24">
+        <div className="space-y-4">
+          {services.map((service) => (
+            <Link
+              key={service.id}
+              href={`/butlers/${service.id}`}
+              className="block p-6 rounded-sm bg-primary-foreground/5 border border-primary-foreground/10 hover:border-brass-text/50 transition-all duration-350 hover:bg-primary-foreground/10"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-serif font-semibold text-optical-white">
+                    {service.name}
+                  </h2>
+                  <p className="text-warm-gray text-sm mt-1">
+                    {service.subtitle}
+                  </p>
+                </div>
+                {service.priceFrom && (
+                  <span className="text-sm font-medium px-3 py-1 rounded bg-brass/20 text-brass-text shrink-0 ml-4">
+                    {service.priceFrom}
+                  </span>
+                )}
+              </div>
+            </Link>
+          ))}
+        </div>
+      </main>
 
       <ButlerCategoryGrid showHeader={false} />
     </div>

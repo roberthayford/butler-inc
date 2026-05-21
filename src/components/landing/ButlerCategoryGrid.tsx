@@ -108,6 +108,11 @@ export function ButlerCategoryGrid({ showHeader = true }: ButlerCategoryGridProp
                         ? "Consultation"
                         : `From £${pricing.hourlyRate}/hour`}
                     </p>
+                    {service.priceFrom && (
+                      <span className="text-xs font-medium px-2 py-1 rounded bg-brass/20 text-brass-text shrink-0 ml-2">
+                        {service.priceFrom}
+                      </span>
+                    )}
                   </div>
                   <p className="relative z-10 text-warm-gray text-sm leading-relaxed">
                     {service.subtitle}

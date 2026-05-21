@@ -138,6 +138,24 @@ export async function POST(request: NextRequest) {
           subject: adminSubject,
           html: notifyHtml,
           text: notifyText,
+      await Promise.all([
+        resend.emails.send({
+          from: "Butlers Inc. <bookings@butlersinc.co.uk>",
+          to: "bookings@butlersinc.co.uk",
+          subject: `New Booking: ${reference} - ${data.butlerType} Butler`,
+          html: `
+            <h2>New Booking Request</h2>
+            <p><strong>Reference:</strong> ${reference}</p>
+            <p><strong>Butler:</strong> ${data.butlerType}</p>
+            <p><strong>Service:</strong> ${data.serviceOption ?? "Bespoke"}</p>
+            <p><strong>When:</strong> ${data.dayOption} - ${data.timeSlot}</p>
+            ${data.specificDate ? `<p><strong>Date:</strong> ${data.specificDate}</p>` : ""}
+            <p><strong>Name:</strong> ${data.name}</p>
+            <p><strong>Email:</strong> ${data.email}</p>
+            <p><strong>Phone:</strong> ${data.phone}</p>
+            ${data.notes ? `<p><strong>Notes:</strong> ${data.notes}</p>` : ""}
+            ${data.customDescription ? `<p><strong>Custom request:</strong> ${data.customDescription}</p>` : ""}
+          `,
         }),
         resend.emails.send({
           from: "Butlers Inc. <bookings@butlersinc.com>",
