@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { TimePicker } from "./TimePicker";
 import { generateTimeSlots } from "@/lib/pricing/time-slots";
+import { phoneNumberSchema } from "@/lib/phone";
 
 const consultationSchema = z.object({
   preferredServiceDate: z.date().optional(),
@@ -21,7 +22,7 @@ const consultationSchema = z.object({
   consultationTime: z.string().min(1, "Please select a time"),
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email"),
-  phone: z.string().min(10, "Please enter a valid phone number"),
+  phone: phoneNumberSchema,
 });
 
 export type BespokeConsultationFormData = z.infer<typeof consultationSchema>;

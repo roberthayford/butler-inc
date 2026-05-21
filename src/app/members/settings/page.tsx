@@ -1,20 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { phoneNumberSchema } from "@/lib/phone";
+
+const profileSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  phone: phoneNumberSchema,
+});
+
+type ProfileForm = z.infer<typeof profileSchema>;
 
 export default function SettingsPage() {
   const { user, loading, supabase } = useAuth();
   const router = useRouter();
+  const userId = user?.id;
+  const userName = (user?.user_metadata?.name as string) ?? "";
+  const userPhone = (user?.user_metadata?.phone as string) ?? "";
 
-  // Profile state
-  const [name, setName] = useState(user?.user_metadata?.name ?? "");
-  const [phone, setPhone] = useState(user?.user_metadata?.phone ?? "");
-  const [profileSaving, setProfileSaving] = useState(false);
+  const profileForm = useForm<ProfileForm>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      name: userName,
+      phone: userPhone,
+    },
+  });
+  const { reset: resetProfileForm } = profileForm;
 
   // Email state
   const [newEmail, setNewEmail] = useState("");
@@ -39,18 +57,32 @@ export default function SettingsPage() {
     return null;
   }
 
-  const handleProfileSave = async () => {
-    setProfileSaving(true);
-    try {
-      const { error } = await supabase.auth.updateUser({
-        data: { name, phone },
+  useEffect(() => {
+    if (userId) {
+      resetProfileForm({
+        name: userName,
+        phone: userPhone,
       });
-      if (error) throw error;
+    }
+  }, [resetProfileForm, userId, userName, userPhone]);
+
+  const handleProfileSave = async (data: ProfileForm) => {
+    try {
+      const response = await fetch("/api/members/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+        const phoneError = result?.details?.fieldErrors?.phone?.[0];
+        throw new Error(phoneError ?? result?.error ?? "Failed to update profile");
+      }
+
       toast.success("Profile updated");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to update profile");
-    } finally {
-      setProfileSaving(false);
     }
   };
 
@@ -111,7 +143,7 @@ export default function SettingsPage() {
         {/* Profile Section */}
         <section className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-sm p-6 mb-6">
           <h2 className="text-lg font-serif font-semibold text-optical-white mb-4">Profile</h2>
-          <div className="space-y-4">
+          <form onSubmit={profileForm.handleSubmit(handleProfileSave)} className="space-y-4">
             <div>
               <label htmlFor="settings-name" className="block text-sm font-medium text-optical-white mb-1">
                 Name
@@ -119,10 +151,14 @@ export default function SettingsPage() {
               <input
                 id="settings-name"
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                {...profileForm.register("name")}
                 className="w-full bg-primary-foreground/5 border border-primary-foreground/10 rounded-sm p-2 text-optical-white focus:border-brass/40 focus:outline-none"
               />
+              {profileForm.formState.errors.name && (
+                <p className="text-[#EE4B2B] text-sm mt-1" role="alert">
+                  {profileForm.formState.errors.name.message}
+                </p>
+              )}
             </div>
             <div>
               <label htmlFor="settings-phone" className="block text-sm font-medium text-optical-white mb-1">
@@ -131,19 +167,23 @@ export default function SettingsPage() {
               <input
                 id="settings-phone"
                 type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                {...profileForm.register("phone")}
                 className="w-full bg-primary-foreground/5 border border-primary-foreground/10 rounded-sm p-2 text-optical-white focus:border-brass/40 focus:outline-none"
               />
+              {profileForm.formState.errors.phone && (
+                <p className="text-[#EE4B2B] text-sm mt-1" role="alert">
+                  {profileForm.formState.errors.phone.message}
+                </p>
+              )}
             </div>
             <Button
-              onClick={handleProfileSave}
-              disabled={profileSaving}
+              type="submit"
+              disabled={profileForm.formState.isSubmitting}
               className="bg-brass text-charcoal hover:bg-brass-muted disabled:opacity-50"
             >
-              {profileSaving ? "Saving..." : "Save"}
+              {profileForm.formState.isSubmitting ? "Saving..." : "Save"}
             </Button>
-          </div>
+          </form>
         </section>
 
         {/* Email Section */}
@@ -212,7 +252,7 @@ export default function SettingsPage() {
               />
             </div>
             {passwordError && (
-              <p className="text-red-400 text-sm">{passwordError}</p>
+              <p className="text-[#EE4B2B] text-sm">{passwordError}</p>
             )}
             <Button
               onClick={handlePasswordSave}

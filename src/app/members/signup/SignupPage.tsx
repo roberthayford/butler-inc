@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,6 +8,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { phoneNumberSchema } from "@/lib/phone";
 import {
   Form,
   FormControl,
@@ -22,13 +22,12 @@ const signupSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  phone: z.string().min(10, "Please enter a valid phone number"),
+  phone: phoneNumberSchema,
 });
 
 type SignupForm = z.infer<typeof signupSchema>;
 
 export function SignupPage() {
-  const { signUp } = useAuth();
   const router = useRouter();
 
   const form = useForm<SignupForm>({
@@ -37,11 +36,19 @@ export function SignupPage() {
   });
 
   const onSubmit = async (data: SignupForm) => {
-    const { error } = await signUp(data.email, data.password, data.name, data.phone);
-    if (error) {
-      toast.error(error.message);
+    const response = await fetch("/api/members/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const result = await response.json();
+      const phoneError = result?.details?.fieldErrors?.phone?.[0];
+      toast.error(phoneError ?? result?.error ?? "Failed to create account");
       return;
     }
+
     toast.success("Account created! Please check your email to verify.");
     router.push("/members/login");
   };

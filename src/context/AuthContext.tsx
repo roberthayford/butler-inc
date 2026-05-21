@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { normalizePhoneNumber } from "@/lib/phone";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { User, Session } from "@supabase/supabase-js";
 
@@ -60,10 +61,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const signUp = async (email: string, password: string, name: string, phone: string) => {
+    const normalizedPhone = normalizePhoneNumber(phone);
+    if (!normalizedPhone.ok) {
+      return { error: new Error(normalizedPhone.message) };
+    }
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { name, phone } },
+      options: { data: { name, phone: normalizedPhone.value } },
     });
     return { error: error ? new Error(error.message) : null };
   };

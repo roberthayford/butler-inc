@@ -95,6 +95,53 @@ describe("BookingForm", () => {
     });
   });
 
+  it("rejects a UK mobile number that is one digit short", async () => {
+    render(<BookingForm {...defaultProps} />);
+
+    fireEvent.click(screen.getByRole("radio", { name: /Same Day/i }));
+    fireEvent.change(screen.getByPlaceholderText("Jane Smith"), {
+      target: { value: "Jane Smith" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("you@example.com"), {
+      target: { value: "jane@example.com" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("07700 900000"), {
+      target: { value: "07700 90000" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Request Your Butler/i }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Phone number is too short for its country/i)
+      ).toBeInTheDocument();
+    });
+    expect(defaultProps.onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("submits phone numbers in E.164 format", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    render(<BookingForm {...defaultProps} onSubmit={onSubmit} />);
+
+    fireEvent.click(screen.getByRole("radio", { name: /Same Day/i }));
+    fireEvent.change(screen.getByPlaceholderText("Jane Smith"), {
+      target: { value: "Jane Smith" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("you@example.com"), {
+      target: { value: "jane@example.com" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("07700 900000"), {
+      target: { value: "07700 900000" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Request Your Butler/i }));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ phone: "+447700900000" }),
+        expect.anything()
+      );
+    });
+  });
+
   it("uses accessible radiogroup roles for day options", () => {
     render(<BookingForm {...defaultProps} />);
 

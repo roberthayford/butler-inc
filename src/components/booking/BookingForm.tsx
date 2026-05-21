@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { addDays } from "date-fns";
 import { useAuth } from "@/context/AuthContext";
+import { phoneNumberSchema } from "@/lib/phone";
 
 const bookingFormSchema = z
   .object({
@@ -21,7 +22,7 @@ const bookingFormSchema = z
     timeSlot: z.enum(["morning", "noon", "evening"]),
     name: z.string().min(1, "Name is required"),
     email: z.string().email("Please enter a valid email"),
-    phone: z.string().min(10, "Please enter a valid phone number"),
+    phone: phoneNumberSchema,
     notes: z.string().max(500).optional(),
   })
   .refine((d) => d.dayOption !== "advance" || d.specificDate != null, {

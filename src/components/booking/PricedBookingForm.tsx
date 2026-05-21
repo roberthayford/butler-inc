@@ -23,6 +23,7 @@ import { URGENCY_MULTIPLIERS } from "@/data/pricing-config";
 import type { ButlerPricing } from "@/lib/pricing/types";
 import type { ButlerTypeKey } from "@/data/butler-tasks";
 import { useAuth } from "@/context/AuthContext";
+import { phoneNumberSchema } from "@/lib/phone";
 
 const pricedBookingSchema = z.object({
   serviceDate: z.date({ error: "Please select a date" }),
@@ -30,7 +31,7 @@ const pricedBookingSchema = z.object({
   endTime: z.string().min(1, "Please select an end time"),
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email"),
-  phone: z.string().min(10, "Please enter a valid phone number"),
+  phone: phoneNumberSchema,
   notes: z.string().max(500).optional(),
 });
 
