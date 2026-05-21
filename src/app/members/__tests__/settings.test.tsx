@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from "@/test/test-utils";
 import SettingsPage from "../settings/page";
 
 const mockUpdateUser = vi.fn().mockResolvedValue({ data: {}, error: null });
+const mockFetch = vi.fn();
 
 vi.mock("@/context/AuthContext", () => ({
   useAuth: () => ({
@@ -24,6 +25,8 @@ describe("SettingsPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUpdateUser.mockResolvedValue({ data: {}, error: null });
+    mockFetch.mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
+    vi.stubGlobal("fetch", mockFetch);
   });
 
   it("renders profile section with current name and phone", async () => {
@@ -58,10 +61,27 @@ describe("SettingsPage", () => {
     fireEvent.click(saveBtn);
 
     await waitFor(() => {
-      expect(mockUpdateUser).toHaveBeenCalledWith({
-        data: { name: "Kwasi H", phone: "07700900000" },
-      });
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/members/profile",
+        expect.objectContaining({
+          method: "PATCH",
+          body: JSON.stringify({ name: "Kwasi H", phone: "+447700900000" }),
+        })
+      );
     });
+  });
+
+  it("prompts users to fix invalid existing phone numbers on profile save", async () => {
+    render(<SettingsPage />);
+    const phoneInput = await screen.findByLabelText(/Phone/i);
+    fireEvent.change(phoneInput, { target: { value: "07700 90000" } });
+    const saveBtn = screen.getAllByRole("button", { name: /Save/i })[0];
+    fireEvent.click(saveBtn);
+
+    expect(
+      await screen.findByText(/Phone number is too short for its country/i)
+    ).toBeInTheDocument();
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it("shows error when passwords don't match", async () => {

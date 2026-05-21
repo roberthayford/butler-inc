@@ -8,6 +8,7 @@ import { render } from "@react-email/components";
 import { BookingConfirmationEmail } from "@/emails/booking-confirmation";
 import { BookingNotificationEmail } from "@/emails/booking-notification";
 import { formatBookingDate, getPriceLabel, getTimeSlotLabel } from "@/lib/utils";
+import { phoneNumberSchema } from "@/lib/phone";
 
 const bookingSchema = z.object({
   butlerType: z.string(),
@@ -18,7 +19,7 @@ const bookingSchema = z.object({
   timeSlot: z.enum(["morning", "noon", "evening"]),
   name: z.string().min(1),
   email: z.string().email(),
-  phone: z.string().min(10),
+  phone: phoneNumberSchema,
   notes: z.string().max(500).optional(),
 });
 

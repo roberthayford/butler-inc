@@ -9,6 +9,7 @@ import {
 import { generateBookingReference } from "@/lib/pricing/booking-reference";
 import { getPaymentGateway } from "@/lib/payment/gateway";
 import { getBookingRepository } from "@/lib/payment/booking-repository";
+import { phoneNumberSchema } from "@/lib/phone";
 import type { ButlerTypeKey } from "@/data/butler-tasks";
 
 const checkoutSchema = z.object({
@@ -20,7 +21,7 @@ const checkoutSchema = z.object({
   endTime: z.string().regex(/^\d{2}:\d{2}$/),
   customerName: z.string().min(2, "Name must be at least 2 characters"),
   customerEmail: z.string().email("Please enter a valid email"),
-  customerPhone: z.string().min(10, "Please enter a valid phone number"),
+  customerPhone: phoneNumberSchema,
   additionalNotes: z.string().max(500).optional(),
 });
 
