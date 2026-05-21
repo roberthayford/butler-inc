@@ -55,7 +55,7 @@ export function ServiceOptionSelector({
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-serif font-semibold text-optical-white">
-        What do you need?
+        Click to book?
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {tasks.map((task) => {
@@ -76,11 +76,10 @@ export function ServiceOptionSelector({
               }}
               className={`
                 p-4 rounded-sm text-left transition-all duration-200
-                bg-primary-foreground/5 border backdrop-blur-sm
-                ${
-                  isSelected
-                    ? "border-brass text-optical-white"
-                    : "border-primary-foreground/10 text-warm-gray hover:border-primary-foreground/30 hover:text-optical-white"
+                bg-primary-foreground/5 border backdrop-blur-sm cursor-pointer hover:border-brass! border-brass! lg:border-inherit!
+                ${isSelected
+                  ? "border-brass text-optical-white"
+                  : "border-primary-foreground/10 text-warm-gray hover:border-primary-foreground/30 hover:text-optical-white"
                 }
               `}
             >
