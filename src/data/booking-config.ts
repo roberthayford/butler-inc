@@ -26,5 +26,12 @@ export const TIME_SLOTS = [
   { key: "evening", label: "Evening", times: "17:00 - 21:00" },
 ] as const;
 
+export const GENIE_SERVICE = {
+  serviceOption: "genie",
+  leadTimeHours: 0,
+  responsePromise: "Response within 30 minutes",
+  bookingMode: "immediate_response",
+} as const;
+
 export type DayOptionKey = (typeof DAY_OPTIONS)[number]["key"];
 export type TimeSlotKey = (typeof TIME_SLOTS)[number]["key"];

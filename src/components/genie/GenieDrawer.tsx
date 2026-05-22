@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { GENIE_SERVICE } from "@/data/booking-config";
 
 const EXAMPLE_WISHES = [
   "Source a sold-out designer handbag before the weekend",
@@ -177,6 +178,9 @@ export function GenieDrawer({ open, onClose }: GenieDrawerProps) {
                 </h2>
                 <p className="text-warm-gray mt-2 text-sm leading-relaxed">
                   Tell us what you want. We{"'"}ll make it happen.
+                </p>
+                <p className="mt-3 text-sm font-medium text-destructive">
+                  {GENIE_SERVICE.responsePromise}
                 </p>
 
                 <div className="mt-5">

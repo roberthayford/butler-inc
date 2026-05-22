@@ -35,9 +35,16 @@ export type BookingFormData = z.infer<typeof bookingFormSchema>;
 interface BookingFormProps {
   onSubmit: (data: BookingFormData) => Promise<void>;
   isSubmitting: boolean;
+  hideScheduling?: boolean;
+  responsePromise?: string;
 }
 
-export function BookingForm({ onSubmit, isSubmitting }: BookingFormProps) {
+export function BookingForm({
+  onSubmit,
+  isSubmitting,
+  hideScheduling = false,
+  responsePromise,
+}: BookingFormProps) {
   const {
     register,
     handleSubmit,
@@ -81,121 +88,129 @@ export function BookingForm({ onSubmit, isSubmitting }: BookingFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-      {/* Day Options — accessible radiogroup */}
-      <fieldset className="space-y-3">
-        <Label asChild>
-          <legend className="text-optical-white text-base font-serif">
-            When do you need this?
-          </legend>
-        </Label>
-        <div
-          role="radiogroup"
-          aria-label="Urgency and pricing"
-          className="grid grid-cols-1 sm:grid-cols-3 gap-3"
-        >
-          {DAY_OPTIONS.map((opt) => (
-            <motion.button
-              key={opt.key}
-              type="button"
-              role="radio"
-              aria-checked={selectedDay === opt.key}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() =>
-                setValue("dayOption", opt.key, { shouldValidate: true })
-              }
-              className={`
-                p-4 rounded-sm text-center transition-colors duration-200
-                bg-primary-foreground/5 border backdrop-blur-sm
-                focus-visible:outline-2 focus-visible:outline-brass
-                ${
-                  selectedDay === opt.key
-                    ? "border-brass text-optical-white"
-                    : "border-primary-foreground/10 text-warm-gray hover:border-primary-foreground/30"
-                }
-              `}
-            >
-              <span className="block font-medium">{opt.label}</span>
-              <span className="block text-sm mt-1 text-brass-text">
-                {opt.priceLabel}
-              </span>
-            </motion.button>
-          ))}
+      {hideScheduling && responsePromise ? (
+        <div className="rounded-sm border border-destructive/40 bg-destructive/10 p-4 text-center">
+          <p className="text-optical-white font-medium">{responsePromise}</p>
         </div>
-      </fieldset>
+      ) : (
+        <>
+          {/* Day Options — accessible radiogroup */}
+          <fieldset className="space-y-3">
+            <Label asChild>
+              <legend className="text-optical-white text-base font-serif">
+                When do you need this?
+              </legend>
+            </Label>
+            <div
+              role="radiogroup"
+              aria-label="Urgency and pricing"
+              className="grid grid-cols-1 sm:grid-cols-3 gap-3"
+            >
+              {DAY_OPTIONS.map((opt) => (
+                <motion.button
+                  key={opt.key}
+                  type="button"
+                  role="radio"
+                  aria-checked={selectedDay === opt.key}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() =>
+                    setValue("dayOption", opt.key, { shouldValidate: true })
+                  }
+                  className={`
+                    p-4 rounded-sm text-center transition-colors duration-200
+                    bg-primary-foreground/5 border backdrop-blur-sm
+                    focus-visible:outline-2 focus-visible:outline-brass
+                    ${
+                      selectedDay === opt.key
+                        ? "border-brass text-optical-white"
+                        : "border-primary-foreground/10 text-warm-gray hover:border-primary-foreground/30"
+                    }
+                  `}
+                >
+                  <span className="block font-medium">{opt.label}</span>
+                  <span className="block text-sm mt-1 text-brass-text">
+                    {opt.priceLabel}
+                  </span>
+                </motion.button>
+              ))}
+            </div>
+          </fieldset>
 
-      {/* Date picker for advance bookings */}
-      {selectedDay === "advance" && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          className="flex justify-center"
-        >
-          <Controller
-            control={control}
-            name="specificDate"
-            render={({ field }) => (
-              <div>
-                <Calendar
-                  mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
-                  disabled={(date) => date < addDays(new Date(), 3)}
-                  className="rounded-sm border border-primary-foreground/10 bg-primary-foreground/5 text-optical-white"
-                />
-                {errors.specificDate && (
-                  <p className="text-destructive text-sm mt-1" role="alert">
-                    {errors.specificDate.message}
-                  </p>
+          {/* Date picker for advance bookings */}
+          {selectedDay === "advance" && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="flex justify-center"
+            >
+              <Controller
+                control={control}
+                name="specificDate"
+                render={({ field }) => (
+                  <div>
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) => date < addDays(new Date(), 3)}
+                      className="rounded-sm border border-primary-foreground/10 bg-primary-foreground/5 text-optical-white"
+                    />
+                    {errors.specificDate && (
+                      <p className="text-destructive text-sm mt-1" role="alert">
+                        {errors.specificDate.message}
+                      </p>
+                    )}
+                  </div>
                 )}
-              </div>
-            )}
-          />
-        </motion.div>
-      )}
+              />
+            </motion.div>
+          )}
 
-      {/* Time Slots — accessible radiogroup */}
-      <fieldset className="space-y-3">
-        <Label asChild>
-          <legend className="text-optical-white text-base font-serif">
-            Preferred time
-          </legend>
-        </Label>
-        <div
-          role="radiogroup"
-          aria-label="Time of day"
-          className="grid grid-cols-1 sm:grid-cols-3 gap-3"
-        >
-          {TIME_SLOTS.map((slot) => (
-            <motion.button
-              key={slot.key}
-              type="button"
-              role="radio"
-              aria-checked={selectedTime === slot.key}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() =>
-                setValue("timeSlot", slot.key, { shouldValidate: true })
-              }
-              className={`
-                p-4 rounded-sm text-center transition-colors duration-200
-                bg-primary-foreground/5 border backdrop-blur-sm
-                focus-visible:outline-2 focus-visible:outline-brass
-                ${
-                  selectedTime === slot.key
-                    ? "border-brass text-optical-white"
-                    : "border-primary-foreground/10 text-warm-gray hover:border-primary-foreground/30"
-                }
-              `}
+          {/* Time Slots — accessible radiogroup */}
+          <fieldset className="space-y-3">
+            <Label asChild>
+              <legend className="text-optical-white text-base font-serif">
+                Preferred time
+              </legend>
+            </Label>
+            <div
+              role="radiogroup"
+              aria-label="Time of day"
+              className="grid grid-cols-1 sm:grid-cols-3 gap-3"
             >
-              <span className="block font-medium">{slot.label}</span>
-              <span className="block text-xs mt-1 opacity-70">
-                {slot.times}
-              </span>
-            </motion.button>
-          ))}
-        </div>
-      </fieldset>
+              {TIME_SLOTS.map((slot) => (
+                <motion.button
+                  key={slot.key}
+                  type="button"
+                  role="radio"
+                  aria-checked={selectedTime === slot.key}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() =>
+                    setValue("timeSlot", slot.key, { shouldValidate: true })
+                  }
+                  className={`
+                    p-4 rounded-sm text-center transition-colors duration-200
+                    bg-primary-foreground/5 border backdrop-blur-sm
+                    focus-visible:outline-2 focus-visible:outline-brass
+                    ${
+                      selectedTime === slot.key
+                        ? "border-brass text-optical-white"
+                        : "border-primary-foreground/10 text-warm-gray hover:border-primary-foreground/30"
+                    }
+                  `}
+                >
+                  <span className="block font-medium">{slot.label}</span>
+                  <span className="block text-xs mt-1 opacity-70">
+                    {slot.times}
+                  </span>
+                </motion.button>
+              ))}
+            </div>
+          </fieldset>
+        </>
+      )}
 
       {/* Contact Details */}
       <fieldset className="space-y-4">

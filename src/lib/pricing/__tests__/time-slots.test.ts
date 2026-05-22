@@ -3,7 +3,9 @@ import {
   generateTimeSlots,
   getAvailableEndTimes,
   filterPastTimes,
+  filterSlotsByLeadTime,
   formatDuration,
+  localDateTimeToUtcIso,
   timeToMinutes,
   minutesToTime,
 } from "../time-slots";
@@ -138,6 +140,40 @@ describe("filterPastTimes", () => {
     expect(result).not.toContain("10:30");
     expect(result).toContain("11:00");
     expect(result).toContain("12:00");
+  });
+});
+
+describe("filterSlotsByLeadTime", () => {
+  it("filters slots that are under the configured lead time", () => {
+    const slots = ["10:00", "12:00", "14:00"];
+    const result = filterSlotsByLeadTime(
+      slots,
+      "2026-06-15",
+      4,
+      new Date("2026-06-15T09:00:00")
+    );
+
+    expect(result).toEqual(["14:00"]);
+  });
+
+  it("keeps all slots when lead time is zero", () => {
+    const slots = ["10:00", "12:00"];
+    const result = filterSlotsByLeadTime(
+      slots,
+      "2026-06-15",
+      0,
+      new Date("2026-06-15T09:00:00")
+    );
+
+    expect(result).toEqual(slots);
+  });
+});
+
+describe("localDateTimeToUtcIso", () => {
+  it("returns a UTC ISO timestamp for a locally selected date and time", () => {
+    const result = localDateTimeToUtcIso("2026-06-15", "10:30");
+
+    expect(result).toMatch(/2026-06-15T\d{2}:30:00\.000Z/);
   });
 });
 

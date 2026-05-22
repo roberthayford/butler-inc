@@ -13,6 +13,8 @@ import {
 import { BookingForm, type BookingFormData } from "./BookingForm";
 import { BUTLER_TASKS, type ButlerTypeKey } from "@/data/butler-tasks";
 import { BUTLER_PRICING } from "@/data/pricing-config";
+import { GENIE_SERVICE } from "@/data/booking-config";
+import { localDateTimeToUtcIso } from "@/lib/pricing/time-slots";
 
 interface BookingFlowProps {
   butlerType: ButlerTypeKey;
@@ -28,6 +30,7 @@ export function BookingFlow({ butlerType }: BookingFlowProps) {
   const [customDescription, setCustomDescription] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
+  const isGenieService = selectedService === GENIE_SERVICE.serviceOption;
 
   useEffect(() => {
     if (phase === "form") {
@@ -63,6 +66,10 @@ export function BookingFlow({ butlerType }: BookingFlowProps) {
           serviceDate: format(data.serviceDate, "yyyy-MM-dd"),
           startTime: data.startTime,
           endTime: data.endTime,
+          serviceStartsAtUtc: localDateTimeToUtcIso(
+            format(data.serviceDate, "yyyy-MM-dd"),
+            data.startTime
+          ),
           customerName: data.name,
           customerEmail: data.email,
           customerPhone: data.phone,
@@ -114,7 +121,9 @@ export function BookingFlow({ butlerType }: BookingFlowProps) {
   };
 
   const selectedTaskLabel =
-    selectedService === "bespoke" || selectedService === "other"
+    selectedService === GENIE_SERVICE.serviceOption
+      ? "Genie in the Butler"
+      : selectedService === "bespoke" || selectedService === "other"
       ? customDescription
       : BUTLER_TASKS[butlerType].find((t) => t.id === selectedService)?.label;
 
@@ -173,6 +182,10 @@ export function BookingFlow({ butlerType }: BookingFlowProps) {
               <BookingForm
                 onSubmit={handleConsultationSubmit}
                 isSubmitting={isSubmitting}
+                hideScheduling={isGenieService}
+                responsePromise={
+                  isGenieService ? GENIE_SERVICE.responsePromise : undefined
+                }
               />
             )}
           </motion.div>

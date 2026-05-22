@@ -17,6 +17,7 @@ import {
   generateTimeSlots,
   getAvailableEndTimes,
   filterPastTimes,
+  filterSlotsByLeadTime,
 } from "@/lib/pricing/time-slots";
 import { calculatePricePreview } from "@/lib/pricing/calculate-price";
 import { URGENCY_MULTIPLIERS } from "@/data/pricing-config";
@@ -58,6 +59,7 @@ export function PricedBookingForm({
     watch,
     control,
     setValue,
+    setError,
     reset,
     formState: { errors },
   } = useForm<PricedBookingFormData>({
@@ -100,8 +102,13 @@ export function PricedBookingForm({
 
   const startSlots = useMemo(() => {
     const base = generateTimeSlots(6, 22, 15);
-    return dateString ? filterPastTimes(base, dateString) : base;
-  }, [dateString]);
+    if (!dateString) return base;
+    return filterSlotsByLeadTime(
+      filterPastTimes(base, dateString),
+      dateString,
+      pricing.leadTimeHours
+    );
+  }, [dateString, pricing.leadTimeHours]);
 
   const endSlots = useMemo(() => {
     if (!startTime || !pricing.minimumHours) return [];
@@ -115,6 +122,13 @@ export function PricedBookingForm({
     },
     [setValue]
   );
+
+  useEffect(() => {
+    if (startTime && !startSlots.includes(startTime)) {
+      setValue("startTime", "", { shouldValidate: true });
+      setValue("endTime", "", { shouldValidate: false });
+    }
+  }, [startTime, startSlots, setValue]);
 
   const handleEndTimeChange = useCallback(
     (value: string) => {
@@ -137,9 +151,21 @@ export function PricedBookingForm({
 
   const isFormReady = selectedDate && startTime && endTime && pricePreview;
 
+  const submitWithLeadTimeCheck = async (data: PricedBookingFormData) => {
+    if (!dateString || !startSlots.includes(data.startTime)) {
+      setError("startTime", {
+        type: "manual",
+        message: `Please choose a start time at least ${pricing.leadTimeHours} hours from now.`,
+      });
+      return;
+    }
+
+    await onSubmit(data);
+  };
+
   return (
     <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-8">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit(submitWithLeadTimeCheck)} className="space-y-8">
         {/* Date picker */}
         <fieldset className="space-y-3">
           <Label asChild>
@@ -199,9 +225,19 @@ export function PricedBookingForm({
               disabled={!startTime}
             />
           </div>
+          {errors.startTime && (
+            <p className="text-destructive text-sm mt-1" role="alert">
+              {errors.startTime.message}
+            </p>
+          )}
           {pricing.minimumHours && (
             <p className="text-warm-gray/50 text-xs">
               Minimum booking: {pricing.minimumHours} hours
+            </p>
+          )}
+          {pricing.leadTimeHours > 0 && (
+            <p className="text-warm-gray/50 text-xs">
+              Earliest booking: at least {pricing.leadTimeHours} hours from now
             </p>
           )}
         </fieldset>

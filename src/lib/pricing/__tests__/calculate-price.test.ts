@@ -121,6 +121,35 @@ describe("validateBookingTime", () => {
     const result = validateBookingTime("09:00", "10:00", null, "2026-12-25");
     expect(result.valid).toBe(true);
   });
+
+  it("rejects bookings under the configured lead time using a UTC instant", () => {
+    const result = validateBookingTime(
+      "12:00",
+      "14:00",
+      2,
+      "2026-12-25",
+      4,
+      "2026-12-25T12:00:00.000Z",
+      new Date("2026-12-25T09:00:01.000Z")
+    );
+
+    expect(result.valid).toBe(false);
+    expect(result.error).toMatch(/4 hours/i);
+  });
+
+  it("accepts bookings at the configured lead time boundary", () => {
+    const result = validateBookingTime(
+      "13:00",
+      "15:00",
+      2,
+      "2026-12-25",
+      4,
+      "2026-12-25T13:00:00.000Z",
+      new Date("2026-12-25T09:00:00.000Z")
+    );
+
+    expect(result.valid).toBe(true);
+  });
 });
 
 describe("determineUrgencyMultiplier", () => {

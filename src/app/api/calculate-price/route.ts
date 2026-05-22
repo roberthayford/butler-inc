@@ -13,6 +13,7 @@ const priceRequestSchema = z.object({
   serviceDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   startTime: z.string().regex(/^\d{2}:\d{2}$/),
   endTime: z.string().regex(/^\d{2}:\d{2}$/),
+  serviceStartsAtUtc: z.string().datetime().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { butlerType, serviceDate, startTime, endTime } = parsed.data;
+  const { butlerType, serviceDate, startTime, endTime, serviceStartsAtUtc } = parsed.data;
   const pricing = BUTLER_PRICING[butlerType as ButlerTypeKey];
 
   if (!pricing || !pricing.isActive) {
@@ -56,7 +57,9 @@ export async function POST(request: NextRequest) {
     startTime,
     endTime,
     pricing.minimumHours,
-    serviceDate
+    serviceDate,
+    pricing.leadTimeHours,
+    serviceStartsAtUtc
   );
 
   if (!validation.valid) {

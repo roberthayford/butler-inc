@@ -46,13 +46,45 @@ export function filterPastTimes(
   slots: string[],
   selectedDate: string
 ): string[] {
-  const today = new Date().toISOString().split("T")[0];
+  const today = formatLocalDate(new Date());
   if (selectedDate !== today) return slots;
 
   const now = new Date();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
   return slots.filter((slot) => timeToMinutes(slot) > currentMinutes);
+}
+
+export function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export function localDateTimeToUtcIso(
+  serviceDate: string,
+  startTime: string
+): string {
+  const [year, month, day] = serviceDate.split("-").map(Number);
+  const [hours, minutes] = startTime.split(":").map(Number);
+  return new Date(year, month - 1, day, hours, minutes).toISOString();
+}
+
+export function filterSlotsByLeadTime(
+  slots: string[],
+  selectedDate: string,
+  leadTimeHours: number,
+  now: Date = new Date()
+): string[] {
+  if (leadTimeHours <= 0) return slots;
+
+  const earliestStart = now.getTime() + leadTimeHours * 60 * 60 * 1000;
+
+  return slots.filter((slot) => {
+    const startsAt = new Date(localDateTimeToUtcIso(selectedDate, slot));
+    return startsAt.getTime() >= earliestStart;
+  });
 }
 
 export function formatDuration(durationHours: number): string {

@@ -19,6 +19,7 @@ const checkoutSchema = z.object({
   serviceDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   startTime: z.string().regex(/^\d{2}:\d{2}$/),
   endTime: z.string().regex(/^\d{2}:\d{2}$/),
+  serviceStartsAtUtc: z.string().datetime(),
   customerName: z.string().min(2, "Name must be at least 2 characters"),
   customerEmail: z.string().email("Please enter a valid email"),
   customerPhone: phoneNumberSchema,
@@ -66,7 +67,9 @@ export async function POST(request: NextRequest) {
     data.startTime,
     data.endTime,
     pricing.minimumHours,
-    data.serviceDate
+    data.serviceDate,
+    pricing.leadTimeHours,
+    data.serviceStartsAtUtc
   );
 
   if (!validation.valid) {
