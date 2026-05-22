@@ -66,9 +66,9 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             ],
         },
         hero: {
-            headline: 'Same-day courier. Across London. Within 2 hours.',
+            headline: 'When time is of the essence.',
             subheading:
-                "For time-critical documents, urgent purchases, and last-minute deliveries when waiting isn't an option.",
+                'For time-critical documents, urgent purchases, and last-minute deliveries where traditional courier and postal services will not suffice.',
             useCases: [
                 'Signed contracts to clients by 5pm',
                 'Forgotten birthday gift delivered this afternoon',
@@ -125,7 +125,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
         hero: {
             headline: 'Trusted care. When life gets in the way.',
             subheading:
-                'For school runs, activity pickups, and welfare checks when you can\'t be there yourself.',
+                'For school runs, activity pickups, welfare checks for precious cargo\u2026 and when you can\'t be there yourself.',
             useCases: [
                 'School pickup when your meeting runs late',
                 'Watch your child between after-school activities',
@@ -158,7 +158,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             'Emergency childcare when regular arrangements fall through',
         ],
         trustIndicators: [
-            { text: 'Enhanced DBS check required' },
+            { text: 'Enhanced DBS check verified Butlers' },
             { text: 'Body-cam equipped for your peace of mind' },
             { text: 'Real-time photo updates sent to you' },
         ],
@@ -179,9 +179,9 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             ],
         },
         hero: {
-            headline: 'The impossible. Made possible.',
+            headline: 'A butler to secure the finer things in life.',
             subheading:
-                'For rare finds, impossible reservations, and experiences money alone cannot buy.',
+                'For rare finds, exclusive reservations, and luxury experiences tailored to you.',
             useCases: [
                 'Source a sold-out vintage from a Scottish distillery',
                 'Secure a table at that restaurant with a 3-month wait',
@@ -212,6 +212,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             'Custom gift curation for high-net-worth clients',
             'Private viewing arrangements at auction houses',
             'Personalised luxury holiday planning and booking',
+            'Nightclub booking and VIP table service',
         ],
         trustIndicators: [
             { text: 'Exclusive network access' },
@@ -237,7 +238,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
         hero: {
             headline: 'Your home, handled. While you\'re away.',
             subheading:
-                'For deliveries, tradesmen, and property needs when you can\'t be there.',
+                'For deliveries, tradesmen, and property needs\u2026 whether you\'re home or away.',
             useCases: [
                 'Wait for Sky broadband installation while you\'re at work',
                 'Stock the fridge and prepare your home before arrival',
@@ -291,7 +292,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             ],
         },
         hero: {
-            headline: 'Butler service. Budget friendly.',
+            headline: 'For the more flexible client\u2026',
             subheading:
                 'For tasks that need doing, but don\'t need doing today.',
             useCases: [
@@ -305,7 +306,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             steps: [
                 {
                     title: 'Flexible booking',
-                    description: 'Choose a date range—we fit it in when available.',
+                    description: 'Choose a date range—we fit it in when it\'s most cost-effective for you.',
                 },
                 {
                     title: 'Best rates',

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -11,6 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { addDays } from "date-fns";
+import { useAuth } from "@/context/AuthContext";
+import { phoneNumberSchema } from "@/lib/phone";
 
 const bookingFormSchema = z
   .object({
@@ -19,7 +22,7 @@ const bookingFormSchema = z
     timeSlot: z.enum(["morning", "noon", "evening"]),
     name: z.string().min(1, "Name is required"),
     email: z.string().email("Please enter a valid email"),
-    phone: z.string().min(10, "Please enter a valid phone number"),
+    phone: phoneNumberSchema,
     notes: z.string().max(500).optional(),
   })
   .refine((d) => d.dayOption !== "advance" || d.specificDate != null, {
@@ -41,6 +44,7 @@ export function BookingForm({ onSubmit, isSubmitting }: BookingFormProps) {
     watch,
     control,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<BookingFormData>({
     resolver: zodResolver(bookingFormSchema),
@@ -53,6 +57,24 @@ export function BookingForm({ onSubmit, isSubmitting }: BookingFormProps) {
       notes: "",
     },
   });
+
+  const { user, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      reset(
+        {
+          dayOption: "advance",
+          timeSlot: "morning",
+          name: (user.user_metadata?.name as string) ?? "",
+          email: user.email ?? "",
+          phone: (user.user_metadata?.phone as string) ?? "",
+          notes: "",
+        },
+        { keepDirtyValues: true }
+      );
+    }
+  }, [user, authLoading, reset]);
 
   const selectedDay = watch("dayOption");
   const selectedTime = watch("timeSlot");
@@ -186,16 +208,16 @@ export function BookingForm({ onSubmit, isSubmitting }: BookingFormProps) {
         </Label>
 
         <div className="space-y-3">
-          <div>
-            <label htmlFor="booking-name" className="sr-only">
+          <div className="space-y-1.5">
+            <label htmlFor="booking-name" className="text-sm text-optical-white/80">
               Full name
             </label>
             <Input
               id="booking-name"
               {...register("name")}
-              placeholder="Full name"
+              placeholder="Jane Smith"
               autoComplete="name"
-              className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray focus-visible:ring-brass"
+              className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray/50 focus-visible:ring-brass"
             />
             {errors.name && (
               <p className="text-destructive text-sm mt-1" role="alert">
@@ -204,17 +226,17 @@ export function BookingForm({ onSubmit, isSubmitting }: BookingFormProps) {
             )}
           </div>
 
-          <div>
-            <label htmlFor="booking-email" className="sr-only">
+          <div className="space-y-1.5">
+            <label htmlFor="booking-email" className="text-sm text-optical-white/80">
               Email address
             </label>
             <Input
               id="booking-email"
               {...register("email")}
               type="email"
-              placeholder="Email address"
+              placeholder="you@example.com"
               autoComplete="email"
-              className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray focus-visible:ring-brass"
+              className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray/50 focus-visible:ring-brass"
             />
             {errors.email && (
               <p className="text-destructive text-sm mt-1" role="alert">
@@ -223,17 +245,18 @@ export function BookingForm({ onSubmit, isSubmitting }: BookingFormProps) {
             )}
           </div>
 
-          <div>
-            <label htmlFor="booking-phone" className="sr-only">
+          <div className="space-y-1.5">
+            <label htmlFor="booking-phone" className="text-sm text-optical-white/80">
               Phone number
             </label>
             <Input
               id="booking-phone"
               {...register("phone")}
               type="tel"
-              placeholder="Phone number"
+              placeholder="07700 900000"
               autoComplete="tel"
-              className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray focus-visible:ring-brass"
+              pattern="[0-9+\s\-()]*"
+              className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray/50 focus-visible:ring-brass"
             />
             {errors.phone && (
               <p className="text-destructive text-sm mt-1" role="alert">
@@ -242,15 +265,15 @@ export function BookingForm({ onSubmit, isSubmitting }: BookingFormProps) {
             )}
           </div>
 
-          <div>
-            <label htmlFor="booking-notes" className="sr-only">
-              Additional notes
+          <div className="space-y-1.5">
+            <label htmlFor="booking-notes" className="text-sm text-optical-white/80">
+              Additional notes <span className="text-warm-gray/60">(optional)</span>
             </label>
             <Textarea
               id="booking-notes"
               {...register("notes")}
-              placeholder="Additional notes (optional)"
-              className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray resize-none focus-visible:ring-brass"
+              placeholder="Any specific requirements or details..."
+              className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray/50 resize-none focus-visible:ring-brass"
               rows={3}
             />
           </div>
@@ -262,7 +285,7 @@ export function BookingForm({ onSubmit, isSubmitting }: BookingFormProps) {
         disabled={isSubmitting}
         className="w-full py-6 text-lg bg-brass text-charcoal hover:bg-brass-muted font-medium"
       >
-        {isSubmitting ? "Submitting..." : "Submit Booking Request"}
+        {isSubmitting ? "Sending your request..." : "Request Your Butler"}
       </Button>
     </form>
   );

@@ -4,8 +4,8 @@ import { services } from "@/data/services";
 export function Footer() {
   return (
     <footer className="bg-charcoal border-t border-primary-foreground/10">
-      <div className="max-w-6xl mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+      <div className="max-w-6xl mx-auto px-6 py-10 md:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
           {/* Brand */}
           <div>
             <Link
@@ -20,10 +20,10 @@ export function Footer() {
             </p>
             <p className="text-warm-gray text-sm mt-4">
               <a
-                href="mailto:hello@butlersinc.co.uk"
+                href="mailto:hello@butlersinc.com"
                 className="hover:text-brass-text transition-colors"
               >
-                hello@butlersinc.co.uk
+                hello@butlersinc.com
               </a>
             </p>
           </div>
@@ -33,12 +33,12 @@ export function Footer() {
             <h4 className="text-optical-white font-semibold mb-4">
               Our Butlers
             </h4>
-            <ul className="space-y-2">
+            <ul className="space-y-1 md:space-y-2">
               {services.map((s) => (
                 <li key={s.id}>
                   <Link
                     href={`/butlers/${s.id}`}
-                    className="text-warm-gray text-sm hover:text-brass-text transition-colors"
+                    className="text-warm-gray text-sm hover:text-brass-text transition-colors inline-block py-1.5 md:py-0"
                   >
                     {s.name}
                   </Link>
@@ -50,11 +50,11 @@ export function Footer() {
           {/* Legal */}
           <div>
             <h4 className="text-optical-white font-semibold mb-4">Legal</h4>
-            <ul className="space-y-2">
+            <ul className="space-y-1 md:space-y-2">
               <li>
                 <Link
                   href="/privacy"
-                  className="text-warm-gray text-sm hover:text-brass-text transition-colors"
+                  className="text-warm-gray text-sm hover:text-brass-text transition-colors inline-block py-1.5 md:py-0"
                 >
                   Privacy Policy
                 </Link>
@@ -62,7 +62,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/terms"
-                  className="text-warm-gray text-sm hover:text-brass-text transition-colors"
+                  className="text-warm-gray text-sm hover:text-brass-text transition-colors inline-block py-1.5 md:py-0"
                 >
                   Terms of Service
                 </Link>
@@ -71,7 +71,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-primary-foreground/10 text-center">
+        <div className="mt-8 pt-6 md:mt-12 md:pt-8 border-t border-primary-foreground/10 text-center">
           <p className="text-warm-gray text-sm">
             &copy; 2025 Butlers Inc. All rights reserved.
           </p>

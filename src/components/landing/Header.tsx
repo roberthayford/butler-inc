@@ -4,12 +4,14 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/context/AuthContext";
+import { isAdmin } from "@/lib/admin";
 import { Menu, X } from "lucide-react";
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, loading } = useAuth();
+  const showAdmin = !loading && user && isAdmin(user.email ?? undefined);
   const menuRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
 
@@ -66,19 +68,29 @@ export function Header() {
               Our Butlers
             </Link>
             {loading ? null : user ? (
-              <Link
-                href="/members/dashboard"
-                className="text-sm px-4 py-2 rounded-sm bg-brass text-charcoal hover:bg-brass-muted transition-colors"
-              >
-                Dashboard
-              </Link>
+              <>
+                {showAdmin && (
+                  <Link
+                    href="/admin"
+                    className="text-optical-white/80 hover:text-optical-white transition-colors text-sm"
+                  >
+                    Admin
+                  </Link>
+                )}
+                <Link
+                  href="/members/dashboard"
+                  className="text-sm px-4 py-2 rounded-sm bg-brass text-charcoal hover:bg-brass-muted transition-colors"
+                >
+                  Dashboard
+                </Link>
+              </>
             ) : (
               <>
                 <Link
                   href="/members/login"
                   className="text-optical-white/80 hover:text-optical-white transition-colors text-sm"
                 >
-                  Log in
+                  Sign In
                 </Link>
                 <Link
                   href="/members/signup"
@@ -133,13 +145,24 @@ export function Header() {
                   Our Butlers
                 </Link>
                 {loading ? null : user ? (
-                  <Link
-                    href="/members/dashboard"
-                    className="block text-brass-text hover:text-brass-muted py-3"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    Dashboard
-                  </Link>
+                  <>
+                    {showAdmin && (
+                      <Link
+                        href="/admin"
+                        className="block text-optical-white/80 hover:text-optical-white py-3"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        Admin
+                      </Link>
+                    )}
+                    <Link
+                      href="/members/dashboard"
+                      className="block text-brass-text hover:text-brass-muted py-3"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                  </>
                 ) : (
                   <>
                     <Link
@@ -147,7 +170,7 @@ export function Header() {
                       className="block text-optical-white/80 hover:text-optical-white py-3"
                       onClick={() => setMobileOpen(false)}
                     >
-                      Log in
+                      Sign In
                     </Link>
                     <Link
                       href="/members/signup"

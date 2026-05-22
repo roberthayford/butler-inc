@@ -317,4 +317,14 @@
     opacity: 0.04;
     mix-blend-mode: overlay;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-up,
+    .animate-fade-up-slow,
+    .animate-fade-in {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
 }

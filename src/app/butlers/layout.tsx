@@ -1,4 +1,5 @@
 import { Header } from "@/components/landing/Header";
+import { Footer } from "@/components/landing/Footer";
 
 export default function ButlersLayout({
     children,
@@ -9,6 +10,7 @@ export default function ButlersLayout({
         <>
             <Header />
             {children}
+            <Footer />
         </>
     );
 }

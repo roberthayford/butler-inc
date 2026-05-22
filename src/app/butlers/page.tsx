@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { services } from "@/data/services";
+import { LandingHeroBackground } from "@/components/ui/hero-background";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { ButlerCategoryGrid } from "@/components/landing/ButlerCategoryGrid";
 
 export const metadata: Metadata = {
   title: "Our Butlers | Premium Concierge Services",
@@ -11,17 +12,20 @@ export const metadata: Metadata = {
 export default function ButlersPage() {
   return (
     <div className="min-h-screen bg-charcoal">
-      <header className="pt-24 pb-12 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl sm:text-5xl font-serif font-bold text-optical-white tracking-tight">
-            Our Butlers
-          </h1>
-          <p className="mt-4 text-lg text-warm-gray max-w-2xl mx-auto leading-relaxed">
-            Six specialist butlers. Each one precisely matched to the task.
-          </p>
-        </div>
-      </header>
+      <LandingHeroBackground>
+        <header className="pt-24 pb-16 px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl sm:text-5xl font-serif font-bold text-optical-white tracking-tight">
+              Our Butlers
+            </h1>
+            <p className="mt-4 text-lg text-warm-gray max-w-2xl mx-auto leading-relaxed">
+              Six specialist butlers. Each one precisely matched to the task.
+            </p>
+          </div>
+        </header>
+      </LandingHeroBackground>
 
+      <HowItWorks />
       <main className="max-w-4xl mx-auto px-6 pb-24">
         <div className="space-y-4">
           {services.map((service) => (
@@ -50,6 +54,7 @@ export default function ButlersPage() {
         </div>
       </main>
 
+      <ButlerCategoryGrid showHeader={false} />
     </div>
   );
 }

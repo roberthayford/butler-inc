@@ -48,6 +48,10 @@ export const BUTLER_TASKS: Record<ButlerTypeKey, ButlerTask[]> = {
     { id: "luxury-lifestyle", label: "Luxury lifestyle" },
     { id: "holiday-planning", label: "Luxury holiday planning" },
     { id: "event-organising", label: "Luxury event organising" },
+    {
+      id: "nightclub-booking",
+      label: "Night club booking and service",
+    },
     { id: "other", label: "Other" },
   ],
   base: [

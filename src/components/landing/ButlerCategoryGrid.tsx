@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "motion/react";
 import { services, type ServiceId } from "@/data/services";
 import { butlerPageConfigs } from "@/data/butler-page-configs";
+import { BUTLER_PRICING } from "@/data/pricing-config";
 
 /**
  * Per-butler accent colours for the top border gradient.
@@ -25,45 +26,51 @@ const CARD_ACCENTS: Record<ServiceId, string> = {
  */
 const STAGGER_DELAY = 0.06;
 
-export function ButlerCategoryGrid() {
+interface ButlerCategoryGridProps {
+  showHeader?: boolean;
+}
+
+export function ButlerCategoryGrid({ showHeader = true }: ButlerCategoryGridProps) {
   return (
     <section id="butler-categories" className="bg-charcoal section-padding relative">
       <div className="bg-noise" />
       <div className="max-w-6xl mx-auto">
-        <motion.h2
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="text-3xl sm:text-4xl font-serif font-bold text-optical-white text-center mb-4 tracking-tight"
-        >
-          Choose Your Butler
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{
-            duration: 0.5,
-            delay: 0.1,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-          className="text-warm-gray text-center mb-12 max-w-2xl mx-auto leading-relaxed"
-        >
-          Six specialist butlers. Each one precisely matched to the task.
-        </motion.p>
+        {showHeader && (
+          <>
+            <motion.h2
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="text-3xl sm:text-4xl font-serif font-bold text-optical-white text-center mb-4 tracking-tight"
+            >
+              Choose Your Butler
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.5,
+                delay: 0.1,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className="text-warm-gray text-center mb-12 max-w-2xl mx-auto leading-relaxed"
+            >
+              Six specialist butlers. Each one precisely matched to the task.
+            </motion.p>
+          </>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {services.map((service, i) => {
             const config = butlerPageConfigs[service.id];
             const accent = CARD_ACCENTS[service.id];
+            const pricing = BUTLER_PRICING[service.id];
 
             return (
               <motion.div
                 key={service.id}
                 initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{
                   duration: 0.45,
                   delay: i * STAGGER_DELAY,
@@ -85,16 +92,22 @@ export function ButlerCategoryGrid() {
                         src={service.image}
                         alt={`${service.name} background`}
                         fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover scale-105 group-hover:scale-100 transition-transform duration-1000 ease-out"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/80 to-transparent" />
                     </div>
                   )}
 
-                  <div className="relative z-10 flex items-start justify-between mb-3">
+                  <div className="relative z-10 mb-3">
                     <h3 className="text-xl font-serif font-semibold text-optical-white group-hover:text-brass-text transition-colors">
                       {service.name}
                     </h3>
+                    <p className="text-brass-text text-sm mt-1 font-medium">
+                      {pricing.bookingType === "consultation"
+                        ? "Consultation"
+                        : `From £${pricing.hourlyRate}/hour`}
+                    </p>
                     {service.priceFrom && (
                       <span className="text-xs font-medium px-2 py-1 rounded bg-brass/20 text-brass-text shrink-0 ml-2">
                         {service.priceFrom}

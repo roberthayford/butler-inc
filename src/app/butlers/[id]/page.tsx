@@ -7,7 +7,9 @@ import { services, type ServiceId } from "@/data/services";
 import { butlerPageConfigs } from "@/data/butler-page-configs";
 import type { ButlerTypeKey } from "@/data/butler-tasks";
 import { HeroBackground } from "@/components/ui/hero-background";
-import { ButlerPageSections } from "@/components/butler-page-sections";
+import { createClient } from "@/lib/supabase/server";
+import { mergeContent } from "@/lib/content";
+
 
 /**
  * bundle-dynamic-imports: BookingFlow is the heaviest client component.
@@ -76,6 +78,16 @@ export default async function ButlerPage({
   const butlerType = id as ButlerTypeKey;
   const serviceId = id as ServiceId;
   const config = butlerPageConfigs[serviceId];
+
+  const supabase = await createClient();
+  const { data: contentRow } = await supabase
+    .from("site_content")
+    .select("content")
+    .eq("page_slug", serviceId)
+    .single();
+
+  const content = mergeContent(contentRow?.content ?? null, config);
+
   const service = services.find((s) => s.id === id)!;
 
   const jsonLd = {
@@ -85,7 +97,7 @@ export default async function ButlerPage({
     provider: {
       "@type": "Organization",
       name: "Butlers Inc.",
-      url: "https://butlersinc.co.uk",
+      url: "https://butlersinc.com",
     },
     areaServed: { "@type": "Country", name: "England" },
     description: config.seo.description,
@@ -108,10 +120,10 @@ export default async function ButlerPage({
         <header className="pt-24 pb-16 px-6">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl sm:text-5xl font-serif font-bold text-optical-white tracking-tight">
-              {config.hero.headline}
+              {content.hero.headline}
             </h1>
             <p className="mt-4 text-lg text-warm-gray max-w-2xl mx-auto leading-relaxed">
-              {config.hero.subheading}
+              {content.hero.subheading}
             </p>
 
             {service.priceFrom && (
@@ -123,9 +135,22 @@ export default async function ButlerPage({
         </header>
       </HeroBackground>
 
-      {/* Content sections: How It Works, Trust Indicators, Common Requests */}
-      <div className="px-6 py-20 border-b border-primary-foreground/5">
-        <ButlerPageSections config={config} />
+      {/* Trust Indicators */}
+      <div className="px-6 py-10">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-warm-gray text-sm tracking-wide">
+            {content.trustIndicators.map((indicator, i) => (
+              <span key={i} className="flex items-center gap-2">
+                {i > 0 && (
+                  <span className="text-warm-gray/30" aria-hidden="true">
+                    &mdash;
+                  </span>
+                )}
+                <span>{indicator.text}</span>
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Booking flow */}
@@ -145,6 +170,30 @@ export default async function ButlerPage({
           </Suspense>
         </div>
       </main>
+
+      {/* Common Requests */}
+      <div className="px-6 py-20 border-t border-primary-foreground/5">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-serif font-semibold text-optical-white text-center tracking-tight mb-10">
+            Common requests
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto">
+            {content.commonRequests.map((request, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-3 p-4 rounded-sm bg-primary-foreground/5 border border-primary-foreground/10"
+              >
+                <span className="text-brass-text text-sm font-serif font-semibold mt-0.5 shrink-0">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <p className="text-warm-gray text-sm leading-relaxed">
+                  {request}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* Footer navigation */}
       <div className="text-center pb-12 space-y-3">
