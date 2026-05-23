@@ -11,6 +11,7 @@ const EXAMPLE_WISHES = [
 ] as const;
 
 const PREMIUM_EASE = [0.22, 1, 0.36, 1] as const;
+const GENIE_TAGLINE = "For when the other butlers aren't quick enough";
 
 type Phase = "wish" | "contact" | "success";
 
@@ -174,7 +175,7 @@ export function GenieDrawer({ open, onClose }: GenieDrawerProps) {
                 transition={{ duration: 0.25, ease: PREMIUM_EASE }}
               >
                 <h2 className="text-2xl sm:text-3xl font-serif font-bold text-optical-white tracking-tight">
-                  Have an impossible wish?
+                  {GENIE_TAGLINE}
                 </h2>
                 <p className="text-warm-gray mt-2 text-sm leading-relaxed">
                   Tell us what you want. We{"'"}ll make it happen.
@@ -191,7 +192,7 @@ export function GenieDrawer({ open, onClose }: GenieDrawerProps) {
                     id="genie-wish"
                     value={wish}
                     onChange={(e) => setWish(e.target.value)}
-                    placeholder="Describe your impossible wish..."
+                    placeholder="Describe what you need..."
                     rows={3}
                     className="w-full p-3.5 rounded-sm bg-primary-foreground/[0.04] border border-primary-foreground/15 text-optical-white placeholder:text-warm-gray/50 resize-none focus:outline-none focus:border-destructive/40 focus:ring-1 focus:ring-destructive/20 transition-colors duration-300 text-sm"
                   />
