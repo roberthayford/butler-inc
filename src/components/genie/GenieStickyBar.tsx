@@ -6,6 +6,7 @@ import { GenieDrawer } from "./GenieDrawer";
 
 const SCROLL_THRESHOLD = 200;
 const PREMIUM_EASE = [0.22, 1, 0.36, 1] as const;
+const GENIE_TAGLINE = "For when the other butlers aren't quick enough";
 
 export function GenieStickyBar() {
   const [visible, setVisible] = useState(false);
@@ -57,7 +58,7 @@ export function GenieStickyBar() {
               md:text-optical-white md:font-serif md:text-lg md:truncate-none
             `}
           >
-            Have an impossible wish?
+            {GENIE_TAGLINE}
           </p>
 
           {/* Desktop-only subtitle */}

@@ -38,7 +38,9 @@ describe("GenieStickyBar", () => {
 
   it("renders the invitation text", () => {
     render(<GenieStickyBar />);
-    expect(screen.getByText(/have an impossible wish/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/for when the other butlers aren't quick enough/i)
+    ).toBeInTheDocument();
   });
 
   it("renders the CTA button", () => {
