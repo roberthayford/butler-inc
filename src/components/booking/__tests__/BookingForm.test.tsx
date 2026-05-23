@@ -89,6 +89,7 @@ describe("BookingForm", () => {
 
   it("shows validation errors when submitting empty form", async () => {
     render(<BookingForm {...defaultProps} />);
+    fireEvent.click(screen.getByRole("radio", { name: /Same Day/i }));
     fireEvent.click(screen.getByRole("button", { name: /Request Your Butler/i }));
     await waitFor(() => {
       expect(screen.getByText("Name is required")).toBeInTheDocument();
@@ -189,26 +190,36 @@ describe("BookingForm", () => {
       });
     });
 
-    it("pre-fills name, email, and phone from user profile", async () => {
+    it("hides name and email while keeping phone from the user profile", async () => {
       render(<BookingForm {...defaultProps} />);
 
       await waitFor(() => {
-        expect(screen.getByPlaceholderText("Jane Smith")).toHaveValue("Kim Butler");
-        expect(screen.getByPlaceholderText("you@example.com")).toHaveValue("kim@example.com");
         expect(screen.getByPlaceholderText("07700 900000")).toHaveValue("07700 123456");
       });
+      expect(screen.queryByPlaceholderText("Jane Smith")).not.toBeInTheDocument();
+      expect(screen.queryByPlaceholderText("you@example.com")).not.toBeInTheDocument();
     });
 
-    it("allows editing pre-filled fields", async () => {
-      render(<BookingForm {...defaultProps} />);
+    it("submits without asking for name or email", async () => {
+      const onSubmit = vi.fn().mockResolvedValue(undefined);
+      render(<BookingForm {...defaultProps} onSubmit={onSubmit} />);
+
+      fireEvent.click(screen.getByRole("radio", { name: /Same Day/i }));
+      fireEvent.change(screen.getByPlaceholderText("07700 900000"), {
+        target: { value: "07700 123456" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: /Request Your Butler/i }));
 
       await waitFor(() => {
-        expect(screen.getByPlaceholderText("Jane Smith")).toHaveValue("Kim Butler");
+        expect(onSubmit).toHaveBeenCalledWith(
+          expect.objectContaining({
+            phone: "+447700123456",
+            name: "Kim Butler",
+            email: "kim@example.com",
+          }),
+          expect.anything()
+        );
       });
-
-      const nameInput = screen.getByPlaceholderText("Jane Smith");
-      fireEvent.change(nameInput, { target: { value: "Someone Else" } });
-      expect(nameInput).toHaveValue("Someone Else");
     });
   });
 

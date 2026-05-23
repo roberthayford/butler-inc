@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { bookingLimiter } from "@/lib/rate-limit";
+import { createClient } from "@/lib/supabase/server";
 import { BUTLER_PRICING, URGENCY_MULTIPLIERS } from "@/data/pricing-config";
 import {
   calculatePricePreview,
@@ -20,8 +21,8 @@ const checkoutSchema = z.object({
   startTime: z.string().regex(/^\d{2}:\d{2}$/),
   endTime: z.string().regex(/^\d{2}:\d{2}$/),
   serviceStartsAtUtc: z.string().datetime(),
-  customerName: z.string().min(2, "Name must be at least 2 characters"),
-  customerEmail: z.string().email("Please enter a valid email"),
+  customerName: z.string().min(2, "Name must be at least 2 characters").optional(),
+  customerEmail: z.string().email("Please enter a valid email").optional(),
   customerPhone: phoneNumberSchema,
   additionalNotes: z.string().max(500).optional(),
 });
@@ -47,6 +48,22 @@ export async function POST(request: NextRequest) {
   }
 
   const data = parsed.data;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const customerName = user
+    ? ((user.user_metadata?.name as string | undefined)?.trim() ?? "")
+    : (data.customerName?.trim() ?? "");
+  const customerEmail = user?.email ?? data.customerEmail;
+
+  if (customerName.length < 2 || !customerEmail) {
+    return NextResponse.json(
+      { error: "Name and email are required" },
+      { status: 400 }
+    );
+  }
+
   const pricing = BUTLER_PRICING[data.butlerType as ButlerTypeKey];
 
   if (!pricing || !pricing.isActive) {
@@ -103,8 +120,8 @@ export async function POST(request: NextRequest) {
       subtotal: priceResult.subtotal,
       total_price: priceResult.total,
       currency: "gbp",
-      customer_name: data.customerName,
-      customer_email: data.customerEmail,
+      customer_name: customerName,
+      customer_email: customerEmail,
       customer_phone: data.customerPhone,
       additional_notes:
         [data.additionalNotes, data.customDescription]
@@ -128,7 +145,7 @@ export async function POST(request: NextRequest) {
     amount: priceResult.total,
     currency: "gbp",
     description: `${pricing.name} — ${data.serviceDate}, ${data.startTime}–${data.endTime} (${priceResult.durationHours} hours)`,
-    customerEmail: data.customerEmail,
+    customerEmail,
     metadata: {
       booking_id: bookingId,
       booking_reference: bookingReference,

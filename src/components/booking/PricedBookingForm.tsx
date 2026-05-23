@@ -26,7 +26,17 @@ import type { ButlerTypeKey } from "@/data/butler-tasks";
 import { useAuth } from "@/context/AuthContext";
 import { phoneNumberSchema } from "@/lib/phone";
 
-const pricedBookingSchema = z.object({
+const pricedBookingBaseSchema = z.object({
+  serviceDate: z.date({ error: "Please select a date" }),
+  startTime: z.string().min(1, "Please select a start time"),
+  endTime: z.string().min(1, "Please select an end time"),
+  name: z.string().optional(),
+  email: z.string().optional(),
+  phone: phoneNumberSchema,
+  notes: z.string().max(500).optional(),
+});
+
+const signedOutPricedBookingSchema = z.object({
   serviceDate: z.date({ error: "Please select a date" }),
   startTime: z.string().min(1, "Please select a start time"),
   endTime: z.string().min(1, "Please select an end time"),
@@ -36,7 +46,7 @@ const pricedBookingSchema = z.object({
   notes: z.string().max(500).optional(),
 });
 
-export type PricedBookingFormData = z.infer<typeof pricedBookingSchema>;
+export type PricedBookingFormData = z.infer<typeof pricedBookingBaseSchema>;
 
 interface PricedBookingFormProps {
   butlerType: ButlerTypeKey;
@@ -53,6 +63,7 @@ export function PricedBookingForm({
   onSubmit,
   isSubmitting,
 }: PricedBookingFormProps) {
+  const { user, loading: authLoading } = useAuth();
   const {
     register,
     handleSubmit,
@@ -63,7 +74,7 @@ export function PricedBookingForm({
     reset,
     formState: { errors },
   } = useForm<PricedBookingFormData>({
-    resolver: zodResolver(pricedBookingSchema),
+    resolver: zodResolver(user ? pricedBookingBaseSchema : signedOutPricedBookingSchema),
     defaultValues: {
       startTime: "",
       endTime: "",
@@ -73,8 +84,6 @@ export function PricedBookingForm({
       notes: "",
     },
   });
-
-  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -251,48 +260,52 @@ export function PricedBookingForm({
           </Label>
 
           <div className="space-y-3">
-            <div className="space-y-1.5">
-              <label
-                htmlFor="priced-booking-name"
-                className="text-sm text-optical-white/80"
-              >
-                Full name
-              </label>
-              <Input
-                id="priced-booking-name"
-                {...register("name")}
-                placeholder="Jane Smith"
-                autoComplete="name"
-                className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray/50 focus-visible:ring-brass"
-              />
-              {errors.name && (
-                <p className="text-destructive text-sm mt-1" role="alert">
-                  {errors.name.message}
-                </p>
-              )}
-            </div>
+            {!user && (
+              <>
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="priced-booking-name"
+                    className="text-sm text-optical-white/80"
+                  >
+                    Full name
+                  </label>
+                  <Input
+                    id="priced-booking-name"
+                    {...register("name")}
+                    placeholder="Jane Smith"
+                    autoComplete="name"
+                    className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray/50 focus-visible:ring-brass"
+                  />
+                  {errors.name && (
+                    <p className="text-destructive text-sm mt-1" role="alert">
+                      {errors.name.message}
+                    </p>
+                  )}
+                </div>
 
-            <div className="space-y-1.5">
-              <label
-                htmlFor="priced-booking-email"
-                className="text-sm text-optical-white/80"
-              >
-                Email address
-              </label>
-              <Input
-                id="priced-booking-email"
-                {...register("email")}
-                type="email"
-                placeholder="you@example.com"
-                autoComplete="email"
-                className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray/50 focus-visible:ring-brass"
-              />
-              {errors.email && (
-                <p className="text-destructive text-sm mt-1" role="alert">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="priced-booking-email"
+                    className="text-sm text-optical-white/80"
+                  >
+                    Email address
+                  </label>
+                  <Input
+                    id="priced-booking-email"
+                    {...register("email")}
+                    type="email"
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray/50 focus-visible:ring-brass"
+                  />
+                  {errors.email && (
+                    <p className="text-destructive text-sm mt-1" role="alert">
+                      {errors.email.message}
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
 
             <div className="space-y-1.5">
               <label

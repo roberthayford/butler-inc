@@ -17,8 +17,8 @@ const bookingSchema = z.object({
   dayOption: z.enum(["sameDay", "nextDay", "advance"]),
   specificDate: z.string().optional(),
   timeSlot: z.enum(["morning", "noon", "evening"]),
-  name: z.string().min(1),
-  email: z.string().email(),
+  name: z.string().min(1).optional(),
+  email: z.string().email().optional(),
   phone: phoneNumberSchema,
   notes: z.string().max(500).optional(),
 });
@@ -61,6 +61,18 @@ export async function POST(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const customerName = user
+    ? ((user.user_metadata?.name as string | undefined)?.trim() ?? "")
+    : (data.name?.trim() ?? "");
+  const customerEmail = user?.email ?? data.email;
+
+  if (!customerName || !customerEmail) {
+    return NextResponse.json(
+      { error: "Name and email are required" },
+      { status: 400 }
+    );
+  }
+
   const { error: insertError } = await admin.from("bookings").insert({
     user_id: user?.id ?? null,
     butler_type: data.butlerType,
@@ -68,8 +80,8 @@ export async function POST(request: NextRequest) {
     day_option: data.dayOption,
     specific_date: data.specificDate ?? null,
     time_slot: data.timeSlot,
-    name: data.name,
-    email: data.email,
+    name: customerName,
+    email: customerEmail,
     phone: data.phone,
     notes:
       [data.notes, data.customDescription].filter(Boolean).join("\n") || null,
@@ -105,8 +117,8 @@ export async function POST(request: NextRequest) {
         dayOption: data.dayOption,
         specificDate: data.specificDate,
         timeSlot: data.timeSlot,
-        name: data.name,
-        email: data.email,
+        name: customerName,
+        email: customerEmail,
         phone: data.phone,
         notes: [data.notes, data.customDescription].filter(Boolean).join("\n") || null,
         formattedDate: formatBookingDate(data.dayOption, data.specificDate),
@@ -130,7 +142,7 @@ export async function POST(request: NextRequest) {
         ? `Wish Received: ${reference} — Butlers Inc.`
         : `Booking Confirmed: ${reference} — Butlers Inc.`;
 
-      console.log("[after] Sending emails to:", "hello@butlersinc.com", "and", data.email);
+      console.log("[after] Sending emails to:", "hello@butlersinc.com", "and", customerEmail);
       const results = await Promise.all([
         resend.emails.send({
           from: "Butlers Inc. <bookings@butlersinc.com>",
@@ -141,7 +153,7 @@ export async function POST(request: NextRequest) {
         }),
         resend.emails.send({
           from: "Butlers Inc. <bookings@butlersinc.com>",
-          to: data.email,
+          to: customerEmail,
           subject: customerSubject,
           html: confirmHtml,
           text: confirmText,

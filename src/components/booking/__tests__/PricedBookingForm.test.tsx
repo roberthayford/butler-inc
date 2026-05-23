@@ -69,14 +69,14 @@ describe("PricedBookingForm", () => {
       });
     });
 
-    it("pre-fills name, email, and phone from user profile", async () => {
+    it("hides name and email while keeping phone from the user profile", async () => {
       render(<PricedBookingForm {...defaultProps} />);
 
       await waitFor(() => {
-        expect(screen.getByPlaceholderText("Jane Smith")).toHaveValue("Kim Butler");
-        expect(screen.getByPlaceholderText("you@example.com")).toHaveValue("kim@example.com");
         expect(screen.getByPlaceholderText("07700 900000")).toHaveValue("07700 123456");
       });
+      expect(screen.queryByPlaceholderText("Jane Smith")).not.toBeInTheDocument();
+      expect(screen.queryByPlaceholderText("you@example.com")).not.toBeInTheDocument();
     });
   });
 

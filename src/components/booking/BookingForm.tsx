@@ -15,7 +15,22 @@ import { addDays } from "date-fns";
 import { useAuth } from "@/context/AuthContext";
 import { phoneNumberSchema } from "@/lib/phone";
 
-const bookingFormSchema = z
+const bookingFormBaseSchema = z
+  .object({
+    dayOption: z.enum(["sameDay", "nextDay", "advance"]),
+    specificDate: z.date().optional(),
+    timeSlot: z.enum(["morning", "noon", "evening"]),
+    name: z.string().optional(),
+    email: z.string().optional(),
+    phone: phoneNumberSchema,
+    notes: z.string().max(500).optional(),
+  })
+  .refine((d) => d.dayOption !== "advance" || d.specificDate != null, {
+    message: "Please select a date",
+    path: ["specificDate"],
+  });
+
+const signedOutBookingFormSchema = z
   .object({
     dayOption: z.enum(["sameDay", "nextDay", "advance"]),
     specificDate: z.date().optional(),
@@ -30,7 +45,7 @@ const bookingFormSchema = z
     path: ["specificDate"],
   });
 
-export type BookingFormData = z.infer<typeof bookingFormSchema>;
+export type BookingFormData = z.infer<typeof bookingFormBaseSchema>;
 
 interface BookingFormProps {
   onSubmit: (data: BookingFormData) => Promise<void>;
@@ -45,6 +60,7 @@ export function BookingForm({
   hideScheduling = false,
   responsePromise,
 }: BookingFormProps) {
+  const { user, loading: authLoading } = useAuth();
   const {
     register,
     handleSubmit,
@@ -54,7 +70,7 @@ export function BookingForm({
     reset,
     formState: { errors },
   } = useForm<BookingFormData>({
-    resolver: zodResolver(bookingFormSchema),
+    resolver: zodResolver(user ? bookingFormBaseSchema : signedOutBookingFormSchema),
     defaultValues: {
       dayOption: "advance",
       timeSlot: "morning",
@@ -64,8 +80,6 @@ export function BookingForm({
       notes: "",
     },
   });
-
-  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -221,42 +235,46 @@ export function BookingForm({
         </Label>
 
         <div className="space-y-3">
-          <div className="space-y-1.5">
-            <label htmlFor="booking-name" className="text-sm text-optical-white/80">
-              Full name
-            </label>
-            <Input
-              id="booking-name"
-              {...register("name")}
-              placeholder="Jane Smith"
-              autoComplete="name"
-              className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray/50 focus-visible:ring-brass"
-            />
-            {errors.name && (
-              <p className="text-destructive text-sm mt-1" role="alert">
-                {errors.name.message}
-              </p>
-            )}
-          </div>
+          {!user && (
+            <>
+              <div className="space-y-1.5">
+                <label htmlFor="booking-name" className="text-sm text-optical-white/80">
+                  Full name
+                </label>
+                <Input
+                  id="booking-name"
+                  {...register("name")}
+                  placeholder="Jane Smith"
+                  autoComplete="name"
+                  className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray/50 focus-visible:ring-brass"
+                />
+                {errors.name && (
+                  <p className="text-destructive text-sm mt-1" role="alert">
+                    {errors.name.message}
+                  </p>
+                )}
+              </div>
 
-          <div className="space-y-1.5">
-            <label htmlFor="booking-email" className="text-sm text-optical-white/80">
-              Email address
-            </label>
-            <Input
-              id="booking-email"
-              {...register("email")}
-              type="email"
-              placeholder="you@example.com"
-              autoComplete="email"
-              className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray/50 focus-visible:ring-brass"
-            />
-            {errors.email && (
-              <p className="text-destructive text-sm mt-1" role="alert">
-                {errors.email.message}
-              </p>
-            )}
-          </div>
+              <div className="space-y-1.5">
+                <label htmlFor="booking-email" className="text-sm text-optical-white/80">
+                  Email address
+                </label>
+                <Input
+                  id="booking-email"
+                  {...register("email")}
+                  type="email"
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray/50 focus-visible:ring-brass"
+                />
+                {errors.email && (
+                  <p className="text-destructive text-sm mt-1" role="alert">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+            </>
+          )}
 
           <div className="space-y-1.5">
             <label htmlFor="booking-phone" className="text-sm text-optical-white/80">

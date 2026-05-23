@@ -27,3 +27,9 @@ Each entry follows this structure:
 - **Root cause:** No server-side or client-side admin check on the `/admin` route
 - **Fix:** Added admin email check to restrict access (commits `c18d809`, `c99f1ce`)
 - **Lesson:** Always gate admin routes with `isAdmin()` from `src/lib/admin.ts` — both the page component and any Header nav links.
+
+### 2026-05-23 — Signed-in booking forms asked for account identity again
+- **Symptom:** Signed-in users opening booking forms were still asked for their name and email.
+- **Root cause:** Booking form validation and API payloads treated name/email as client-entered fields for every user, even though authenticated users already have those details in Supabase auth metadata.
+- **Fix:** Hide name/email fields for authenticated booking forms and have booking APIs override submitted contact identity from `auth.getUser()`.
+- **Lesson:** For authenticated flows, derive account identity server-side and only ask for intake details that are booking-specific.
