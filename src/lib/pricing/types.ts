@@ -7,6 +7,7 @@ export interface ButlerPricing {
   name: string;
   hourlyRate: number;
   minimumHours: number | null;
+  leadTimeHours: number;
   bookingType: BookingType;
   isActive: boolean;
 }
@@ -42,6 +43,7 @@ export interface BookingPayload {
   serviceDate: string;
   startTime: string;
   endTime: string;
+  serviceStartsAtUtc: string;
   customerName: string;
   customerEmail: string;
   customerPhone: string;

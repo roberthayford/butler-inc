@@ -18,7 +18,10 @@ export function validateBookingTime(
   startTime: string,
   endTime: string,
   minimumHours: number | null,
-  serviceDate: string
+  serviceDate: string,
+  leadTimeHours: number = 0,
+  serviceStartsAtUtc?: string,
+  now: Date = new Date()
 ): { valid: boolean; error?: string } {
   const startMinutes = timeToMinutes(startTime);
   const endMinutes = timeToMinutes(endTime);
@@ -47,6 +50,27 @@ export function validateBookingTime(
       return {
         valid: false,
         error: `Minimum booking is ${minimumHours} hours`,
+      };
+    }
+  }
+
+  if (leadTimeHours > 0) {
+    const serviceStart = serviceStartsAtUtc
+      ? new Date(serviceStartsAtUtc)
+      : new Date(`${serviceDate}T${startTime}:00Z`);
+
+    if (Number.isNaN(serviceStart.getTime())) {
+      return {
+        valid: false,
+        error: "Invalid booking start time",
+      };
+    }
+
+    const earliestStart = now.getTime() + leadTimeHours * 60 * 60 * 1000;
+    if (serviceStart.getTime() < earliestStart) {
+      return {
+        valid: false,
+        error: `Bookings require at least ${leadTimeHours} hours' notice`,
       };
     }
   }

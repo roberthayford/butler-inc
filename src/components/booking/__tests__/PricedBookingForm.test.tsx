@@ -38,9 +38,13 @@ vi.mock("motion/react", () => ({
 const defaultProps = {
   butlerType: "busy" as const,
   pricing: {
+    id: "busy" as const,
+    name: "Busy Butler",
     bookingType: "self_service" as const,
     hourlyRate: 50,
     minimumHours: 2,
+    leadTimeHours: 4,
+    isActive: true,
   },
   serviceName: "Household errands",
   onSubmit: vi.fn(),

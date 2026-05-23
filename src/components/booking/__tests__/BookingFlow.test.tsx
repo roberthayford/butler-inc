@@ -42,7 +42,7 @@ describe("BookingFlow", () => {
   it("renders the service selection phase initially", () => {
     render(<BookingFlow butlerType="busy" />);
 
-    expect(screen.getByText("What do you need?")).toBeInTheDocument();
+    expect(screen.getByText("Click to book?")).toBeInTheDocument();
   });
 
   it("transitions to form phase after selecting a service", () => {
@@ -50,7 +50,7 @@ describe("BookingFlow", () => {
 
     fireEvent.click(screen.getByText("Courier and package services"));
 
-    expect(screen.getByText("Submit Booking Request")).toBeInTheDocument();
+    expect(screen.getByText(/Continue to Payment/)).toBeInTheDocument();
     expect(screen.getByText("Change")).toBeInTheDocument();
   });
 
@@ -70,7 +70,7 @@ describe("BookingFlow", () => {
     fireEvent.click(screen.getByText("Courier and package services"));
     fireEvent.click(screen.getByText("Change"));
 
-    expect(screen.getByText("What do you need?")).toBeInTheDocument();
+    expect(screen.getByText("Click to book?")).toBeInTheDocument();
   });
 
   it("renders bespoke flow with custom description", () => {

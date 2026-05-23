@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
+import { GENIE_SERVICE } from "@/data/booking-config";
 
 const EXAMPLE_WISHES = [
   "Source a sold-out designer handbag before the weekend",
@@ -147,6 +148,19 @@ export function GenieSection() {
                 className="text-warm-gray mt-4 leading-relaxed max-w-lg"
               >
                 Tell us what you want. We{"'"}ll make it happen.
+              </motion.p>
+              <motion.p
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{
+                  duration: 0.45,
+                  delay: 0.2,
+                  ease: PREMIUM_EASE,
+                }}
+                className="mt-3 text-sm font-medium text-destructive"
+              >
+                {GENIE_SERVICE.responsePromise}
               </motion.p>
 
               <motion.div
