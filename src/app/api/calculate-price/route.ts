@@ -1,11 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { priceLimiter } from "@/lib/rate-limit";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { BUTLER_PRICING, URGENCY_MULTIPLIERS } from "@/data/pricing-config";
 import {
   calculatePricePreview,
   validateBookingTime,
 } from "@/lib/pricing/calculate-price";
+import { readActiveMembership } from "@/lib/membership/membership-reader";
+import { todayUK } from "@/lib/dates/today-uk";
 import type { ButlerTypeKey } from "@/data/butler-tasks";
 
 const priceRequestSchema = z.object({
@@ -66,12 +69,29 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: validation.error }, { status: 400 });
   }
 
+  // Server-derived membership: client cannot forge this — read from session.
+  // Uses readActiveMembership which lazy-resets the billing period via the
+  // service-role client and gates `isActive` on status='active' AND period
+  // covering today (so a lapsed member doesn't get the member rate).
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const admin = createServiceClient();
+  const { isActive: isMember } = await readActiveMembership(
+    user?.id ?? null,
+    supabase,
+    admin,
+    todayUK()
+  );
+
   const result = calculatePricePreview({
     hourlyRate: pricing.hourlyRate,
     startTime,
     endTime,
     serviceDate,
     multipliers: URGENCY_MULTIPLIERS,
+    isMember,
   });
 
   return NextResponse.json({

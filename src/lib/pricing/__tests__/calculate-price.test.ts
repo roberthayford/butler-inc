@@ -319,19 +319,107 @@ describe("calculatePricePreview", () => {
     expect(result.total).toBe(165);
   });
 
-  it("handles budget butler rate: 2hrs x £35/hr = £70", () => {
+  it("handles budget butler rate: 2hrs x £50/hr = £100", () => {
     const farFuture = new Date();
     farFuture.setDate(farFuture.getDate() + 5);
     const serviceDate = farFuture.toISOString().split("T")[0];
 
     const result = calculatePricePreview({
-      hourlyRate: 35,
+      hourlyRate: 50,
       startTime: "10:00",
       endTime: "12:00",
       serviceDate,
       multipliers: URGENCY_MULTIPLIERS,
     });
-    expect(result.subtotal).toBe(70);
-    expect(result.total).toBe(70);
+    expect(result.subtotal).toBe(100);
+    expect(result.total).toBe(100);
+  });
+});
+
+describe("calculatePricePreview with isMember", () => {
+  // Build a same-day booking that would normally attract the 1.5x premium
+  const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
+  // Pick a time ~6h from now so it's same-day but still after lead time
+  const sixHoursFromNow = new Date(Date.now() + 6 * 60 * 60 * 1000);
+  const sameDayStart = sixHoursFromNow.toTimeString().slice(0, 5);
+  const sameDayEnd = new Date(sixHoursFromNow.getTime() + 2 * 60 * 60 * 1000)
+    .toTimeString()
+    .slice(0, 5);
+
+  it("forces hourlyRate to £50 for members, regardless of butler rate", () => {
+    const result = calculatePricePreview({
+      hourlyRate: 80, // Baby Butler-style rate
+      startTime: "14:00",
+      endTime: "16:00",
+      serviceDate: todayStr,
+      multipliers: URGENCY_MULTIPLIERS,
+      isMember: true,
+    });
+    expect(result.hourlyRate).toBe(50);
+  });
+
+  it("forces urgencyMultiplier to 1.0 for members on same-day bookings", () => {
+    const result = calculatePricePreview({
+      hourlyRate: 50,
+      startTime: sameDayStart,
+      endTime: sameDayEnd,
+      serviceDate: todayStr,
+      multipliers: URGENCY_MULTIPLIERS,
+      isMember: true,
+    });
+    expect(result.urgencyMultiplier).toBe(1.0);
+    expect(result.total).toBe(100); // £50 × 2hrs, no premium
+  });
+
+  it("labels member pricing as 'Member rate' (not 'Same-day premium')", () => {
+    const result = calculatePricePreview({
+      hourlyRate: 50,
+      startTime: sameDayStart,
+      endTime: sameDayEnd,
+      serviceDate: todayStr,
+      multipliers: URGENCY_MULTIPLIERS,
+      isMember: true,
+    });
+    expect(result.urgencyLabel).toBe("Member rate");
+  });
+
+  it("breakdown omits the multiplier segment for members", () => {
+    const result = calculatePricePreview({
+      hourlyRate: 50,
+      startTime: sameDayStart,
+      endTime: sameDayEnd,
+      serviceDate: todayStr,
+      multipliers: URGENCY_MULTIPLIERS,
+      isMember: true,
+    });
+    expect(result.breakdown).toBe("£50/hr × 2hrs = £100.00");
+    // Only one × (between rate and hours); no second × for an urgency multiplier.
+    expect((result.breakdown.match(/×/g) ?? []).length).toBe(1);
+  });
+
+  it("non-members (isMember undefined) still pay urgency premium", () => {
+    const result = calculatePricePreview({
+      hourlyRate: 50,
+      startTime: sameDayStart,
+      endTime: sameDayEnd,
+      serviceDate: todayStr,
+      multipliers: URGENCY_MULTIPLIERS,
+    });
+    expect(result.urgencyMultiplier).toBe(1.5);
+    expect(result.total).toBe(150);
+  });
+
+  it("non-members (isMember: false) still pay urgency premium", () => {
+    const result = calculatePricePreview({
+      hourlyRate: 50,
+      startTime: sameDayStart,
+      endTime: sameDayEnd,
+      serviceDate: todayStr,
+      multipliers: URGENCY_MULTIPLIERS,
+      isMember: false,
+    });
+    expect(result.urgencyMultiplier).toBe(1.5);
+    expect(result.total).toBe(150);
   });
 });

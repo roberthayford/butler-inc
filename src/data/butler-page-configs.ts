@@ -56,7 +56,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
         seo: {
             title: 'Same-Day Courier London | Busy Butler | 2-Hour Delivery',
             description:
-                'Urgent same-day courier across London. Documents, prescriptions, forgotten items delivered within 2 hours. DBS-checked butlers. Live tracking. From £35/hr.',
+                'Urgent same-day courier across London. Documents, prescriptions, forgotten items delivered within 2 hours. DBS-checked butlers. Live tracking. From £50/hr.',
             keywords: [
                 'same-day courier London',
                 'urgent delivery service',
@@ -113,7 +113,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
         seo: {
             title: 'Emergency Childcare London | Baby Butler | DBS-Checked',
             description:
-                'Trusted childcare and elderly care when you need it most. School runs, activity pickups, welfare checks. DBS-checked, body-cam equipped. From £35/hr.',
+                'Trusted childcare and elderly care when you need it most. School runs, activity pickups, welfare checks. DBS-checked, body-cam equipped. From £50/hr.',
             keywords: [
                 'emergency childcare London',
                 'school pickup service',
@@ -226,7 +226,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
         seo: {
             title: 'Property Management London | Base Butler | Home Waiting',
             description:
-                'Professional property waiting, key holding, and home management. Wait for deliveries, coordinate tradesmen, prepare your home. From £35/hr.',
+                'Professional property waiting, key holding, and home management. Wait for deliveries, coordinate tradesmen, prepare your home. From £50/hr.',
             keywords: [
                 'property waiting service London',
                 'key holding service',
@@ -280,9 +280,9 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
 
     budget: {
         seo: {
-            title: 'Affordable Errand Service London | Budget Butler | From £35/hr',
+            title: 'Affordable Errand Service London | Budget Butler | From £50/hr',
             description:
-                'Quality errand service at accessible prices. Flexible timing for non-urgent tasks. Shopping, returns, admin runs. From £35/hr.',
+                'Quality errand service at accessible prices. Flexible timing for non-urgent tasks. Shopping, returns, admin runs. From £50/hr.',
             keywords: [
                 'affordable errand service London',
                 'cheap personal assistant',

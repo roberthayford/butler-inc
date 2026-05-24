@@ -1,73 +1,79 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
-
-// Mock Supabase response
-const mockMembership = {
-  id: "mem-1",
-  user_id: "user-1",
-  tier_id: "tier-essential",
-  personal_hours_total: 15,
-  personal_hours_used: 7,
-  virtual_tasks_total: 8,
-  virtual_tasks_used: 3,
-  billing_period_start: "2026-04-01",
-  billing_period_end: "2026-04-30",
-  status: "active",
-  created_at: "2026-03-31T00:00:00Z",
-  updated_at: "2026-03-31T00:00:00Z",
-  membership_tiers: {
-    id: "tier-essential",
-    slug: "essential",
-    name: "Essential",
-    description: "Mid-tier",
-    personal_hours_included: 15,
-    virtual_tasks_included: 8,
-    monthly_price: 99,
-    display_order: 2,
-    is_active: true,
-  },
-};
-
-const singleFn = vi.fn(() => Promise.resolve({ data: mockMembership, error: null }));
-
-const mockSupabase = {
-  from: vi.fn(() => ({
-    select: vi.fn(() => ({
-      eq: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          single: singleFn,
-        })),
-      })),
-    })),
-  })),
-};
 
 vi.mock("@/context/AuthContext", () => ({
   useAuth: () => ({
     user: { id: "user-1" },
     loading: false,
-    supabase: mockSupabase,
+    supabase: {},
   }),
 }));
 
 import { useMembership } from "../useMembership";
 
+function buildMockMembership(overrides: Partial<{
+  billing_period_start: string;
+  billing_period_end: string;
+  personal_hours_used: number;
+  virtual_tasks_used: number;
+}> = {}) {
+  return {
+    id: "mem-1",
+    user_id: "user-1",
+    tier_id: "tier-essential",
+    personal_hours_total: 15,
+    personal_hours_used: 7,
+    virtual_tasks_total: 8,
+    virtual_tasks_used: 3,
+    billing_period_start: "2026-05-01",
+    billing_period_end: "2026-05-31",
+    status: "active",
+    created_at: "2026-04-30T00:00:00Z",
+    updated_at: "2026-04-30T00:00:00Z",
+    membership_tiers: {
+      id: "tier-essential",
+      slug: "essential",
+      name: "Essential",
+      description: "Mid-tier",
+      personal_hours_included: 15,
+      virtual_tasks_included: 8,
+      monthly_price: 99,
+      display_order: 2,
+      is_active: true,
+    },
+    ...overrides,
+  };
+}
+
+const originalFetch = global.fetch;
+
+function mockFetch(response: { membership: ReturnType<typeof buildMockMembership> | null; isActive: boolean }) {
+  global.fetch = vi.fn().mockResolvedValue({
+    ok: true,
+    status: 200,
+    json: async () => response,
+  }) as never;
+}
+
 function createWrapper() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  // eslint-disable-next-line react/display-name
   return ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={qc}>{children}</QueryClientProvider>
   );
 }
 
-describe("useMembership", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    singleFn.mockResolvedValue({ data: mockMembership, error: null });
-  });
+afterEach(() => {
+  global.fetch = originalFetch;
+  vi.clearAllMocks();
+});
 
-  it("returns membership data with tier info", async () => {
+describe("useMembership", () => {
+  it("returns membership data with tier info when isActive=true", async () => {
+    mockFetch({ membership: buildMockMembership(), isActive: true });
+
     const { result } = renderHook(() => useMembership(), { wrapper: createWrapper() });
 
     await waitFor(() => {
@@ -81,8 +87,8 @@ describe("useMembership", () => {
     expect(result.current.isMember).toBe(true);
   });
 
-  it("returns isMember false when no membership", async () => {
-    singleFn.mockResolvedValueOnce({ data: null, error: { code: "PGRST116", message: "no rows" } });
+  it("returns isMember=false when no membership", async () => {
+    mockFetch({ membership: null, isActive: false });
 
     const { result } = renderHook(() => useMembership(), { wrapper: createWrapper() });
 
@@ -94,5 +100,37 @@ describe("useMembership", () => {
     expect(result.current.isMember).toBe(false);
     expect(result.current.personalHoursRemaining).toBe(0);
     expect(result.current.virtualTasksRemaining).toBe(0);
+  });
+
+  it("returns membership but isMember=false when server reports isActive=false (e.g. expired period reset failed)", async () => {
+    // Server returns the stale row (so dashboard can render) but isActive=false
+    // so pricing won't grant member benefits
+    mockFetch({
+      membership: buildMockMembership({
+        billing_period_end: "2026-04-30",
+        personal_hours_used: 9,
+      }),
+      isActive: false,
+    });
+
+    const { result } = renderHook(() => useMembership(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.membership).toBeDefined();
+    expect(result.current.isMember).toBe(false);
+  });
+
+  it("calls /api/members/me with credentials", async () => {
+    mockFetch({ membership: null, isActive: false });
+
+    renderHook(() => useMembership(), { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/api/members/me",
+        expect.objectContaining({ credentials: "include" })
+      );
+    });
   });
 });

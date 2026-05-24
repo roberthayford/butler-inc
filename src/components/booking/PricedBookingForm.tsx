@@ -24,6 +24,7 @@ import { URGENCY_MULTIPLIERS } from "@/data/pricing-config";
 import type { ButlerPricing } from "@/lib/pricing/types";
 import type { ButlerTypeKey } from "@/data/butler-tasks";
 import { useAuth } from "@/context/AuthContext";
+import { useMembership } from "@/hooks/useMembership";
 import { phoneNumberSchema } from "@/lib/phone";
 
 const pricedBookingBaseSchema = z.object({
@@ -64,6 +65,7 @@ export function PricedBookingForm({
   isSubmitting,
 }: PricedBookingFormProps) {
   const { user, loading: authLoading } = useAuth();
+  const { isMember } = useMembership();
   const {
     register,
     handleSubmit,
@@ -156,8 +158,9 @@ export function PricedBookingForm({
       endTime,
       serviceDate: dateString,
       multipliers: URGENCY_MULTIPLIERS,
+      isMember,
     });
-  }, [dateString, startTime, endTime, pricing.hourlyRate]);
+  }, [dateString, startTime, endTime, pricing.hourlyRate, isMember]);
 
   const isFormReady = selectedDate && startTime && endTime && pricePreview;
 

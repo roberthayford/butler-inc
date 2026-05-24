@@ -4,6 +4,7 @@ import { z } from "zod";
 import { webhookLimiter } from "@/lib/rate-limit";
 import { getPaymentGateway } from "@/lib/payment/gateway";
 import { getBookingRepository } from "@/lib/payment/booking-repository";
+import { createServiceClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 import { render } from "@react-email/components";
 import { BookingConfirmationEmail } from "@/emails/booking-confirmation";
@@ -68,6 +69,44 @@ export async function POST(request: NextRequest) {
       { error: "Failed to confirm booking" },
       { status: 500 }
     );
+  }
+
+  // Member hours decrement — only for bookings made by an authenticated
+  // member at member-rate. Detected by `urgency_label === "Member rate"`
+  // (set server-side in /api/create-checkout-session when isActive=true).
+  // Atomic via optimistic lock; DB CHECK constraint enforces the cap if
+  // a race slipped through.
+  if (booking.user_id && booking.urgency_label === "Member rate") {
+    const admin = createServiceClient();
+    const { data: membership } = await admin
+      .from("memberships")
+      .select("id, personal_hours_used")
+      .eq("user_id", booking.user_id)
+      .eq("status", "active")
+      .maybeSingle();
+
+    if (membership) {
+      const newUsed = membership.personal_hours_used + booking.duration_hours;
+      const { error: incrementError } = await admin
+        .from("memberships")
+        .update({
+          personal_hours_used: newUsed,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", membership.id)
+        .eq("personal_hours_used", membership.personal_hours_used); // optimistic lock
+
+      if (incrementError) {
+        // Race or CHECK violation — log but don't fail the webhook;
+        // the booking is paid for and the user has the service.
+        // Admin reconciliation can pick up the discrepancy.
+        console.error(
+          "[payment-complete] Member hour decrement failed for booking",
+          booking.booking_reference,
+          incrementError
+        );
+      }
+    }
   }
 
   after(async () => {

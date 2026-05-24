@@ -105,7 +105,7 @@ export function ButlerCategoryGrid({ showHeader = true }: ButlerCategoryGridProp
                     </h3>
                     <p className="text-brass-text text-sm mt-1 font-medium">
                       {pricing.bookingType === "consultation"
-                        ? "Consultation"
+                        ? "Price upon consultation"
                         : `From £${pricing.hourlyRate}/hour`}
                     </p>
                   </div>

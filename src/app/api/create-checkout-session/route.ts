@@ -10,6 +10,10 @@ import {
 import { generateBookingReference } from "@/lib/pricing/booking-reference";
 import { getPaymentGateway } from "@/lib/payment/gateway";
 import { getBookingRepository } from "@/lib/payment/booking-repository";
+import { readActiveMembership } from "@/lib/membership/membership-reader";
+import { hasSufficientMemberHours } from "@/lib/membership/member-hours";
+import { todayUK } from "@/lib/dates/today-uk";
+import { createServiceClient } from "@/lib/supabase/server";
 import { phoneNumberSchema } from "@/lib/phone";
 import type { ButlerTypeKey } from "@/data/butler-tasks";
 
@@ -93,13 +97,48 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: validation.error }, { status: 400 });
   }
 
+  // Server-derived membership: never trust the client for pricing flags.
+  // Also lazy-resets the billing period via the service-role client if
+  // expired, and gates `isActive` on period covering today.
+  const admin = createServiceClient();
+  const { membership, isActive: isMember } = await readActiveMembership(
+    user?.id ?? null,
+    supabase,
+    admin,
+    todayUK()
+  );
+
   const priceResult = calculatePricePreview({
     hourlyRate: pricing.hourlyRate,
     startTime: data.startTime,
     endTime: data.endTime,
     serviceDate: data.serviceDate,
     multipliers: URGENCY_MULTIPLIERS,
+    isMember,
   });
+
+  // Member bookings are covered by the monthly hour allowance. Gate the
+  // booking on having enough remaining hours; the post-payment webhook
+  // will atomically deduct them (with optimistic lock + CHECK constraint
+  // as the race-safety net).
+  if (isMember) {
+    const membershipRow = membership as
+      | { personal_hours_total: number; personal_hours_used: number }
+      | null;
+    if (!hasSufficientMemberHours(membershipRow, priceResult.durationHours)) {
+      const remaining = membershipRow
+        ? Math.max(0, membershipRow.personal_hours_total - membershipRow.personal_hours_used)
+        : 0;
+      return NextResponse.json(
+        {
+          error: "Insufficient member hours remaining for this booking",
+          remaining,
+          required: priceResult.durationHours,
+        },
+        { status: 400 }
+      );
+    }
+  }
 
   const bookingReference = generateBookingReference();
   const repo = getBookingRepository();
@@ -129,6 +168,7 @@ export async function POST(request: NextRequest) {
           .join("\n") || null,
       status: "pending",
       payment_status: "pending",
+      user_id: user?.id ?? null,
     });
     bookingId = result.id;
   } catch {
