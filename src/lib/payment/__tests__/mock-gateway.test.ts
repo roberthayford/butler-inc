@@ -166,5 +166,11 @@ describe("MockPaymentGateway", () => {
       expect(event.type).toBe("unhandled");
       expect(event).toMatchObject({ rawType: "customer.created" });
     });
+
+    it("parseWebhookEvent throws for a handled type with missing data field", async () => {
+      const gw = new MockPaymentGateway();
+      const body = JSON.stringify({ type: "checkout.session.completed", created: 1717000000 });
+      await expect(gw.parseWebhookEvent(body, null)).rejects.toThrow(/missing required 'data' field/);
+    });
   });
 });

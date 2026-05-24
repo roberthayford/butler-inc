@@ -97,6 +97,9 @@ export class MockPaymentGateway implements PaymentGateway {
     const parsed = JSON.parse(rawBody);
     const type = parsed.type as string;
     if (HANDLED_TYPES.has(type)) {
+      if (!parsed.data || typeof parsed.data !== "object") {
+        throw new Error(`webhook event '${type}' is missing required 'data' field`);
+      }
       return parsed as WebhookEvent;
     }
     return { type: "unhandled", created: parsed.created ?? Date.now() / 1000, rawType: type };
