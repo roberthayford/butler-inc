@@ -32,7 +32,7 @@ export const BUTLER_PRICING: Record<ButlerTypeKey, ButlerPricing> = {
   budget: {
     id: "budget",
     name: "Budget Butler",
-    hourlyRate: 35,
+    hourlyRate: 50,
     minimumHours: 1,
     leadTimeHours: 4,
     bookingType: "self_service",

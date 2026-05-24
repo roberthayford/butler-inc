@@ -1,7 +1,11 @@
 import type { MembershipTier, VirtualTaskCategory, TierSlug } from "@/types/membership";
 
-/** Member hourly rate — matches Budget Butler rate as incentive */
-export const MEMBER_HOURLY_RATE = 35;
+/**
+ * Flat member hourly rate at checkout.
+ * Members pay this rate for any self-service butler regardless of urgency.
+ * Non-members continue to pay the per-butler rate × urgency multiplier.
+ */
+export const MEMBER_HOURLY_RATE = 50;
 
 export const MEMBERSHIP_TIERS: MembershipTier[] = [
   {

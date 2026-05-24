@@ -14,8 +14,8 @@ export const DAY_OPTIONS = [
   {
     key: "advance",
     label: "72+ Hours Notice",
-    priceLabel: "from £35/hr",
-    priceFrom: 35,
+    priceLabel: "from £50/hr",
+    priceFrom: 50,
     requiresDatePicker: true,
   },
 ] as const;

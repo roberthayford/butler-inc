@@ -11,9 +11,9 @@ describe("DAY_OPTIONS", () => {
     expect(keys).toEqual(["sameDay", "nextDay", "advance"]);
   });
 
-  it("has correct prices: 70, 55, 35", () => {
+  it("has correct prices: 70, 55, 50", () => {
     const prices = DAY_OPTIONS.map((o) => o.priceFrom);
-    expect(prices).toEqual([70, 55, 35]);
+    expect(prices).toEqual([70, 55, 50]);
   });
 
   it("only advance option requires date picker", () => {
