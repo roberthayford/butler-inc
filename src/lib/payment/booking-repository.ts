@@ -20,6 +20,12 @@ export interface BookingInsertData {
   additional_notes: string | null;
   status: string;
   payment_status: string;
+  /**
+   * Authenticated user's id (nullable for anonymous bookings). Captured
+   * so the post-payment webhook can decrement that member's hour balance
+   * if applicable.
+   */
+  user_id?: string | null;
 }
 
 export interface BookingRow extends BookingInsertData {
