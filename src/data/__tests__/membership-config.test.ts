@@ -10,8 +10,8 @@ describe("membership-config", () => {
   it("defines three tiers in order", () => {
     expect(MEMBERSHIP_TIERS).toHaveLength(3);
     expect(MEMBERSHIP_TIERS[0].slug).toBe("lite");
-    expect(MEMBERSHIP_TIERS[1].slug).toBe("essential");
-    expect(MEMBERSHIP_TIERS[2].slug).toBe("heavy");
+    expect(MEMBERSHIP_TIERS[1].slug).toBe("frequent");
+    expect(MEMBERSHIP_TIERS[2].slug).toBe("pro");
   });
 
   it("each tier has hours and tasks", () => {
@@ -36,8 +36,8 @@ describe("membership-config", () => {
   });
 
   it("getTierBySlug returns the correct tier", () => {
-    const essential = getTierBySlug("essential");
-    expect(essential?.name).toBe("Essential");
+    const frequent = getTierBySlug("frequent");
+    expect(frequent?.name).toBe("Frequent");
   });
 
   it("getTierBySlug returns undefined for invalid slug", () => {

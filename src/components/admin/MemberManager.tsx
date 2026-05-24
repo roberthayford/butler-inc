@@ -43,9 +43,9 @@ interface EditFormData {
 }
 
 const TIER_DEFAULTS: Record<TierSlug, { hours: number; tasks: number }> = {
-  lite: { hours: 5, tasks: 3 },
-  essential: { hours: 15, tasks: 8 },
-  heavy: { hours: 30, tasks: 15 },
+  lite: { hours: 10, tasks: 5 },
+  frequent: { hours: 20, tasks: 10 },
+  pro: { hours: 55, tasks: 25 },
 };
 
 function getDefaultBillingPeriod() {
@@ -97,10 +97,10 @@ export function MemberManager() {
       });
     } else {
       setFormData({
-        tierSlug: "essential",
-        personalHoursTotal: TIER_DEFAULTS.essential.hours,
+        tierSlug: "frequent",
+        personalHoursTotal: TIER_DEFAULTS.frequent.hours,
         personalHoursUsed: 0,
-        virtualTasksTotal: TIER_DEFAULTS.essential.tasks,
+        virtualTasksTotal: TIER_DEFAULTS.frequent.tasks,
         virtualTasksUsed: 0,
         billingPeriodStart: billing.start,
         billingPeriodEnd: billing.end,
@@ -207,7 +207,7 @@ export function MemberManager() {
               <div>
                 <label className="block text-sm font-medium text-optical-white mb-1">Tier</label>
                 <div className="flex gap-2">
-                  {(["lite", "essential", "heavy"] as TierSlug[]).map((slug) => (
+                  {(["lite", "frequent", "pro"] as TierSlug[]).map((slug) => (
                     <button
                       key={slug}
                       type="button"

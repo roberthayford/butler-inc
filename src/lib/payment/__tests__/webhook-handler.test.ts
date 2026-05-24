@@ -22,9 +22,9 @@ function makeCheckoutEvent(overrides: Partial<{ userId: string; subId: string; p
 function makeSupabaseFake() {
   const memberships: Array<Record<string, unknown>> = [];
   const tiers = [
-    { id: "tier-lite", slug: "lite", personal_hours_included: 5, virtual_tasks_included: 3 },
-    { id: "tier-essential", slug: "essential", personal_hours_included: 15, virtual_tasks_included: 8 },
-    { id: "tier-heavy", slug: "heavy", personal_hours_included: 30, virtual_tasks_included: 15 },
+    { id: "tier-lite", slug: "lite", personal_hours_included: 10, virtual_tasks_included: 5 },
+    { id: "tier-frequent", slug: "frequent", personal_hours_included: 20, virtual_tasks_included: 10 },
+    { id: "tier-pro", slug: "pro", personal_hours_included: 55, virtual_tasks_included: 25 },
   ];
   const tierBySlug = (slug: string) => tiers.find((t) => t.slug === slug);
   return {
@@ -112,8 +112,8 @@ describe("handleSubscriptionUpdated", () => {
   it("changes tier when price_id changes", async () => {
     const db = makeSupabaseFake();
     db.memberships.push({ id: "m1", user_id: "u1", stripe_subscription_id: "sub_1", tier_id: "tier-lite", status: "active", updated_at: new Date(0).toISOString() });
-    await handleSubscriptionUpdated(makeSubEvent("customer.subscription.updated", { items: { data: [{ price: { id: "mock_essential" } }] } }), db as never);
-    expect(db.memberships[0].tier_id).toBe("tier-essential");
+    await handleSubscriptionUpdated(makeSubEvent("customer.subscription.updated", { items: { data: [{ price: { id: "mock_frequent" } }] } }), db as never);
+    expect(db.memberships[0].tier_id).toBe("tier-frequent");
   });
 
   it("sets status='past_due' when Stripe status flips to past_due", async () => {
@@ -189,8 +189,8 @@ describe("handleCheckoutCompleted", () => {
       stripe_subscription_id: "sub_1",
       stripe_customer_id: "cus_1",
       status: "active",
-      personal_hours_total: 5,
-      virtual_tasks_total: 3,
+      personal_hours_total: 10,
+      virtual_tasks_total: 5,
     });
   });
 
@@ -207,13 +207,13 @@ describe("handleCheckoutCompleted", () => {
     db.memberships.push({
       id: "mem-existing",
       user_id: "user-1",
-      tier_id: "tier-essential",
+      tier_id: "tier-frequent",
       stripe_subscription_id: null,
       stripe_customer_id: null,
       status: "active",
-      personal_hours_total: 15,
+      personal_hours_total: 20,
       personal_hours_used: 4,
-      virtual_tasks_total: 8,
+      virtual_tasks_total: 10,
       virtual_tasks_used: 2,
     });
     await handleCheckoutCompleted(makeCheckoutEvent({ priceId: "mock_lite" }), db as never);
@@ -222,9 +222,9 @@ describe("handleCheckoutCompleted", () => {
       stripe_subscription_id: "sub_1",
       stripe_customer_id: "cus_1",
       tier_id: "tier-lite",
-      personal_hours_total: 5,
+      personal_hours_total: 10,
       personal_hours_used: 0,
-      virtual_tasks_total: 3,
+      virtual_tasks_total: 5,
       virtual_tasks_used: 0,
     });
   });

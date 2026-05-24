@@ -1,4 +1,4 @@
-export type TierSlug = "lite" | "essential" | "heavy";
+export type TierSlug = "lite" | "frequent" | "pro";
 export type MembershipStatus = "active" | "paused" | "cancelled" | "past_due";
 export type VirtualTaskCategory = "appointment" | "taxi_airport" | "restaurant" | "other";
 export type VirtualRequestStatus = "pending" | "in_progress" | "completed" | "cancelled";

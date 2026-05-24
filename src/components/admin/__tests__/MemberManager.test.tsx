@@ -18,8 +18,8 @@ const mockUsers = [
       billing_period_end: "2026-04-30",
       status: "active",
       membership_tiers: {
-        slug: "essential",
-        name: "Essential",
+        slug: "frequent",
+        name: "Frequent",
       },
     },
   },
@@ -50,7 +50,7 @@ describe("MemberManager", () => {
 
   it("shows tier badge for members", async () => {
     render(<MemberManager />);
-    expect(await screen.findByText("Essential")).toBeInTheDocument();
+    expect(await screen.findByText("Frequent")).toBeInTheDocument();
   });
 
   it("shows 'No membership' for non-members", async () => {

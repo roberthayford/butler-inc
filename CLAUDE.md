@@ -28,7 +28,7 @@ Required in `.env.local`:
 - `PAYMENT_GATEWAY` — `mock` (default) or `stripe`. Selects which `PaymentGateway` implementation `getPaymentGateway()` returns. `/api/webhooks/stripe` now **requires** an explicit value (returns 500 if unset, preventing silent downgrade to mock mode in production).
 - `STRIPE_SECRET_KEY` — set when wiring real Stripe (StripeGateway currently throws "not yet implemented")
 - `STRIPE_WEBHOOK_SECRET` — for verifying Stripe webhook signatures
-- `STRIPE_PRICE_LITE` / `STRIPE_PRICE_ESSENTIAL` / `STRIPE_PRICE_HEAVY` — Stripe price IDs resolved by `getTierPriceId()` in `src/lib/membership/tier-pricing.ts`. Falls back to `mock_<slug>` when unset
+- `STRIPE_PRICE_LITE` / `STRIPE_PRICE_FREQUENT` / `STRIPE_PRICE_PRO` — Stripe price IDs resolved by `getTierPriceId()` in `src/lib/membership/tier-pricing.ts`. Falls back to `mock_<slug>` when unset
 - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` — client-side Stripe.js, when Stripe Elements is wired
 
 ## Testing
@@ -123,7 +123,7 @@ src/data/                       # Static config
   booking-config.ts             # Booking options
   butler-page-configs.ts        # Butler page content
   butler-tasks.ts               # Task definitions per butler
-  membership-config.ts          # Tier definitions (Lite/Essential/Heavy)
+  membership-config.ts          # Tier definitions (Lite/Frequent/Pro)
   pricing-config.ts             # Pricing rules
   content-schema.ts             # CMS content schema
 
@@ -155,7 +155,7 @@ docs/plans/                     # Design docs and implementation plans
 ## Key Patterns
 
 - **Payment gateway:** Provider pattern in `src/lib/payment/gateway.ts` — currently uses `MockPaymentGateway`; Stripe integration is stubbed but not implemented. Set `PAYMENT_GATEWAY=mock` (default). Mock gateway blocked in `NODE_ENV=production`.
-- **Membership tiers:** Three tiers — Lite (£49, 5h / 3 tasks), Essential (£99, 15h / 8 tasks), Heavy (£199, 30h / 15 tasks) — defined in `src/data/membership-config.ts`. Tier data stored in Supabase with RLS policies. DB CHECK constraints enforce usage limits.
+- **Membership tiers:** Three tiers, Lite (£500, 10h / 5 tasks), Frequent (£1,000, 20h / 10 tasks), Pro (£2,500, 55h / 25 tasks), defined in `src/data/membership-config.ts`. Tier data stored in Supabase with RLS policies. DB CHECK constraints enforce usage limits.
 - **Pricing:** `calculatePricePreview()` in `src/lib/pricing/calculate-price.ts` accepts `isMember`. Members pay flat `MEMBER_HOURLY_RATE` (£50) and are exempt from urgency multipliers; non-members get the butler's hourly rate × urgency multiplier. Budget Butler is £50/hr; Bespoke is "price upon consultation" (no displayed rate). All `/api/calculate-price` and booking-submit endpoints **re-derive `isMember` server-side** from the session — client-supplied totals are recomputed and rejected on mismatch.
 - **UIOLO (use-it-or-lose-it):** Membership hours/tasks reset to tier max at calendar-month boundary. Implemented as a **lazy reset** in `src/lib/membership/period-rollover.ts` — applied on every read via `/api/members/me` and `useMembership()`. UK timezone via `src/lib/dates/today-uk.ts`. No cron; no schema change. Member bookings are gated on remaining hours and decrement atomically via `src/lib/membership/member-hours.ts`.
 - **Admin:** Tabbed layout (`AdminTabs`) with content editor and member manager. Access controlled by email allowlist in `src/lib/admin.ts` and `admin_users` table (RLS policies reference this table).

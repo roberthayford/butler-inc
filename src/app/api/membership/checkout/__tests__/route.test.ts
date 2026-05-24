@@ -45,13 +45,13 @@ describe("POST /api/membership/checkout", () => {
   });
 
   it("calls gateway with tier + priceId + userId + origin-derived URLs and returns the gateway URL", async () => {
-    const res = await POST(req({ tier: "essential" }));
+    const res = await POST(req({ tier: "frequent" }));
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body).toEqual({ url: "https://stripe.test/checkout/sess_1" });
     expect(mockCreateSub).toHaveBeenCalledWith(expect.objectContaining({
-      tier: "essential",
-      priceId: "mock_essential",
+      tier: "frequent",
+      priceId: "mock_frequent",
       userId: "u1",
       customerEmail: "u1@example.com",
       successUrl: "https://staging.butlersinc.com/members/checkout/success?session_id={CHECKOUT_SESSION_ID}",

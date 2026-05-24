@@ -8,18 +8,18 @@ describe("TierBadge", () => {
     expect(screen.getByText("Lite")).toBeInTheDocument();
   });
 
-  it("renders essential tier", () => {
-    render(<TierBadge tier="essential" />);
-    expect(screen.getByText("Essential")).toBeInTheDocument();
+  it("renders frequent tier", () => {
+    render(<TierBadge tier="frequent" />);
+    expect(screen.getByText("Frequent")).toBeInTheDocument();
   });
 
-  it("renders heavy tier", () => {
-    render(<TierBadge tier="heavy" />);
-    expect(screen.getByText("Heavy")).toBeInTheDocument();
+  it("renders pro tier", () => {
+    render(<TierBadge tier="pro" />);
+    expect(screen.getByText("Pro")).toBeInTheDocument();
   });
 
   it("applies size variant", () => {
-    const { container } = render(<TierBadge tier="heavy" size="lg" />);
+    const { container } = render(<TierBadge tier="pro" size="lg" />);
     expect(container.firstChild).toHaveClass("text-sm");
   });
 });
