@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { phoneNumberSchema } from "@/lib/phone";
+import { getSiteUrl } from "@/lib/site-url";
 
 const signupSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -26,7 +27,10 @@ export async function POST(request: NextRequest) {
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { name, phone } },
+    options: {
+      data: { name, phone },
+      emailRedirectTo: `${getSiteUrl(request)}/auth/callback`,
+    },
   });
 
   if (error) {
