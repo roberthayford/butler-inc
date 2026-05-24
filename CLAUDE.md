@@ -25,6 +25,11 @@ Required in `.env.local`:
 - `DEV_BYPASS_DB=true` — use in-memory booking store instead of Supabase (dev only)
 - `ADMIN_EMAILS` — comma-separated admin emails (optional, has defaults in `src/lib/admin.ts`)
 - `NEXT_PUBLIC_SITE_URL` — canonical site origin used as fallback for Supabase `emailRedirectTo`. Set **per Vercel environment** (Production: `https://butlersinc.com`, Preview: `https://staging.butlersinc.com`). Server route handlers prefer the incoming request origin and fall back to this var via `getSiteUrl()` in `src/lib/site-url.ts`.
+- `PAYMENT_GATEWAY` — `mock` (default) or `stripe`. Selects which `PaymentGateway` implementation `getPaymentGateway()` returns. `/api/webhooks/stripe` now **requires** an explicit value (returns 500 if unset, preventing silent downgrade to mock mode in production).
+- `STRIPE_SECRET_KEY` — set when wiring real Stripe (StripeGateway currently throws "not yet implemented")
+- `STRIPE_WEBHOOK_SECRET` — for verifying Stripe webhook signatures
+- `STRIPE_PRICE_LITE` / `STRIPE_PRICE_ESSENTIAL` / `STRIPE_PRICE_HEAVY` — Stripe price IDs resolved by `getTierPriceId()` in `src/lib/membership/tier-pricing.ts`. Falls back to `mock_<slug>` when unset
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` — client-side Stripe.js, when Stripe Elements is wired
 
 ## Testing
 
@@ -77,8 +82,11 @@ src/app/                        # Next.js App Router pages
     settings/page.tsx           # Account settings (profile, email, password)
   admin/page.tsx                # Admin panel (content editor + member manager, tabbed)
   booking-confirmation/         # Post-booking confirmation
-  payment/simulate/             # Dev-only payment simulation
+  payment/simulate/             # Dev-only payment simulator (handles ?type=subscription branch for membership flow)
   auth/callback/route.ts        # Supabase PKCE code exchange — confirmation/magic-link landing
+  membership/page.tsx           # Public pricing page (3 tier cards, hybrid intro + grid layout)
+  membership/checkout/[tier]/page.tsx  # Server component: validates tier, redirects signed-out to signup, creates Stripe Checkout Session, 307s to gateway URL
+  members/checkout/success/     # page.tsx + CheckoutActivating.tsx — polls /api/members/me until activated then redirects to dashboard
   (legal)/                      # Route group — Header + Footer layout for static pages
     about/page.tsx              # Placeholder
     careers/page.tsx            # Placeholder
@@ -96,14 +104,16 @@ src/app/api/                    # API routes
   calculate-price/              # Price calculation endpoint (server-derives isMember)
   create-checkout-session/      # Payment checkout initiation
   members/me/                   # Authoritative membership read (applies UIOLO rollover before returning)
+  membership/checkout/          # POST creates subscription Checkout Session via getPaymentGateway()
   virtual-butler/               # Virtual task submission
-  webhooks/payment-complete/    # Payment webhook handler
+  webhooks/payment-complete/    # One-off booking webhook handler
+  webhooks/stripe/              # Stripe (and mock) subscription webhook receiver — signature-gated, dispatches to webhook-handler.ts
 
 src/components/
   PlaceholderPage.tsx           # Shared shell for (legal) placeholder routes — throwaway scaffold
   landing/                      # Header, Hero, Footer (4-col / 9-link), HowItWorks, ButlerCategoryGrid
   booking/                      # BookingFlow, BookingForm, ServiceOptionSelector, PricedBookingForm
-  membership/                   # TierBadge, UsageGauge, VirtualRequestForm
+  membership/                   # TierBadge, UsageGauge, VirtualRequestForm, TierCard, TierComparison
   admin/                        # AdminTabs, MemberManager, ButlerContentEditor
   genie/                        # GenieDrawer, GenieStickyBar (persistent CTA)
   ui/                           # shadcn primitives
@@ -119,9 +129,9 @@ src/data/                       # Static config
 
 src/lib/
   supabase/                     # client.ts, server.ts
-  payment/                      # gateway.ts (provider pattern), mock-gateway.ts, booking-repository.ts (atomic hours decrement)
+  payment/                      # gateway.ts (provider pattern), mock-gateway.ts, stripe-gateway.ts (stub), types.ts (PaymentGateway + WebhookEvent union), webhook-handler.ts (5 handlers), booking-repository.ts (atomic hours decrement, dev singleton on globalThis)
   pricing/                      # calculate-price.ts (member-aware), time-slots.ts, booking-reference.ts
-  membership/                   # membership-reader.ts (server-side read), period-rollover.ts (UIOLO), member-hours.ts (atomic decrement helper)
+  membership/                   # membership-reader.ts (server-side read), period-rollover.ts (UIOLO), member-hours.ts (atomic decrement helper), tier-pricing.ts (Stripe price ID resolver)
   dates/                        # today-uk.ts — UK-aware "today" for period-boundary logic
   rate-limit.ts                 # In-memory per-IP rate limiting for API routes
   admin.ts                      # Admin email allowlist + isAdmin()
@@ -155,6 +165,13 @@ docs/plans/                     # Design docs and implementation plans
 - **Content system:** Static defaults in `src/data/` merged with Supabase-stored overrides via `src/lib/content.ts`.
 - **Placeholder pages:** Nine footer routes live under `src/app/(legal)/` and share `src/components/PlaceholderPage.tsx` (charcoal bg, serif h1, italic subtitle). The component is throwaway — when a page gets real content, it stops using `PlaceholderPage` and gets its own JSX.
 - **Supabase email links / auth callback:** Both `signUp()` call sites (`src/context/AuthContext.tsx`, `src/app/api/members/signup/route.ts`) pass `options.emailRedirectTo` so confirmation links point at the same origin the user signed up on (client uses `window.location.origin`; server uses `getSiteUrl(request)`). The link lands on `src/app/auth/callback/route.ts`, which calls `supabase.auth.exchangeCodeForSession(code)` and redirects to `?next=` (default `/members/dashboard`). The Supabase dashboard's **Site URL** is the fallback when `emailRedirectTo` is omitted or not in the Redirect URL allowlist — keep all deploy origins (`https://butlersinc.com`, `https://staging.butlersinc.com`, `http://localhost:3000`) in the allowlist as `…/auth/callback`.
+- **Subscription checkout (Stripe-shaped, mock today):** Public `/membership` page → "Choose Lite" → `/membership/checkout/[tier]` (server component) → `/api/membership/checkout` resolves the price via `getTierPriceId(slug)` from `src/lib/membership/tier-pricing.ts` and calls `gateway.createSubscriptionCheckoutSession(...)`. Mock returns a `/payment/simulate?type=subscription&...` URL; future `StripeGateway` will return a real Stripe Checkout URL. `client_reference_id` carries the Supabase `user.id` through to the webhook. After payment the simulator POSTs a synthetic `checkout.session.completed` event to `/api/webhooks/stripe` with header `x-mock-signature: 1`, then the browser lands on `/members/checkout/success` which polls `/api/members/me` for ~10s until provisioning completes, then redirects to `/members/dashboard?welcome=1`.
+- **Webhook-driven provisioning:** `/api/webhooks/stripe` is signature-gated (requires `stripe-signature` in stripe mode, `x-mock-signature` in mock mode), uses an exhaustive `switch` over the `WebhookEvent` discriminated union with TS `never` guard, dispatches to pure handler functions in `src/lib/payment/webhook-handler.ts`. Provisioning happens in the webhook, NOT in the success URL (per Stripe's recommendation). Idempotency, stale-event guard, admin-overlap UPSERT, and the `unpaid`/`incomplete_expired`/`incomplete` Stripe-status-to-app-status mapping all live in webhook-handler.ts and are unit-tested with real Stripe sample event JSON. The 5 events handled: `checkout.session.completed`, `customer.subscription.updated`/`.deleted`, `invoice.paid` (resets UIOLO, preserves paused state), `invoice.payment_failed` (→ `past_due`).
+- **Payment gateway types:** Canonical `PaymentGateway` interface lives in `src/lib/payment/types.ts` (`src/lib/pricing/types.ts` re-exports for back-compat). `WebhookEvent` is a discriminated union; `CheckoutSessionData` has JSDoc explaining that some fields (period dates, line_items) are part of our envelope shape and the future Stripe adapter must populate them by retrieving the subscription. `pause_collection.behavior` is typed as the Stripe literal union (`'keep_as_draft' | 'mark_uncollectible' | 'void'`).
+- **Mock vs Stripe gateways:** `getPaymentGateway()` in `src/lib/payment/gateway.ts` returns `MockPaymentGateway` when `PAYMENT_GATEWAY=mock` (default), `StripeGateway` when `=stripe`. StripeGateway is a tested stub — every method throws `"not yet implemented"` with a clear message that doubles as the future implementation checklist. Mock-mode guard: throws if `NODE_ENV=production` and `PAYMENT_GATEWAY=mock`.
+- **Mock gateway verifyPayment by pattern:** `verifyPayment(sessionId)` accepts any `mock_session_*` ID via prefix match. Replay protection is at the DB layer: `booking_repository.findByCheckoutSession` returns null for unknown IDs (yields 404 at the webhook) and the webhook short-circuits with `already_processed` when `payment_status === 'paid'`. Gateway-level Set-based replay protection doesn't survive serverless instance boundaries.
+- **DevBookingStore singleton on `globalThis`:** `getBookingRepository()` pins the dev in-memory store on `globalThis.__butlersDevStore` (not a module-level `let`) so the same instance is reused across route handlers in Next.js App Router dev mode. Without this, `/api/create-checkout-session` and `/api/webhooks/payment-complete` see different stores and bookings vanish between requests.
+- **Route-level error JSON envelope:** `/api/create-checkout-session` and `/api/bookings` wrap their entire handler body in a try/catch that always returns JSON 500 with the underlying error message (also logged via `console.error`). Pairs with the client-side `readErrorMessage` helper in `BookingFlow.tsx` which falls back to `Failed (HTTP <status>)` when the response body isn't JSON. Prevents Safari's cryptic `JSON.parse → "The string did not match the expected pattern"` toast when an upstream throws synchronously.
 
 ## Bug Resolution Log
 

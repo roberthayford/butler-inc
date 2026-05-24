@@ -3,7 +3,16 @@
 **Date:** 2026-05-24
 **Author:** Rob Hayford (paired with Claude)
 **Brief reference:** No formal brief section — closes the gap surfaced after the C-rate spec landed (PR #17): members exist as a concept but only admin can create them.
-**Status:** Approved for implementation
+**Status:** Phase A SHIPPED (PR #20, merged to staging 2026-05-24). Phase B not started.
+
+## Implementation status
+
+| Slice | Status | Notes |
+|---|---|---|
+| **Phase A — funnel + provisioning** | ✅ SHIPPED on staging | Public `/membership` page, Stripe-shaped subscription checkout (mock today, `StripeGateway` stub for later), webhook-driven provisioning, dashboard upsell, Header "Join" → `/membership`, signup `?next=` honoring, DB migrations 007 + 008. Sub-skills: Set-based mock replay protection removed (DB layer instead), DevBookingStore singleton on `globalThis`, route-level JSON error envelope, em-dash sweep across copy. |
+| **Phase B — self-serve** | ⏳ TODO | `PlanManager` on `/members/settings`, `/api/membership/portal` (Stripe Customer Portal for cancel + plan-swap + payment-method update), `/api/membership/pause` (custom because portal doesn't support pause), mock portal simulator. See "Self-serve actions" section below for the full breakdown. |
+| **Real Stripe wiring** | ⏳ Deferred | Wait until Phase B is done. The 7 `StripeGateway` stub methods become the implementation checklist. |
+| **Tier values + rename** | ⏳ Blocked on Faridah | Proposed £500/£1k/TBC and Lite/Frequent/Daily; current code uses £49/£99/£199 and Lite/Essential/Heavy. Single `MEMBERSHIP_TIERS` edit + DB migration when locked. |
 
 ## Why
 
@@ -256,6 +265,8 @@ export type WebhookEvent =
 9. After 10s with no active membership: render "Taking longer than usual — your membership should appear shortly" with a "Go to dashboard" link (webhook will catch up in the background)
 
 ### Self-serve actions
+
+**⏳ Phase B — not yet implemented.** Routes (`/api/membership/portal`, `/api/membership/pause`), mock portal simulator page (`/payment/simulate-portal`), and the `PlanManager` settings panel are not in the Phase A PR. Mock gateway already has `createPortalSession` + `pauseSubscription`/`resumeSubscription` stubs, so the contract is in place; Phase B wires the routes + UI on top.
 
 - **Manage / Cancel / Plan-swap / Update card** → `POST /api/membership/portal` → `gateway.createPortalSession({ customerId, returnUrl })` → 307 → portal → user does stuff → returns to settings → webhooks sync DB asynchronously.
 - **Pause** → `POST /api/membership/pause { action: 'pause' }` → `gateway.pauseSubscription(subId)` (sets Stripe `pause_collection.behavior='mark_uncollectible'`) + `UPDATE memberships SET status='paused', paused_at=now()`. Booking gate (existing `hasSufficientMemberHours`) already checks `status='active'` → paused members revert to non-member pricing automatically.
