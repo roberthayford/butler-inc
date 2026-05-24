@@ -1,74 +1,112 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@/test/test-utils";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, waitFor } from "@/test/test-utils";
 import MemberDashboard from "../dashboard/page";
 
-vi.mock("@/context/AuthContext", () => ({
-  useAuth: () => ({
-    user: { id: "user-1", email: "test@example.com", user_metadata: { name: "Jane" } },
-    loading: false,
-    signOut: vi.fn(),
-    supabase: {
-      from: () => ({
-        select: () => ({
-          eq: () => ({
-            order: () =>
-              Promise.resolve({
-                data: [
-                  {
-                    id: "booking-1",
-                    butler_type: "busy",
-                    service_option: "Courier and package services",
-                    day_option: "advance",
-                    time_slot: "morning",
-                    reference: "REF001",
-                    status: "confirmed",
-                    created_at: "2026-03-15T10:00:00Z",
-                  },
-                ],
-                error: null,
-              }),
-          }),
+const mockAuth = vi.fn(() => ({
+  user: { id: "user-1", email: "test@example.com", user_metadata: { name: "Jane" } },
+  loading: false,
+  signOut: vi.fn(),
+  supabase: {
+    from: () => ({
+      select: () => ({
+        eq: () => ({
+          order: () =>
+            Promise.resolve({
+              data: [
+                {
+                  id: "booking-1",
+                  butler_type: "busy",
+                  service_option: "Courier and package services",
+                  day_option: "advance",
+                  time_slot: "morning",
+                  reference: "REF001",
+                  status: "confirmed",
+                  created_at: "2026-03-15T10:00:00Z",
+                },
+              ],
+              error: null,
+            }),
         }),
       }),
+    }),
+  },
+}));
+
+const mockMembership = vi.fn(() => ({
+  membership: {
+    id: "mem-1",
+    userId: "user-1",
+    tierId: "tier-essential",
+    tier: {
+      id: "tier-essential",
+      slug: "essential",
+      name: "Essential",
+      description: "Mid-tier",
+      personalHoursIncluded: 15,
+      virtualTasksIncluded: 8,
+      monthlyPrice: 99,
+      displayOrder: 2,
+      isActive: true,
     },
-  }),
+    personalHoursTotal: 15,
+    personalHoursUsed: 7,
+    virtualTasksTotal: 8,
+    virtualTasksUsed: 3,
+    billingPeriodStart: "2026-04-01",
+    billingPeriodEnd: "2026-04-30",
+    status: "active",
+    createdAt: "2026-03-31T00:00:00Z",
+    updatedAt: "2026-03-31T00:00:00Z",
+  },
+  isLoading: false,
+  isMember: true,
+  personalHoursRemaining: 8,
+  virtualTasksRemaining: 5,
+}));
+
+vi.mock("@/context/AuthContext", () => ({
+  useAuth: () => mockAuth(),
 }));
 
 vi.mock("@/hooks/useMembership", () => ({
-  useMembership: () => ({
-    membership: {
-      id: "mem-1",
-      userId: "user-1",
-      tierId: "tier-essential",
-      tier: {
-        id: "tier-essential",
-        slug: "essential",
-        name: "Essential",
-        description: "Mid-tier",
-        personalHoursIncluded: 15,
-        virtualTasksIncluded: 8,
-        monthlyPrice: 99,
-        displayOrder: 2,
-        isActive: true,
-      },
-      personalHoursTotal: 15,
-      personalHoursUsed: 7,
-      virtualTasksTotal: 8,
-      virtualTasksUsed: 3,
-      billingPeriodStart: "2026-04-01",
-      billingPeriodEnd: "2026-04-30",
-      status: "active",
-      createdAt: "2026-03-31T00:00:00Z",
-      updatedAt: "2026-03-31T00:00:00Z",
-    },
-    isLoading: false,
-    isMember: true,
-    personalHoursRemaining: 8,
-    virtualTasksRemaining: 5,
-  }),
+  useMembership: () => mockMembership(),
 }));
 
 describe("MemberDashboard", () => {
+  beforeEach(() => {
+    mockMembership.mockImplementation(() => ({
+      membership: {
+        id: "mem-1",
+        userId: "user-1",
+        tierId: "tier-essential",
+        tier: {
+          id: "tier-essential",
+          slug: "essential",
+          name: "Essential",
+          description: "Mid-tier",
+          personalHoursIncluded: 15,
+          virtualTasksIncluded: 8,
+          monthlyPrice: 99,
+          displayOrder: 2,
+          isActive: true,
+        },
+        personalHoursTotal: 15,
+        personalHoursUsed: 7,
+        virtualTasksTotal: 8,
+        virtualTasksUsed: 3,
+        billingPeriodStart: "2026-04-01",
+        billingPeriodEnd: "2026-04-30",
+        status: "active",
+        createdAt: "2026-03-31T00:00:00Z",
+        updatedAt: "2026-03-31T00:00:00Z",
+      },
+      isLoading: false,
+      isMember: true,
+      personalHoursRemaining: 8,
+      virtualTasksRemaining: 5,
+    }));
+  });
+
   it("shows welcome message with user name", async () => {
     render(<MemberDashboard />);
     expect(await screen.findByText(/Welcome back, Jane/)).toBeInTheDocument();
@@ -107,5 +145,23 @@ describe("MemberDashboard", () => {
     render(<MemberDashboard />);
     expect(await screen.findByText(/Busy Butler/)).toBeInTheDocument();
     expect(screen.getByText(/REF001/)).toBeInTheDocument();
+  });
+});
+
+describe("Dashboard — no membership", () => {
+  beforeEach(() => {
+    mockMembership.mockImplementation(() => ({
+      membership: null as unknown as ReturnType<typeof mockMembership>["membership"],
+      isLoading: false,
+      isMember: false,
+      personalHoursRemaining: 0,
+      virtualTasksRemaining: 0,
+    }));
+  });
+
+  it("shows a 'Choose a plan' card linking to /membership", async () => {
+    render(<MemberDashboard />);
+    await waitFor(() => expect(screen.getByText(/choose a plan/i)).toBeInTheDocument());
+    expect(screen.getByRole("link", { name: /see plans/i })).toHaveAttribute("href", "/membership");
   });
 });

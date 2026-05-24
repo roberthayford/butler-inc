@@ -58,12 +58,20 @@ export function AudienceCTA({ className }: { className?: string }) {
           <h2 className="text-2xl font-serif font-bold text-optical-white">
             New to Butlers Inc.?
           </h2>
-          <Link
-            href="/butlers"
-            className="px-6 py-3 rounded-sm bg-brass text-charcoal font-medium hover:bg-brass-muted transition-colors text-sm tracking-wide"
-          >
-            Browse Our Butlers
-          </Link>
+          <div className="flex flex-col gap-3">
+            <Link
+              href="/butlers"
+              className="px-6 py-3 rounded-sm bg-brass text-charcoal font-medium hover:bg-brass-muted transition-colors text-sm tracking-wide text-center"
+            >
+              Browse Our Butlers
+            </Link>
+            <Link
+              href="/membership"
+              className="px-6 py-3 rounded-sm border border-brass/60 text-brass font-medium hover:border-brass hover:bg-brass/10 transition-colors text-sm tracking-wide text-center"
+            >
+              Become a member
+            </Link>
+          </div>
         </motion.div>
 
         <motion.div

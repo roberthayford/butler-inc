@@ -137,15 +137,16 @@ export default function MemberDashboard() {
             </Link>
           </div>
         ) : (
-          <div className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-sm p-8 text-center mb-12">
-            <p className="text-optical-white font-serif text-lg mb-2">Become a Member</p>
+          <div className="bg-white/5 border border-brass/30 rounded-sm p-6 text-center mb-12">
+            <h2 className="font-serif text-2xl text-optical-white mb-2">Choose a plan</h2>
             <p className="text-warm-gray text-sm mb-4">
-              Get discounted butler rates and virtual concierge tasks with a membership.
+              Unlock the flat £50/hr rate and a monthly allowance of butler hours.
             </p>
-            <Link href="/butlers">
-              <Button className="bg-brass text-charcoal hover:bg-brass-muted">
-                View Butler Services
-              </Button>
+            <Link
+              href="/membership"
+              className="inline-block bg-brass text-charcoal px-5 py-2.5 rounded-sm font-semibold text-sm"
+            >
+              See plans
             </Link>
           </div>
         )}
