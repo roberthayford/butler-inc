@@ -55,7 +55,7 @@ export function ServiceOptionSelector({
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-serif font-semibold text-optical-white">
-        Click to book?
+        Choose a service
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {tasks.map((task) => {
