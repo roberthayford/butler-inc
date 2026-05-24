@@ -81,7 +81,7 @@ function statusFromStripe(s: SubscriptionData["status"]): "active" | "paused" | 
 
 async function findRowBySub(db: DB, subscriptionId: string) {
   const { data } = await db.from("memberships").select().eq("stripe_subscription_id", subscriptionId).maybeSingle();
-  return data as { id: string; updated_at: string; tier_id: string | null } | null;
+  return data as { id: string; updated_at: string; tier_id: string | null; status: string } | null;
 }
 
 export async function handleSubscriptionUpdated(event: Extract<WebhookEvent, { type: "customer.subscription.updated" }>, db: DB) {
@@ -125,14 +125,22 @@ export async function handleInvoicePaid(event: Extract<WebhookEvent, { type: "in
   if (!d.subscription) return;
   const row = await findRowBySub(db, d.subscription);
   if (!row) return;
-  await db.from("memberships").update({
-    status: "active",
+
+  // Stale-event guard — mirrors handleSubscriptionUpdated
+  if (new Date(row.updated_at).getTime() / 1000 > event.created) return;
+
+  const patch: Record<string, unknown> = {
     billing_period_start: new Date(d.period_start * 1000).toISOString(),
     billing_period_end: new Date(d.period_end * 1000).toISOString(),
     personal_hours_used: 0,
     virtual_tasks_used: 0,
     updated_at: new Date().toISOString(),
-  }).eq("id", row.id);
+  };
+  // Only revive to active if not currently paused — preserves manual pause state
+  if (row.status !== "paused") {
+    patch.status = "active";
+  }
+  await db.from("memberships").update(patch).eq("id", row.id);
 }
 
 export async function handleInvoicePaymentFailed(event: Extract<WebhookEvent, { type: "invoice.payment_failed" }>, db: DB) {

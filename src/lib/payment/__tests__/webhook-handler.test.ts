@@ -255,9 +255,10 @@ function makeInvoiceEvent(type: "invoice.paid" | "invoice.payment_failed", overr
 describe("handleInvoicePaid", () => {
   it("extends billing_period_end and resets usage counters", async () => {
     const db = makeSupabaseFake();
-    db.memberships.push({ id: "m1", stripe_subscription_id: "sub_1", status: "active", personal_hours_used: 4, virtual_tasks_used: 2, billing_period_end: "2020-01-01T00:00:00.000Z", updated_at: new Date(0).toISOString() });
+    db.memberships.push({ id: "m1", stripe_subscription_id: "sub_1", status: "active", personal_hours_used: 4, virtual_tasks_used: 2, billing_period_start: "2020-01-01T00:00:00.000Z", billing_period_end: "2020-01-01T00:00:00.000Z", updated_at: new Date(0).toISOString() });
     await handleInvoicePaid(makeInvoiceEvent("invoice.paid"), db as never);
     expect(db.memberships[0]).toMatchObject({ personal_hours_used: 0, virtual_tasks_used: 0 });
+    expect(db.memberships[0].billing_period_start).not.toBe("2020-01-01T00:00:00.000Z");
     expect(db.memberships[0].billing_period_end).not.toBe("2020-01-01T00:00:00.000Z");
   });
 
@@ -267,6 +268,48 @@ describe("handleInvoicePaid", () => {
     await handleInvoicePaid(makeInvoiceEvent("invoice.paid"), db as never);
     expect(db.memberships[0].status).toBe("active");
   });
+
+  it("is a no-op when stripe_subscription_id is not found in memberships", async () => {
+    const db = makeSupabaseFake();
+    // No rows pushed — findRowBySub returns null
+    await handleInvoicePaid(makeInvoiceEvent("invoice.paid", { subscription: "sub_unknown" }), db as never);
+    expect(db.memberships).toHaveLength(0);
+  });
+
+  it("preserves status='paused' when invoice.paid fires for a paused subscription", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({
+      id: "m1",
+      stripe_subscription_id: "sub_1",
+      status: "paused",
+      paused_at: new Date(1717000000 * 1000).toISOString(),
+      personal_hours_used: 4,
+      virtual_tasks_used: 2,
+      billing_period_end: "2020-01-01T00:00:00.000Z",
+      updated_at: new Date(0).toISOString(),
+    });
+    await handleInvoicePaid(makeInvoiceEvent("invoice.paid"), db as never);
+    expect(db.memberships[0]).toMatchObject({ status: "paused" });
+    // Still resets counters + extends period
+    expect(db.memberships[0]).toMatchObject({ personal_hours_used: 0, virtual_tasks_used: 0 });
+  });
+
+  it("ignores stale invoice.paid events (event.created older than row's updated_at)", async () => {
+    const db = makeSupabaseFake();
+    const now = Math.floor(Date.now() / 1000);
+    db.memberships.push({
+      id: "m1",
+      stripe_subscription_id: "sub_1",
+      status: "active",
+      personal_hours_used: 3,
+      virtual_tasks_used: 1,
+      billing_period_end: "2020-01-01T00:00:00.000Z",
+      updated_at: new Date(now * 1000).toISOString(),
+    });
+    await handleInvoicePaid(makeInvoiceEvent("invoice.paid", { created: now - 100 }), db as never);
+    // Counters NOT reset because stale guard fired
+    expect(db.memberships[0].personal_hours_used).toBe(3);
+  });
 });
 
 describe("handleInvoicePaymentFailed", () => {
@@ -275,5 +318,11 @@ describe("handleInvoicePaymentFailed", () => {
     db.memberships.push({ id: "m1", stripe_subscription_id: "sub_1", status: "active", updated_at: new Date(0).toISOString() });
     await handleInvoicePaymentFailed(makeInvoiceEvent("invoice.payment_failed"), db as never);
     expect(db.memberships[0].status).toBe("past_due");
+  });
+
+  it("is a no-op when stripe_subscription_id is not found in memberships", async () => {
+    const db = makeSupabaseFake();
+    await handleInvoicePaymentFailed(makeInvoiceEvent("invoice.payment_failed", { subscription: "sub_unknown" }), db as never);
+    expect(db.memberships).toHaveLength(0);
   });
 });
