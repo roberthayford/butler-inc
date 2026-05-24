@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { WebhookEvent, CheckoutSessionData } from "./types";
+import type { WebhookEvent, CheckoutSessionData, SubscriptionData } from "./types";
 
 type DB = SupabaseClient;
 
@@ -70,4 +70,48 @@ export async function handleCheckoutCompleted(event: Extract<WebhookEvent, { typ
 
   // Case 3: fresh INSERT
   await db.from("memberships").insert({ user_id: d.client_reference_id, ...patch });
+}
+
+function statusFromStripe(s: SubscriptionData["status"]): "active" | "paused" | "cancelled" | "past_due" {
+  if (s === "canceled") return "cancelled";
+  if (s === "paused") return "paused";
+  if (s === "past_due") return "past_due";
+  return "active";
+}
+
+async function findRowBySub(db: DB, subscriptionId: string) {
+  const { data } = await db.from("memberships").select().eq("stripe_subscription_id", subscriptionId).maybeSingle();
+  return data as { id: string; updated_at: string; tier_id: string | null } | null;
+}
+
+export async function handleSubscriptionUpdated(event: Extract<WebhookEvent, { type: "customer.subscription.updated" }>, db: DB) {
+  const d = event.data;
+  const row = await findRowBySub(db, d.id);
+  if (!row) return;
+
+  // Stale-event guard
+  if (new Date(row.updated_at).getTime() / 1000 > event.created) return;
+
+  const newPriceId = d.items.data[0]?.price.id;
+  const newTier = newPriceId ? await lookupTierByPriceId(db, newPriceId) : null;
+
+  const patch: Record<string, unknown> = {
+    status: statusFromStripe(d.status),
+    cancel_at_period_end: d.cancel_at_period_end,
+    billing_period_start: new Date(d.current_period_start * 1000).toISOString(),
+    billing_period_end: new Date(d.current_period_end * 1000).toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+  if (newTier && newTier.id !== row.tier_id) {
+    patch.tier_id = newTier.id;
+    patch.personal_hours_total = newTier.personal_hours_included;
+    patch.virtual_tasks_total = newTier.virtual_tasks_included;
+  }
+  await db.from("memberships").update(patch).eq("id", row.id);
+}
+
+export async function handleSubscriptionDeleted(event: Extract<WebhookEvent, { type: "customer.subscription.deleted" }>, db: DB) {
+  const row = await findRowBySub(db, event.data.id);
+  if (!row) return;
+  await db.from("memberships").update({ status: "cancelled", updated_at: new Date().toISOString() }).eq("id", row.id);
 }

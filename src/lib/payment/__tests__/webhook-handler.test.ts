@@ -77,6 +77,70 @@ function makeSupabaseFake() {
   };
 }
 
+import { handleSubscriptionUpdated, handleSubscriptionDeleted } from "../webhook-handler";
+import type { SubscriptionData } from "../types";
+
+function makeSubEvent(type: "customer.subscription.updated", overrides?: Partial<SubscriptionData & { created: number }>): Extract<WebhookEvent, { type: "customer.subscription.updated" }>;
+function makeSubEvent(type: "customer.subscription.deleted", overrides?: Partial<SubscriptionData & { created: number }>): Extract<WebhookEvent, { type: "customer.subscription.deleted" }>;
+function makeSubEvent(type: "customer.subscription.updated" | "customer.subscription.deleted", overrides: Partial<SubscriptionData & { created: number }> = {}) {
+  const { created = 1717000000, ...rest } = overrides;
+  return {
+    type,
+    created,
+    data: {
+      id: "sub_1",
+      customer: "cus_1",
+      status: "active",
+      cancel_at_period_end: false,
+      current_period_start: created,
+      current_period_end: created + 30 * 24 * 60 * 60,
+      pause_collection: null,
+      items: { data: [{ price: { id: "mock_lite" } }] },
+      ...rest,
+    },
+  };
+}
+
+describe("handleSubscriptionUpdated", () => {
+  it("updates cancel_at_period_end when Stripe sets it", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({ id: "m1", user_id: "u1", stripe_subscription_id: "sub_1", status: "active", cancel_at_period_end: false, updated_at: new Date(0).toISOString() });
+    await handleSubscriptionUpdated(makeSubEvent("customer.subscription.updated", { cancel_at_period_end: true }), db as never);
+    expect(db.memberships[0]).toMatchObject({ cancel_at_period_end: true });
+  });
+
+  it("changes tier when price_id changes", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({ id: "m1", user_id: "u1", stripe_subscription_id: "sub_1", tier_id: "tier-lite", status: "active", updated_at: new Date(0).toISOString() });
+    await handleSubscriptionUpdated(makeSubEvent("customer.subscription.updated", { items: { data: [{ price: { id: "mock_essential" } }] } }), db as never);
+    expect(db.memberships[0].tier_id).toBe("tier-essential");
+  });
+
+  it("sets status='past_due' when Stripe status flips to past_due", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({ id: "m1", user_id: "u1", stripe_subscription_id: "sub_1", status: "active", updated_at: new Date(0).toISOString() });
+    await handleSubscriptionUpdated(makeSubEvent("customer.subscription.updated", { status: "past_due" }), db as never);
+    expect(db.memberships[0].status).toBe("past_due");
+  });
+
+  it("ignores stale events (event.created older than row's updated_at)", async () => {
+    const db = makeSupabaseFake();
+    const now = Math.floor(Date.now() / 1000);
+    db.memberships.push({ id: "m1", user_id: "u1", stripe_subscription_id: "sub_1", status: "active", cancel_at_period_end: false, updated_at: new Date(now * 1000).toISOString() });
+    await handleSubscriptionUpdated(makeSubEvent("customer.subscription.updated", { created: now - 100, cancel_at_period_end: true }), db as never);
+    expect(db.memberships[0].cancel_at_period_end).toBe(false);
+  });
+});
+
+describe("handleSubscriptionDeleted", () => {
+  it("sets status='cancelled'", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({ id: "m1", user_id: "u1", stripe_subscription_id: "sub_1", status: "active", updated_at: new Date(0).toISOString() });
+    await handleSubscriptionDeleted(makeSubEvent("customer.subscription.deleted"), db as never);
+    expect(db.memberships[0].status).toBe("cancelled");
+  });
+});
+
 describe("handleCheckoutCompleted", () => {
   beforeEach(() => vi.useRealTimers());
 
