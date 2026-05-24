@@ -1,11 +1,43 @@
 import Link from "next/link";
 import { services } from "@/data/services";
 
+const linksColA: Array<{ href: string; text: string }> = [
+  { href: "/about", text: "About Us" },
+  { href: "/terms", text: "Terms and Conditions" },
+  { href: "/privacy", text: "Privacy Policy" },
+  { href: "/refund", text: "Refund Policy" },
+];
+
+const linksColB: Array<{ href: string; text: string }> = [
+  { href: "/cookies", text: "Cookie Policy" },
+  { href: "/ico", text: "ICO Membership" },
+  { href: "/careers", text: "Careers" },
+  { href: "/contact", text: "Contact Us" },
+  { href: "/faqs", text: "FAQs" },
+];
+
+const linkClass =
+  "text-warm-gray text-sm hover:text-brass-text transition-colors inline-block py-1.5 md:py-0";
+
+function LinkList({ items }: { items: Array<{ href: string; text: string }> }) {
+  return (
+    <ul className="space-y-1 md:space-y-2">
+      {items.map((item) => (
+        <li key={item.href}>
+          <Link href={item.href} className={linkClass}>
+            {item.text}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function Footer() {
   return (
     <footer className="bg-charcoal border-t border-primary-foreground/10">
       <div className="max-w-6xl mx-auto px-6 py-10 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12">
           {/* Brand */}
           <div>
             <Link
@@ -38,7 +70,7 @@ export function Footer() {
                 <li key={s.id}>
                   <Link
                     href={`/butlers/${s.id}`}
-                    className="text-warm-gray text-sm hover:text-brass-text transition-colors inline-block py-1.5 md:py-0"
+                    className={linkClass}
                   >
                     {s.name}
                   </Link>
@@ -47,27 +79,14 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Legal */}
+          {/* Links column A */}
           <div>
-            <h4 className="text-optical-white font-semibold mb-4">Legal</h4>
-            <ul className="space-y-1 md:space-y-2">
-              <li>
-                <Link
-                  href="/privacy"
-                  className="text-warm-gray text-sm hover:text-brass-text transition-colors inline-block py-1.5 md:py-0"
-                >
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/terms"
-                  className="text-warm-gray text-sm hover:text-brass-text transition-colors inline-block py-1.5 md:py-0"
-                >
-                  Terms of Service
-                </Link>
-              </li>
-            </ul>
+            <LinkList items={linksColA} />
+          </div>
+
+          {/* Links column B */}
+          <div>
+            <LinkList items={linksColB} />
           </div>
         </div>
 
