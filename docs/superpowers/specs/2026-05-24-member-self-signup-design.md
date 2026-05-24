@@ -161,6 +161,25 @@ CREATE INDEX idx_memberships_stripe_subscription_id ON memberships(stripe_subscr
 CREATE INDEX idx_memberships_stripe_customer_id ON memberships(stripe_customer_id);
 ```
 
+A follow-up migration `008_membership_uniqueness.sql` widens the partial unique index `idx_memberships_one_active_per_user` from `WHERE status='active'` to `WHERE status IN ('active', 'past_due')` so the "one membership per user" invariant covers `past_due` rows (closes a gap surfaced during Phase A code review).
+
+#### Production deployment note (lock duration)
+
+Both migrations 007 and 008 use statements that acquire **ACCESS EXCLUSIVE** on the `memberships` table:
+
+- `ALTER TABLE ... ADD COLUMN ... UNIQUE` (007): each UNIQUE column adds an implicit B-tree index built under ACCESS EXCLUSIVE, scanning every existing row.
+- `ALTER TABLE ... ADD CONSTRAINT ... CHECK (...)` (007): validates the constraint against every existing row, also under ACCESS EXCLUSIVE.
+- `DROP INDEX ... ; CREATE UNIQUE INDEX ...` (008): the create scans every row in the partial set under ACCESS EXCLUSIVE.
+
+On a small table (Phase A launch, dozens of members) this completes in milliseconds and is irrelevant. **On a larger table**, the same migrations queue every concurrent read/write behind a multi-second lock, which on a live site is a partial outage window.
+
+Mitigation when the table is large enough to matter (deferred until needed):
+
+1. Run inside a maintenance window.
+2. Or use the concurrent pattern: add columns as nullable non-unique first, `CREATE UNIQUE INDEX CONCURRENTLY`, then `ADD CONSTRAINT ... USING INDEX`. CHECK constraint rebuilds can be split into `NOT VALID` + later `VALIDATE CONSTRAINT` (which only acquires SHARE UPDATE EXCLUSIVE).
+
+No code change required today; this note exists so the next person touching `memberships` doesn't repeat the pattern on a hot table.
+
 Admin-created memberships keep working — `stripe_customer_id` and `stripe_subscription_id` are nullable. Self-serve actions (Manage / Pause / Resume) hide their buttons when `stripe_subscription_id IS NULL`, since those members were provisioned by admin and don't have a Stripe subscription to act on.
 
 ### Environment variables (Vercel per-env)
