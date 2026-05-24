@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { PlaceholderPage } from "@/components/PlaceholderPage";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy",
+  title: "Contact Us",
 };
 
-export default function PrivacyPage() {
+export default function ContactPage() {
   return (
     <PlaceholderPage
-      title="Privacy Policy"
-      subtitle="Our legal team is pressing the fine print."
+      title="Contact Us"
+      subtitle="Our line will be open soon."
       body="Check back shortly."
     />
   );
