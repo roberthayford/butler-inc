@@ -11,5 +11,6 @@ export function getTierPriceId(slug: TierSlug): string {
   if (!envKey) {
     throw new Error(`unknown tier slug: ${slug}`);
   }
-  return process.env[envKey] ?? `mock_${slug}`;
+  const value = process.env[envKey];
+  return value && value.length > 0 ? value : `mock_${slug}`;
 }

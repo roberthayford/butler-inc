@@ -15,9 +15,9 @@ describe("getTierPriceId", () => {
   });
 
   afterEach(() => {
-    if (envBackup.lite) process.env.STRIPE_PRICE_LITE = envBackup.lite;
-    if (envBackup.essential) process.env.STRIPE_PRICE_ESSENTIAL = envBackup.essential;
-    if (envBackup.heavy) process.env.STRIPE_PRICE_HEAVY = envBackup.heavy;
+    if (envBackup.lite !== undefined) process.env.STRIPE_PRICE_LITE = envBackup.lite;
+    if (envBackup.essential !== undefined) process.env.STRIPE_PRICE_ESSENTIAL = envBackup.essential;
+    if (envBackup.heavy !== undefined) process.env.STRIPE_PRICE_HEAVY = envBackup.heavy;
   });
 
   it("returns the env var value when set", async () => {
@@ -31,6 +31,12 @@ describe("getTierPriceId", () => {
     expect(getTierPriceId("lite")).toBe("mock_lite");
     expect(getTierPriceId("essential")).toBe("mock_essential");
     expect(getTierPriceId("heavy")).toBe("mock_heavy");
+  });
+
+  it("falls back to mock_<slug> when env var is set to empty string", async () => {
+    process.env.STRIPE_PRICE_LITE = "";
+    const { getTierPriceId } = await import("../tier-pricing");
+    expect(getTierPriceId("lite")).toBe("mock_lite");
   });
 
   it("throws for an unknown slug", async () => {
