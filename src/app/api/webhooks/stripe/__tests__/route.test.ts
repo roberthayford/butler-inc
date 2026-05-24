@@ -66,4 +66,40 @@ describe("POST /api/webhooks/stripe", () => {
     const res = await POST(webhookRequest('{}', { "x-mock-signature": "1" }));
     expect(res.status).toBe(400);
   });
+
+  it("returns 500 when PAYMENT_GATEWAY is unset (production misconfiguration)", async () => {
+    // PAYMENT_GATEWAY already deleted in beforeEach
+    const res = await POST(webhookRequest('{"type":"checkout.session.completed"}', { "x-mock-signature": "1" }));
+    expect(res.status).toBe(500);
+    expect(mockParse).not.toHaveBeenCalled();
+  });
+
+  it("returns 500 when PAYMENT_GATEWAY is an unknown value", async () => {
+    process.env.PAYMENT_GATEWAY = "paypal";
+    const res = await POST(webhookRequest('{"type":"checkout.session.completed"}', { "x-mock-signature": "1" }));
+    expect(res.status).toBe(500);
+  });
+
+  it("in mock mode, rejects stripe-signature without x-mock-signature (no spoofing)", async () => {
+    process.env.PAYMENT_GATEWAY = "mock";
+    const res = await POST(webhookRequest('{"type":"checkout.session.completed"}', { "stripe-signature": "t=123,v1=fake" }));
+    expect(res.status).toBe(400);
+    expect(mockParse).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 'invalid body' on JSON.parse failures (distinguishable from signature failures)", async () => {
+    process.env.PAYMENT_GATEWAY = "mock";
+    mockParse.mockRejectedValue(new SyntaxError("Unexpected token"));
+    const res = await POST(webhookRequest('not json', { "x-mock-signature": "1" }));
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("invalid body");
+  });
+
+  it("returns 503 when gateway throws not-yet-implemented (Stripe will retry, not drop)", async () => {
+    process.env.PAYMENT_GATEWAY = "stripe";
+    mockParse.mockRejectedValue(new Error("StripeGateway.parseWebhookEvent() is not yet implemented. Wire @stripe/stripe-node in a focused PR."));
+    const res = await POST(webhookRequest('{}', { "stripe-signature": "t=123,v1=fake" }));
+    expect(res.status).toBe(503);
+  });
 });

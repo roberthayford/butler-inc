@@ -13,20 +13,30 @@ export async function POST(request: NextRequest) {
   const rawBody = await request.text();
   const stripeSig = request.headers.get("stripe-signature");
   const mockSig = request.headers.get("x-mock-signature");
-  const provider = process.env.PAYMENT_GATEWAY ?? "mock";
+  const provider = process.env.PAYMENT_GATEWAY;
+  if (provider !== "mock" && provider !== "stripe") {
+    return NextResponse.json({ error: "gateway misconfigured" }, { status: 500 });
+  }
 
   // Signature gate
   if (provider === "stripe" && !stripeSig) {
     return NextResponse.json({ error: "missing stripe-signature" }, { status: 400 });
   }
-  if (provider === "mock" && !mockSig && !stripeSig) {
-    return NextResponse.json({ error: "missing signature" }, { status: 400 });
+  if (provider === "mock" && !mockSig) {
+    return NextResponse.json({ error: "missing x-mock-signature" }, { status: 400 });
   }
 
   let event;
   try {
     event = await getPaymentGateway().parseWebhookEvent(rawBody, stripeSig);
-  } catch {
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("not yet implemented")) {
+      return NextResponse.json({ error: "gateway not yet implemented" }, { status: 503 });
+    }
+    if (err instanceof SyntaxError || msg.includes("JSON")) {
+      return NextResponse.json({ error: "invalid body" }, { status: 400 });
+    }
     return NextResponse.json({ error: "invalid signature" }, { status: 400 });
   }
 
@@ -51,6 +61,11 @@ export async function POST(request: NextRequest) {
     case "unhandled":
       // acknowledged but no-op — keeps Stripe from retrying
       break;
+    default: {
+      const _exhaustive: never = event;
+      void _exhaustive;
+      break;
+    }
   }
 
   return NextResponse.json({ received: true });
