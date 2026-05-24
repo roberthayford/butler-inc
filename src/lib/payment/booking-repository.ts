@@ -43,15 +43,24 @@ export interface BookingRepository {
   confirmPayment(id: string, paymentIntentId: string | null): Promise<void>;
 }
 
-let devStoreInstance: DevBookingStore | null = null;
+// Singleton attached to globalThis so it survives Next.js App Router dev
+// module re-evaluation across route handlers. Without this, /api/create-
+// checkout-session and /api/webhooks/payment-complete each end up with
+// their own DevBookingStore + empty Map, so bookings created in one route
+// are invisible to the other (yields "Booking not found" on payment).
+const globalForDevStore = globalThis as unknown as {
+  __butlersDevStore?: DevBookingStore;
+};
 
 export function getBookingRepository(): BookingRepository {
   if (process.env.DEV_BYPASS_DB === "true") {
-    if (!devStoreInstance) {
-      devStoreInstance = new DevBookingStore();
-      console.warn("[booking-repository] Using in-memory dev store — data will not persist across restarts");
+    if (!globalForDevStore.__butlersDevStore) {
+      globalForDevStore.__butlersDevStore = new DevBookingStore();
+      console.warn(
+        "[booking-repository] Using in-memory dev store; data will not persist across server restarts"
+      );
     }
-    return devStoreInstance;
+    return globalForDevStore.__butlersDevStore;
   }
 
   return new SupabaseBookingRepository();

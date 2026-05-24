@@ -1,5 +1,5 @@
 export type TierSlug = "lite" | "essential" | "heavy";
-export type MembershipStatus = "active" | "paused" | "cancelled";
+export type MembershipStatus = "active" | "paused" | "cancelled" | "past_due";
 export type VirtualTaskCategory = "appointment" | "taxi_airport" | "restaurant" | "other";
 export type VirtualRequestStatus = "pending" | "in_progress" | "completed" | "cancelled";
 
@@ -27,6 +27,10 @@ export interface Membership {
   billingPeriodStart: string;
   billingPeriodEnd: string;
   status: MembershipStatus;
+  stripeCustomerId: string | null;
+  stripeSubscriptionId: string | null;
+  cancelAtPeriodEnd: boolean;
+  pausedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

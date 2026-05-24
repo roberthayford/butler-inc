@@ -9,7 +9,7 @@ export default function CareersPage() {
   return (
     <PlaceholderPage
       title="Careers"
-      subtitle="We're hiring soon — quietly first."
+      subtitle="We're hiring soon, quietly first."
       body="Check back shortly."
     />
   );

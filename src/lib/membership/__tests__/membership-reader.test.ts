@@ -16,6 +16,7 @@ function mockAnonClient(result: { data: MembershipRow | null; error: { code?: st
   const chain = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
+    in: vi.fn().mockReturnThis(),
     maybeSingle: vi.fn().mockResolvedValue(result),
   };
   return {
@@ -117,12 +118,32 @@ describe("readActiveMembership", () => {
     expect(result.isActive).toBe(false);
   });
 
-  it("filters anon query on status=active (defense in depth, RLS scoped too)", async () => {
+  it("filters anon query with status IN active/past_due (defense in depth, RLS scoped too)", async () => {
     const anon = mockAnonClient({ data: currentPeriodMembership, error: null });
     const svc = mockServiceClient({ data: null, error: null });
     await readActiveMembership("user-1", anon as never, svc as never, TODAY);
     const chain = anon.from.mock.results[0]!.value;
     expect(chain.eq).toHaveBeenCalledWith("user_id", "user-1");
-    expect(chain.eq).toHaveBeenCalledWith("status", "active");
+    expect(chain.in).toHaveBeenCalledWith("status", ["active", "past_due"]);
+  });
+
+  it("returns past_due row for display but isActive=false (payment failing, member pricing suspended)", async () => {
+    const pastDueMembership: MembershipRow = {
+      id: "mem-1",
+      status: "past_due",
+      personal_hours_used: 3,
+      virtual_tasks_used: 1,
+      billing_period_start: "2026-05-01",
+      billing_period_end: "2026-05-31",
+    };
+    const anon = mockAnonClient({ data: pastDueMembership, error: null });
+    const svc = mockServiceClient({ data: null, error: null });
+    const result = await readActiveMembership("user-1", anon as never, svc as never, TODAY);
+    // Row is returned so dashboard can show "payment is failing" state
+    expect(result.membership).toBe(pastDueMembership);
+    // But member pricing is not applied
+    expect(result.isActive).toBe(false);
+    // Service client is never called — no period reset for past_due rows
+    expect(svc.from).not.toHaveBeenCalled();
   });
 });

@@ -50,30 +50,12 @@ export interface BookingPayload {
   additionalNotes?: string;
 }
 
-export interface CheckoutSessionRequest {
-  bookingId: string;
-  bookingReference: string;
-  amount: number;
-  currency: string;
-  description: string;
-  customerEmail: string;
-  metadata: Record<string, string>;
-}
-
-export interface CheckoutSessionResult {
-  sessionId: string;
-  url: string;
-}
-
-export interface PaymentGateway {
-  createCheckoutSession(
-    request: CheckoutSessionRequest
-  ): Promise<CheckoutSessionResult>;
-  verifyPayment(sessionId: string): Promise<{
-    verified: boolean;
-    paymentIntentId?: string;
-  }>;
-}
+// Re-exports for back-compat; canonical home is now @/lib/payment/types
+export type {
+  CheckoutSessionRequest,
+  CheckoutSessionResult,
+  PaymentGateway,
+} from "@/lib/payment/types";
 
 export type PaymentStatus = "pending" | "paid" | "refunded" | "failed";
 export type BookingStatus =

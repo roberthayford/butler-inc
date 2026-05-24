@@ -46,7 +46,7 @@ export function BookingNotificationEmail({
     <Html lang="en">
       <Head />
       <Preview>
-        New booking {reference} — {butlerType} Butler · {formattedDate}
+        New booking {reference} · {butlerType} Butler · {formattedDate}
       </Preview>
       <Body style={{ backgroundColor: "#FCFBF9", margin: 0, padding: "40px 0" }}>
         <Container
@@ -79,7 +79,7 @@ export function BookingNotificationEmail({
                 margin: "0 0 16px",
               }}
             >
-              {isGenie ? "URGENT — Genie Request" : "New Booking"}
+              {isGenie ? "URGENT · Genie Request" : "New Booking"}
             </Text>
 
             <Text

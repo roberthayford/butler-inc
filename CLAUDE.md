@@ -46,9 +46,10 @@ The latest audit report is at `docs/ui-ux-audit-2026-03-20.md`.
 
 ## Key Conventions
 
+- **Copy rule: never use em dashes** ( — ) **in any customer-facing content** (page text, button labels, toast messages, email content, tier descriptions, form placeholders, meta descriptions). Replace with commas, periods, parentheses, or colons. Same rule for en dashes used parenthetically; en dashes are only acceptable for numeric ranges (e.g. `Mon-Fri`). Scope is user-visible strings only; code comments and internal docs are out of scope.
 - Dark-first UI: charcoal background (`hsl(220 20% 18%)`), brass accent, optical-white text
 - Font pairing: Cormorant Garamond (serif, headings) + Inter (sans, body)
-- Border radius: 1–2px ("architectural precision") — use `rounded-sm` not `rounded-lg`
+- Border radius: 1-2px ("architectural precision"), use `rounded-sm` not `rounded-lg`
 - Motion: Framer Motion (`motion/react`) for entrance animations — keep tasteful, always `viewport={{ once: true }}`
 - Components: shadcn/ui primitives in `src/components/ui/`
 - Data: static service config in `src/data/`

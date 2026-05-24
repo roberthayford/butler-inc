@@ -18,6 +18,7 @@ function buildMockMembership(overrides: Partial<{
   billing_period_end: string;
   personal_hours_used: number;
   virtual_tasks_used: number;
+  status: string;
 }> = {}) {
   return {
     id: "mem-1",
@@ -118,6 +119,26 @@ describe("useMembership", () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.membership).toBeDefined();
+    expect(result.current.isMember).toBe(false);
+  });
+
+  it("returns past_due membership with status visible but isMember=false (no member pricing)", async () => {
+    // Server finds the past_due row (for dashboard display) but reports isActive=false
+    // so member pricing is not applied
+    mockFetch({
+      membership: buildMockMembership({ status: "past_due" }),
+      isActive: false,
+    });
+
+    const { result } = renderHook(() => useMembership(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    // Row is returned so dashboard can render tier info + payment-failing banner
+    expect(result.current.membership).toBeDefined();
+    expect(result.current.membership?.status).toBe("past_due");
+    expect(result.current.membership?.tier.slug).toBe("essential");
+    // But member pricing is not granted
     expect(result.current.isMember).toBe(false);
   });
 

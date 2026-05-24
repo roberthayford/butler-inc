@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import type {
   MembershipTier,
   Membership,
+  MembershipStatus,
   VirtualButlerRequest,
   VirtualTaskCategory,
 } from "../membership";
@@ -46,6 +47,10 @@ describe("Membership types", () => {
       billingPeriodStart: "2026-04-01",
       billingPeriodEnd: "2026-04-30",
       status: "active",
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      cancelAtPeriodEnd: false,
+      pausedAt: null,
       createdAt: "2026-03-31T00:00:00Z",
       updatedAt: "2026-03-31T00:00:00Z",
     };
@@ -81,5 +86,10 @@ describe("Membership types", () => {
       "other",
     ];
     expect(categories).toHaveLength(4);
+  });
+
+  it("MembershipStatus includes past_due for payment failures", () => {
+    const valid: MembershipStatus[] = ["active", "paused", "cancelled", "past_due"];
+    expect(valid).toHaveLength(4);
   });
 });
