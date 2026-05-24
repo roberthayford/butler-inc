@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getPaymentGateway } from "@/lib/payment/gateway";
 import { createServiceClient } from "@/lib/supabase/server";
+import { requireGatewayConfigured } from "@/lib/payment/require-gateway-configured";
 import {
   handleCheckoutCompleted,
   handleSubscriptionUpdated,
@@ -10,13 +11,13 @@ import {
 } from "@/lib/payment/webhook-handler";
 
 export async function POST(request: NextRequest) {
+  const guard = requireGatewayConfigured();
+  if (!guard.ok) return guard.response;
+
   const rawBody = await request.text();
   const stripeSig = request.headers.get("stripe-signature");
   const mockSig = request.headers.get("x-mock-signature");
   const provider = process.env.PAYMENT_GATEWAY;
-  if (provider !== "mock" && provider !== "stripe") {
-    return NextResponse.json({ error: "gateway misconfigured" }, { status: 500 });
-  }
 
   // Signature gate
   if (provider === "stripe" && !stripeSig) {
