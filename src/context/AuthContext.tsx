@@ -66,10 +66,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: new Error(normalizedPhone.message) };
     }
 
+    const emailRedirectTo =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/auth/callback`
+        : undefined;
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { name, phone: normalizedPhone.value } },
+      options: {
+        data: { name, phone: normalizedPhone.value },
+        emailRedirectTo,
+      },
     });
     return { error: error ? new Error(error.message) : null };
   };
