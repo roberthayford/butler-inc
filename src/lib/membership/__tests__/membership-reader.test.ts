@@ -10,6 +10,7 @@ type MembershipRow = {
   virtual_tasks_used: number;
   billing_period_start: string;
   billing_period_end: string;
+  stripe_subscription_id?: string | null;
 };
 
 function mockAnonClient(result: { data: MembershipRow | null; error: { code?: string } | null }) {
@@ -179,5 +180,50 @@ describe("readActiveMembership", () => {
     expect(result.membership).toBe(cancelledMembership);
     expect(result.isActive).toBe(false);
     expect(svc.from).not.toHaveBeenCalled();
+  });
+
+  it("Stripe-managed expired row: returns isActive=true and DOES NOT lazy-rollover (invoice.paid is source of truth)", async () => {
+    const stripeManagedExpired: MembershipRow = {
+      id: "mem-1",
+      status: "active",
+      stripe_subscription_id: "sub_1",
+      personal_hours_used: 2,
+      virtual_tasks_used: 1,
+      billing_period_start: "2026-04-01",
+      billing_period_end: "2026-04-30",
+    };
+    const anon = mockAnonClient({ data: stripeManagedExpired, error: null });
+    const svc = mockServiceClient({ data: null, error: null });
+    const result = await readActiveMembership("user-1", anon as never, svc as never, TODAY);
+    // Row returned unchanged; isActive=true so member pricing still applies
+    expect(result.membership).toBe(stripeManagedExpired);
+    expect(result.isActive).toBe(true);
+    // No UPDATE — Stripe-managed memberships rely on invoice.paid webhook for period rollover
+    expect(svc.from).not.toHaveBeenCalled();
+  });
+
+  it("Admin-created expired row (stripe_subscription_id null): still applies lazy rollover (fallback)", async () => {
+    const adminExpired: MembershipRow = {
+      id: "mem-1",
+      status: "active",
+      stripe_subscription_id: null,
+      personal_hours_used: 9,
+      virtual_tasks_used: 4,
+      billing_period_start: "2026-04-01",
+      billing_period_end: "2026-04-30",
+    };
+    const updated = {
+      ...adminExpired,
+      personal_hours_used: 0,
+      virtual_tasks_used: 0,
+      billing_period_start: "2026-05-01",
+      billing_period_end: "2026-05-31",
+    };
+    const anon = mockAnonClient({ data: adminExpired, error: null });
+    const svc = mockServiceClient({ data: updated, error: null });
+    const result = await readActiveMembership("user-1", anon as never, svc as never, TODAY);
+    expect(result.isActive).toBe(true);
+    expect(result.membership?.personal_hours_used).toBe(0);
+    expect(svc.from).toHaveBeenCalledWith("memberships");
   });
 });

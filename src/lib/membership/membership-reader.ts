@@ -44,6 +44,7 @@ export async function readActiveMembership(
     virtual_tasks_used: number;
     billing_period_start: string;
     billing_period_end: string;
+    stripe_subscription_id?: string | null;
   };
 
   // past_due: return the row for dashboard display but never grant member
@@ -63,7 +64,16 @@ export async function readActiveMembership(
     return { membership: row, isActive: true };
   }
 
-  // Lazy reset via service client (bypasses RLS)
+  // Stripe-managed memberships: the invoice.paid webhook is the source of
+  // truth for period rollover. Skipping lazy rollover here preserves
+  // personal_hours_used across pause/resume cycles (where billing_period_end
+  // can drift into the past during the pause). Webhook will reconcile.
+  if (row.stripe_subscription_id) {
+    return { membership: row, isActive: true };
+  }
+
+  // Lazy reset via service client (bypasses RLS) — admin-created fallback
+  // for rows with no Stripe subscription to drive period rollover.
   const reset = resetUsageForNewPeriod(
     {
       personalHoursUsed: row.personal_hours_used,
