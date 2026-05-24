@@ -28,6 +28,11 @@ interface MembershipRow {
   };
 }
 
+interface MembershipApiResponse {
+  membership: MembershipRow | null;
+  isActive: boolean;
+}
+
 function toMembership(row: MembershipRow): Membership {
   return {
     id: row.id,
@@ -56,30 +61,39 @@ function toMembership(row: MembershipRow): Membership {
   };
 }
 
+/**
+ * Fetches the authenticated user's membership through the server endpoint
+ * `/api/members/me`. The endpoint reads the row and lazy-resets the
+ * billing period via the service-role client when expired — this is
+ * necessary because the RLS UPDATE policy on `memberships` is admin-only,
+ * so the previous in-hook write was silently no-opping.
+ */
 export function useMembership() {
-  const { user, supabase } = useAuth();
+  const { user } = useAuth();
 
-  const { data: membership = null, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<MembershipApiResponse>({
     queryKey: ["membership", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("memberships")
-        .select("*, membership_tiers(*)")
-        .eq("user_id", user!.id)
-        .eq("status", "active")
-        .single();
-
-      if (error && error.code !== "PGRST116") throw error;
-      if (!data) return null;
-      return toMembership(data as MembershipRow);
+      const res = await fetch("/api/members/me", {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error(`Membership fetch failed: ${res.status}`);
+      return (await res.json()) as MembershipApiResponse;
     },
     enabled: !!user,
   });
 
+  const row = data?.membership ?? null;
+  const membership = row ? toMembership(row) : null;
+
   return {
     membership,
     isLoading,
-    isMember: !!membership,
+    // `isMember` reflects the server's view of "active right now" —
+    // status='active' AND billing period covers today. A lapsed-period
+    // member is reported as not active, so member pricing won't apply
+    // until their reset persists.
+    isMember: data?.isActive ?? false,
     personalHoursRemaining: membership
       ? membership.personalHoursTotal - membership.personalHoursUsed
       : 0,
