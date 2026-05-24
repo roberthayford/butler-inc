@@ -32,18 +32,25 @@ export async function readActiveMembership(
     .from("memberships")
     .select("*, membership_tiers(*)")
     .eq("user_id", userId)
-    .eq("status", "active")
+    .in("status", ["active", "past_due"])
     .maybeSingle();
 
   if (error || !data) return { membership: null, isActive: false };
 
   const row = data as Record<string, unknown> & {
     id: string;
+    status: string;
     personal_hours_used: number;
     virtual_tasks_used: number;
     billing_period_start: string;
     billing_period_end: string;
   };
+
+  // past_due: return the row for dashboard display but never grant member
+  // pricing — the customer's payment is failing and access is suspended.
+  if (row.status === "past_due") {
+    return { membership: row, isActive: false };
+  }
 
   // Period covers today → no reset needed
   if (!hasPeriodExpired(row.billing_period_end, today)) {

@@ -41,4 +41,9 @@ describe("hasSufficientMemberHours", () => {
     const corrupt = { personal_hours_total: 5, personal_hours_used: 10 };
     expect(hasSufficientMemberHours(corrupt, 1)).toBe(false);
   });
+
+  it("false when status is past_due, even if hours remain (payment failing, access suspended)", () => {
+    const pastDue = { personal_hours_total: 15, personal_hours_used: 5, status: "past_due" };
+    expect(hasSufficientMemberHours(pastDue, 1)).toBe(false);
+  });
 });
