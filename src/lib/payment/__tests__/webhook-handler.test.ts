@@ -123,6 +123,27 @@ describe("handleSubscriptionUpdated", () => {
     expect(db.memberships[0].status).toBe("past_due");
   });
 
+  it("sets status='cancelled' when Stripe status is 'unpaid' (retries exhausted)", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({ id: "m1", user_id: "u1", stripe_subscription_id: "sub_1", status: "active", updated_at: new Date(0).toISOString() });
+    await handleSubscriptionUpdated(makeSubEvent("customer.subscription.updated", { status: "unpaid" }), db as never);
+    expect(db.memberships[0].status).toBe("cancelled");
+  });
+
+  it("sets status='cancelled' when Stripe status is 'incomplete_expired'", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({ id: "m1", user_id: "u1", stripe_subscription_id: "sub_1", status: "active", updated_at: new Date(0).toISOString() });
+    await handleSubscriptionUpdated(makeSubEvent("customer.subscription.updated", { status: "incomplete_expired" }), db as never);
+    expect(db.memberships[0].status).toBe("cancelled");
+  });
+
+  it("sets status='past_due' when Stripe status is 'incomplete'", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({ id: "m1", user_id: "u1", stripe_subscription_id: "sub_1", status: "active", updated_at: new Date(0).toISOString() });
+    await handleSubscriptionUpdated(makeSubEvent("customer.subscription.updated", { status: "incomplete" }), db as never);
+    expect(db.memberships[0].status).toBe("past_due");
+  });
+
   it("ignores stale events (event.created older than row's updated_at)", async () => {
     const db = makeSupabaseFake();
     const now = Math.floor(Date.now() / 1000);
@@ -138,6 +159,20 @@ describe("handleSubscriptionDeleted", () => {
     db.memberships.push({ id: "m1", user_id: "u1", stripe_subscription_id: "sub_1", status: "active", updated_at: new Date(0).toISOString() });
     await handleSubscriptionDeleted(makeSubEvent("customer.subscription.deleted"), db as never);
     expect(db.memberships[0].status).toBe("cancelled");
+  });
+
+  it("clears paused_at when cancelling a paused subscription", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({
+      id: "m1",
+      user_id: "u1",
+      stripe_subscription_id: "sub_1",
+      status: "paused",
+      paused_at: new Date(1717000000 * 1000).toISOString(),
+      updated_at: new Date(0).toISOString(),
+    });
+    await handleSubscriptionDeleted(makeSubEvent("customer.subscription.deleted"), db as never);
+    expect(db.memberships[0]).toMatchObject({ status: "cancelled", paused_at: null });
   });
 });
 

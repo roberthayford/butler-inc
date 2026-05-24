@@ -73,10 +73,10 @@ export async function handleCheckoutCompleted(event: Extract<WebhookEvent, { typ
 }
 
 function statusFromStripe(s: SubscriptionData["status"]): "active" | "paused" | "cancelled" | "past_due" {
-  if (s === "canceled") return "cancelled";
+  if (s === "canceled" || s === "unpaid" || s === "incomplete_expired") return "cancelled";
   if (s === "paused") return "paused";
-  if (s === "past_due") return "past_due";
-  return "active";
+  if (s === "past_due" || s === "incomplete") return "past_due";
+  return "active";  // active, trialing
 }
 
 async function findRowBySub(db: DB, subscriptionId: string) {
@@ -113,5 +113,9 @@ export async function handleSubscriptionUpdated(event: Extract<WebhookEvent, { t
 export async function handleSubscriptionDeleted(event: Extract<WebhookEvent, { type: "customer.subscription.deleted" }>, db: DB) {
   const row = await findRowBySub(db, event.data.id);
   if (!row) return;
-  await db.from("memberships").update({ status: "cancelled", updated_at: new Date().toISOString() }).eq("id", row.id);
+  await db.from("memberships").update({
+    status: "cancelled",
+    paused_at: null,
+    updated_at: new Date().toISOString(),
+  }).eq("id", row.id);
 }
