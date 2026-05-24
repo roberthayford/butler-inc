@@ -94,24 +94,23 @@ describe("MockPaymentGateway", () => {
     expect(result.verified).toBe(false);
   });
 
-  it("rejects fabricated mock session IDs not created by this gateway", async () => {
+  it("accepts any mock_session_-prefixed ID (replay protection moved to DB layer)", async () => {
     const gateway = new MockPaymentGateway();
-    // This ID has the right prefix but was never created via createCheckoutSession
+    // Gateway can't track session state across serverless instances. Replay
+    // protection is enforced at the DB layer via booking_repository.findByCheckoutSession
+    // (returns null if no booking exists for the sessionId) and the webhook's
+    // `if (booking.payment_status === "paid") return already_processed` short-circuit.
     const result = await gateway.verifyPayment("mock_session_999_fabricated");
-    expect(result.verified).toBe(false);
+    expect(result.verified).toBe(true);
   });
 
-  it("rejects replaying a session that was already verified", async () => {
+  it("verifies the same session twice without throwing (DB enforces replay protection)", async () => {
     const gateway = new MockPaymentGateway();
     const session = await gateway.createCheckoutSession(SAMPLE_REQUEST);
-
-    // First verification should succeed
     const first = await gateway.verifyPayment(session.sessionId);
-    expect(first.verified).toBe(true);
-
-    // Second verification (replay) should fail
     const second = await gateway.verifyPayment(session.sessionId);
-    expect(second.verified).toBe(false);
+    expect(first.verified).toBe(true);
+    expect(second.verified).toBe(true);
   });
 
   describe("subscription methods", () => {

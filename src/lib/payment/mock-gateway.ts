@@ -16,13 +16,10 @@ const HANDLED_TYPES = new Set([
 ]);
 
 export class MockPaymentGateway implements PaymentGateway {
-  private sessions = new Set<string>();
-
   async createCheckoutSession(
     request: CheckoutSessionRequest
   ): Promise<CheckoutSessionResult> {
     const sessionId = `mock_session_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    this.sessions.add(sessionId);
 
     const params = new URLSearchParams({
       session_id: sessionId,
@@ -42,12 +39,15 @@ export class MockPaymentGateway implements PaymentGateway {
   async verifyPayment(
     sessionId: string
   ): Promise<{ verified: boolean; paymentIntentId?: string }> {
-    if (!sessionId || !this.sessions.has(sessionId)) {
+    // Pattern verification only. Cross-request state (a Set on this instance)
+    // doesn't survive Vercel serverless instances, so the mock can't track
+    // "has this session ID been seen". Replay protection lives at the DB
+    // layer: booking-repository.findByCheckoutSession returns the row only
+    // if a booking was actually created with this session ID, and the
+    // webhook short-circuits when payment_status === "paid".
+    if (!sessionId || !sessionId.startsWith("mock_session_")) {
       return { verified: false };
     }
-
-    // Consume the session — prevents replay attacks
-    this.sessions.delete(sessionId);
 
     return {
       verified: true,
