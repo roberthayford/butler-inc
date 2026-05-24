@@ -9,7 +9,11 @@ export function getPaymentGateway(): PaymentGateway {
     return new StripeGateway();
   }
 
-  if (provider === "mock" && process.env.NODE_ENV === "production") {
+  // Vercel sets NODE_ENV=production for ALL deploys (preview, staging, production),
+  // so we use VERCEL_ENV (which is 'production' | 'preview' | 'development') to
+  // distinguish real production from staging/preview where we still want mock to
+  // work until Stripe is wired. Local dev has VERCEL_ENV undefined → mock OK.
+  if (provider === "mock" && process.env.VERCEL_ENV === "production") {
     throw new Error(
       "Mock payment gateway cannot be used in production. Set PAYMENT_GATEWAY=stripe and configure Stripe credentials."
     );
