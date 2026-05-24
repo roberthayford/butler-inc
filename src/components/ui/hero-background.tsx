@@ -148,8 +148,9 @@ export function LandingHeroBackground({
         }}
       />
 
-      {/* Atmospheric Image Layer */}
-      <div className="absolute inset-0 z-0 overflow-hidden opacity-35 mix-blend-luminosity pointer-events-none">
+      {/* DIRECTION D — image clearly visible (full opacity, full color) with a strong
+          radial vignette covering both the H1 and the CTA stack for AA-level contrast */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <Image
           src="/images/hero-butler.png"
           alt="Premium concierge background"
@@ -157,12 +158,18 @@ export function LandingHeroBackground({
           priority
           className="object-cover object-center"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-charcoal/95 via-charcoal/70 to-charcoal/35" />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 75% 65% at 50% 42%, hsla(220, 25%, 7%, 0.88) 0%, hsla(220, 25%, 9%, 0.62) 45%, hsla(220, 25%, 11%, 0.20) 80%, transparent 100%)",
+          }}
+        />
       </div>
 
-      {/* Noise texture overlay on top of everything for cinematic grain */}
+      {/* Noise grain for tactility */}
       <div
-        className="absolute inset-0 opacity-40 mix-blend-overlay pointer-events-none"
+        className="absolute inset-0 opacity-30 mix-blend-overlay pointer-events-none"
         style={{
           backgroundImage: NOISE_SVG,
           backgroundRepeat: "repeat",
