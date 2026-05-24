@@ -71,6 +71,7 @@ export function BookingForm({
     formState: { errors },
   } = useForm<BookingFormData>({
     resolver: zodResolver(user ? bookingFormBaseSchema : signedOutBookingFormSchema),
+    mode: "onChange",
     defaultValues: {
       dayOption: "advance",
       timeSlot: "morning",

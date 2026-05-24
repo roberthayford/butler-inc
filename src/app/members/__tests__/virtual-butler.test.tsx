@@ -49,7 +49,7 @@ describe("VirtualButlerPage", () => {
   it("renders the request form", async () => {
     render(<VirtualButlerPage />);
     expect(await screen.findByText("Appointment Booking")).toBeInTheDocument();
-    expect(screen.getByLabelText(/What do you need/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Describe your request/i)).toBeInTheDocument();
   });
 
   it("shows request history section", async () => {

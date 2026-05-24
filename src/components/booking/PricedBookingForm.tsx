@@ -75,6 +75,7 @@ export function PricedBookingForm({
     formState: { errors },
   } = useForm<PricedBookingFormData>({
     resolver: zodResolver(user ? pricedBookingBaseSchema : signedOutPricedBookingSchema),
+    mode: "onChange",
     defaultValues: {
       startTime: "",
       endTime: "",

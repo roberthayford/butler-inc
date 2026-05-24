@@ -29,7 +29,7 @@ describe("ServiceOptionSelector", () => {
       <ServiceOptionSelector butlerType="busy" onSelect={onSelect} />
     );
 
-    expect(screen.getByText("What do you need?")).toBeInTheDocument();
+    expect(screen.getByText("Choose a service")).toBeInTheDocument();
     expect(
       screen.getByText("Courier and package services")
     ).toBeInTheDocument();
@@ -55,7 +55,7 @@ describe("ServiceOptionSelector", () => {
     expect(screen.getByText("Describe your request")).toBeInTheDocument();
     expect(
       screen.getByPlaceholderText(
-        /Tell us what you need/
+        /Describe what you need in as much detail as possible/
       )
     ).toBeInTheDocument();
   });
@@ -76,7 +76,7 @@ describe("ServiceOptionSelector", () => {
       <ServiceOptionSelector butlerType="bespoke" onSelect={onSelect} />
     );
 
-    const textarea = screen.getByPlaceholderText(/Tell us what you need/);
+    const textarea = screen.getByPlaceholderText(/Describe what you need in as much detail as possible/);
     fireEvent.change(textarea, {
       target: { value: "Plan a dinner party" },
     });
