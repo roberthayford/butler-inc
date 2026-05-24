@@ -15,7 +15,7 @@ vi.mock("@/hooks/useMembership", () => ({
   useMembership: () => ({
     membership: {
       id: "mem-1",
-      tier: { slug: "essential", name: "Essential" },
+      tier: { slug: "frequent", name: "Frequent" },
       personalHoursTotal: 15,
       personalHoursUsed: 7,
       billingPeriodStart: "2026-04-01",
@@ -38,7 +38,7 @@ vi.mock("@/components/booking/BookingFlow", () => ({
 describe("PersonalButlerPage", () => {
   it("shows tier badge and hours remaining", async () => {
     render(<PersonalButlerPage />);
-    expect(await screen.findByText("Essential")).toBeInTheDocument();
+    expect(await screen.findByText("Frequent")).toBeInTheDocument();
     expect(screen.getByText(/8 hrs remaining/)).toBeInTheDocument();
   });
 

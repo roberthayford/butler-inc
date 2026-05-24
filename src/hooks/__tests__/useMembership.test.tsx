@@ -23,7 +23,7 @@ function buildMockMembership(overrides: Partial<{
   return {
     id: "mem-1",
     user_id: "user-1",
-    tier_id: "tier-essential",
+    tier_id: "tier-frequent",
     personal_hours_total: 15,
     personal_hours_used: 7,
     virtual_tasks_total: 8,
@@ -34,9 +34,9 @@ function buildMockMembership(overrides: Partial<{
     created_at: "2026-04-30T00:00:00Z",
     updated_at: "2026-04-30T00:00:00Z",
     membership_tiers: {
-      id: "tier-essential",
-      slug: "essential",
-      name: "Essential",
+      id: "tier-frequent",
+      slug: "frequent",
+      name: "Frequent",
       description: "Mid-tier",
       personal_hours_included: 15,
       virtual_tasks_included: 8,
@@ -82,7 +82,7 @@ describe("useMembership", () => {
     });
 
     expect(result.current.membership).toBeDefined();
-    expect(result.current.membership?.tier.slug).toBe("essential");
+    expect(result.current.membership?.tier.slug).toBe("frequent");
     expect(result.current.personalHoursRemaining).toBe(8);
     expect(result.current.virtualTasksRemaining).toBe(5);
     expect(result.current.isMember).toBe(true);
@@ -137,7 +137,7 @@ describe("useMembership", () => {
     // Row is returned so dashboard can render tier info + payment-failing banner
     expect(result.current.membership).toBeDefined();
     expect(result.current.membership?.status).toBe("past_due");
-    expect(result.current.membership?.tier.slug).toBe("essential");
+    expect(result.current.membership?.tier.slug).toBe("frequent");
     // But member pricing is not granted
     expect(result.current.isMember).toBe(false);
   });

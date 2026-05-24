@@ -6,7 +6,7 @@ describe("TierComparison", () => {
   it("renders all three active tiers", () => {
     render(<TierComparison />);
     expect(screen.getByText("Lite")).toBeInTheDocument();
-    expect(screen.getByText("Essential")).toBeInTheDocument();
-    expect(screen.getByText("Heavy")).toBeInTheDocument();
+    expect(screen.getByText("Frequent")).toBeInTheDocument();
+    expect(screen.getByText("Pro")).toBeInTheDocument();
   });
 });

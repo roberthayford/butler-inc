@@ -31,8 +31,8 @@ describe("Membership types", () => {
       tierId: "tier-1",
       tier: {
         id: "tier-1",
-        slug: "essential",
-        name: "Essential",
+        slug: "frequent",
+        name: "Frequent",
         description: "Mid-tier",
         personalHoursIncluded: 15,
         virtualTasksIncluded: 8,

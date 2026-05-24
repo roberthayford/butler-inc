@@ -2,8 +2,8 @@ import type { TierSlug } from "@/types/membership";
 
 const ENV_KEYS: Record<TierSlug, string> = {
   lite: "STRIPE_PRICE_LITE",
-  essential: "STRIPE_PRICE_ESSENTIAL",
-  heavy: "STRIPE_PRICE_HEAVY",
+  frequent: "STRIPE_PRICE_FREQUENT",
+  pro: "STRIPE_PRICE_PRO",
 };
 
 export function getTierPriceId(slug: TierSlug): string {

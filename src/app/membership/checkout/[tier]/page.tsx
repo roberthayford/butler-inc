@@ -8,7 +8,7 @@ import type { TierSlug } from "@/types/membership";
 
 type Params = Promise<{ tier: string }>;
 
-const VALID_TIERS: TierSlug[] = ["lite", "essential", "heavy"];
+const VALID_TIERS: TierSlug[] = ["lite", "frequent", "pro"];
 
 function isValidTier(slug: string): slug is TierSlug {
   return (VALID_TIERS as string[]).includes(slug);

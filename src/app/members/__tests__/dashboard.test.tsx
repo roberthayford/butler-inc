@@ -36,11 +36,11 @@ const mockMembership = vi.fn(() => ({
   membership: {
     id: "mem-1",
     userId: "user-1",
-    tierId: "tier-essential",
+    tierId: "tier-frequent",
     tier: {
-      id: "tier-essential",
-      slug: "essential",
-      name: "Essential",
+      id: "tier-frequent",
+      slug: "frequent",
+      name: "Frequent",
       description: "Mid-tier",
       personalHoursIncluded: 15,
       virtualTasksIncluded: 8,
@@ -78,11 +78,11 @@ describe("MemberDashboard", () => {
       membership: {
         id: "mem-1",
         userId: "user-1",
-        tierId: "tier-essential",
+        tierId: "tier-frequent",
         tier: {
-          id: "tier-essential",
-          slug: "essential",
-          name: "Essential",
+          id: "tier-frequent",
+          slug: "frequent",
+          name: "Frequent",
           description: "Mid-tier",
           personalHoursIncluded: 15,
           virtualTasksIncluded: 8,
@@ -114,7 +114,7 @@ describe("MemberDashboard", () => {
 
   it("shows tier badge for members", async () => {
     render(<MemberDashboard />);
-    expect(await screen.findByText("Essential")).toBeInTheDocument();
+    expect(await screen.findByText("Frequent")).toBeInTheDocument();
   });
 
   it("renders Personal Butler card with hours remaining", async () => {

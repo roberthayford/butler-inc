@@ -2,14 +2,14 @@ import type { TierSlug } from "@/types/membership";
 
 const TIER_STYLES: Record<TierSlug, string> = {
   lite: "bg-zinc-700/50 text-zinc-300 border-zinc-600",
-  essential: "bg-brass/20 text-brass-text border-brass/40",
-  heavy: "bg-amber-900/30 text-amber-300 border-amber-700/40",
+  frequent: "bg-brass/20 text-brass-text border-brass/40",
+  pro: "bg-amber-900/30 text-amber-300 border-amber-700/40",
 };
 
 const TIER_LABELS: Record<TierSlug, string> = {
   lite: "Lite",
-  essential: "Essential",
-  heavy: "Heavy",
+  frequent: "Frequent",
+  pro: "Pro",
 };
 
 interface TierBadgeProps {

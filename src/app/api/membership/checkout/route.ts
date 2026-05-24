@@ -5,7 +5,7 @@ import { getPaymentGateway } from "@/lib/payment/gateway";
 import { getTierPriceId } from "@/lib/membership/tier-pricing";
 import { getSiteUrl } from "@/lib/site-url";
 
-const schema = z.object({ tier: z.enum(["lite", "essential", "heavy"]) });
+const schema = z.object({ tier: z.enum(["lite", "frequent", "pro"]) });
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();

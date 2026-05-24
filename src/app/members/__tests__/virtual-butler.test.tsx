@@ -23,7 +23,7 @@ vi.mock("@/hooks/useMembership", () => ({
   useMembership: () => ({
     membership: {
       id: "mem-1",
-      tier: { slug: "essential", name: "Essential" },
+      tier: { slug: "frequent", name: "Frequent" },
       virtualTasksTotal: 8,
       virtualTasksUsed: 3,
       billingPeriodStart: "2026-04-01",

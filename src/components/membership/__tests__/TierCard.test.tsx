@@ -9,9 +9,9 @@ describe("TierCard", () => {
   it("renders tier name, price, hours, tasks", () => {
     render(<TierCard tier={lite} />);
     expect(screen.getByText("Lite")).toBeInTheDocument();
-    expect(screen.getByText(/£49/)).toBeInTheDocument();
-    expect(screen.getByText(/5 personal butler hours/i)).toBeInTheDocument();
-    expect(screen.getByText(/3 virtual tasks/i)).toBeInTheDocument();
+    expect(screen.getByText(/£500/)).toBeInTheDocument();
+    expect(screen.getByText(/10 personal butler hours/i)).toBeInTheDocument();
+    expect(screen.getByText(/5 virtual tasks/i)).toBeInTheDocument();
   });
 
   it("renders a CTA link to /membership/checkout/[slug]", () => {
