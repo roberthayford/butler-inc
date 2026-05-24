@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import type {
   MembershipTier,
   Membership,
+  MembershipStatus,
   VirtualButlerRequest,
   VirtualTaskCategory,
 } from "../membership";
@@ -81,5 +82,10 @@ describe("Membership types", () => {
       "other",
     ];
     expect(categories).toHaveLength(4);
+  });
+
+  it("MembershipStatus includes past_due for payment failures", () => {
+    const valid: MembershipStatus[] = ["active", "paused", "cancelled", "past_due"];
+    expect(valid).toHaveLength(4);
   });
 });
