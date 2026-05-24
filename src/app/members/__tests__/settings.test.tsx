@@ -21,6 +21,18 @@ vi.mock("@/context/AuthContext", () => ({
   }),
 }));
 
+// PlanManager mounts on this page; stub useMembership so its internal
+// useQuery doesn't trigger a real fetch and confuse mockFetch assertions.
+vi.mock("@/hooks/useMembership", () => ({
+  useMembership: () => ({
+    membership: null,
+    isMember: false,
+    isLoading: false,
+    personalHoursRemaining: 0,
+    virtualTasksRemaining: 0,
+  }),
+}));
+
 describe("SettingsPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();

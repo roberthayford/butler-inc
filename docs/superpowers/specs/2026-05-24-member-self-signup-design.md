@@ -3,14 +3,14 @@
 **Date:** 2026-05-24
 **Author:** Rob Hayford (paired with Claude)
 **Brief reference:** No formal brief section — closes the gap surfaced after the C-rate spec landed (PR #17): members exist as a concept but only admin can create them.
-**Status:** Phase A SHIPPED (PR #20, merged to staging 2026-05-24). Phase B not started.
+**Status:** Phase A SHIPPED (PR #20, merged to staging 2026-05-24). Phase B SHIPPED — see `docs/superpowers/specs/2026-05-24-phase-b-self-serve-design.md` for the focused Phase B design and `docs/superpowers/plans/2026-05-24-phase-b-self-serve.md` for the executed plan.
 
 ## Implementation status
 
 | Slice | Status | Notes |
 |---|---|---|
 | **Phase A — funnel + provisioning** | ✅ SHIPPED on staging | Public `/membership` page, Stripe-shaped subscription checkout (mock today, `StripeGateway` stub for later), webhook-driven provisioning, dashboard upsell, Header "Join" → `/membership`, signup `?next=` honoring, DB migrations 007 + 008. Sub-skills: Set-based mock replay protection removed (DB layer instead), DevBookingStore singleton on `globalThis`, route-level JSON error envelope, em-dash sweep across copy. |
-| **Phase B — self-serve** | ⏳ TODO | `PlanManager` on `/members/settings`, `/api/membership/portal` (Stripe Customer Portal for cancel + plan-swap + payment-method update), `/api/membership/pause` (custom because portal doesn't support pause), mock portal simulator. See "Self-serve actions" section below for the full breakdown. |
+| **Phase B — self-serve** | ✅ SHIPPED | `PlanManager` on `/members/settings` (7 view variants), `/api/membership/portal` (Stripe Customer Portal), `/api/membership/pause` (custom pause/resume), mock portal simulator at `/payment/simulate-portal`. See `docs/superpowers/specs/2026-05-24-phase-b-self-serve-design.md` for the locked decisions. |
 | **Real Stripe wiring** | ⏳ Deferred | Wait until Phase B is done. The 7 `StripeGateway` stub methods become the implementation checklist. |
 | **Tier values + rename** | ⏳ Blocked on Faridah | Proposed £500/£1k/TBC and Lite/Frequent/Daily; current code uses £49/£99/£199 and Lite/Essential/Heavy. Single `MEMBERSHIP_TIERS` edit + DB migration when locked. |
 

@@ -105,6 +105,8 @@ src/app/api/                    # API routes
   create-checkout-session/      # Payment checkout initiation
   members/me/                   # Authoritative membership read (applies UIOLO rollover before returning)
   membership/checkout/          # POST creates subscription Checkout Session via getPaymentGateway()
+  membership/portal/            # POST returns Customer Portal URL via gateway.createPortalSession (auth-gated)
+  membership/pause/             # POST { action: 'pause' | 'resume' } self-serve pause; state-machine-guarded conditional UPDATE
   virtual-butler/               # Virtual task submission
   webhooks/payment-complete/    # One-off booking webhook handler
   webhooks/stripe/              # Stripe (and mock) subscription webhook receiver — signature-gated, dispatches to webhook-handler.ts
@@ -113,7 +115,7 @@ src/components/
   PlaceholderPage.tsx           # Shared shell for (legal) placeholder routes — throwaway scaffold
   landing/                      # Header, Hero, Footer (4-col / 9-link), HowItWorks, ButlerCategoryGrid
   booking/                      # BookingFlow, BookingForm, ServiceOptionSelector, PricedBookingForm
-  membership/                   # TierBadge, UsageGauge, VirtualRequestForm, TierCard, TierComparison
+  membership/                   # TierBadge, UsageGauge, VirtualRequestForm, TierCard, TierComparison, PlanManager (7-variant settings panel)
   admin/                        # AdminTabs, MemberManager, ButlerContentEditor
   genie/                        # GenieDrawer, GenieStickyBar (persistent CTA)
   ui/                           # shadcn primitives
@@ -129,7 +131,7 @@ src/data/                       # Static config
 
 src/lib/
   supabase/                     # client.ts, server.ts
-  payment/                      # gateway.ts (provider pattern), mock-gateway.ts, stripe-gateway.ts (stub), types.ts (PaymentGateway + WebhookEvent union), webhook-handler.ts (5 handlers), booking-repository.ts (atomic hours decrement, dev singleton on globalThis)
+  payment/                      # gateway.ts (provider pattern), mock-gateway.ts, stripe-gateway.ts (stub), types.ts (PaymentGateway + WebhookEvent union), webhook-handler.ts (5 handlers), booking-repository.ts (atomic hours decrement, dev singleton on globalThis), require-gateway-configured.ts (shared 500 guard for routes that hit the gateway)
   pricing/                      # calculate-price.ts (member-aware), time-slots.ts, booking-reference.ts
   membership/                   # membership-reader.ts (server-side read), period-rollover.ts (UIOLO), member-hours.ts (atomic decrement helper), tier-pricing.ts (Stripe price ID resolver)
   dates/                        # today-uk.ts — UK-aware "today" for period-boundary logic
@@ -172,6 +174,7 @@ docs/plans/                     # Design docs and implementation plans
 - **Mock gateway verifyPayment by pattern:** `verifyPayment(sessionId)` accepts any `mock_session_*` ID via prefix match. Replay protection is at the DB layer: `booking_repository.findByCheckoutSession` returns null for unknown IDs (yields 404 at the webhook) and the webhook short-circuits with `already_processed` when `payment_status === 'paid'`. Gateway-level Set-based replay protection doesn't survive serverless instance boundaries.
 - **DevBookingStore singleton on `globalThis`:** `getBookingRepository()` pins the dev in-memory store on `globalThis.__butlersDevStore` (not a module-level `let`) so the same instance is reused across route handlers in Next.js App Router dev mode. Without this, `/api/create-checkout-session` and `/api/webhooks/payment-complete` see different stores and bookings vanish between requests.
 - **Route-level error JSON envelope:** `/api/create-checkout-session` and `/api/bookings` wrap their entire handler body in a try/catch that always returns JSON 500 with the underlying error message (also logged via `console.error`). Pairs with the client-side `readErrorMessage` helper in `BookingFlow.tsx` which falls back to `Failed (HTTP <status>)` when the response body isn't JSON. Prevents Safari's cryptic `JSON.parse → "The string did not match the expected pattern"` toast when an upstream throws synchronously.
+- **Self-serve plan management (Phase B):** `src/components/membership/PlanManager.tsx` derives one of 7 view variants from the single `Membership` row (none / active-self / active-admin / pending-cancel / paused / past_due / cancelled). Portal actions (Manage / Reactivate / Update payment) hit `POST /api/membership/portal` which returns a Stripe Customer Portal URL; the browser navigates. Pause/Resume hit `POST /api/membership/pause` which calls the gateway, then writes the DB synchronously via a status-guarded conditional UPDATE (race-safe). Mock portal lives at `/payment/simulate-portal` (server component with `<form action={serverAction}>` buttons firing synthetic webhooks). Lazy UIOLO rollover in `readActiveMembership` is **skipped for Stripe-managed memberships** (those with `stripe_subscription_id`) — `invoice.paid` is the source of truth there; admin-created rows (sub_id NULL) keep the lazy rollover fallback. `hasSufficientMemberHours` blocks all non-active statuses (paused / past_due / cancelled all fall through to non-member pricing).
 
 ## Bug Resolution Log
 
