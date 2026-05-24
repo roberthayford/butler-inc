@@ -22,8 +22,8 @@ describe("membership-config", () => {
     }
   });
 
-  it("MEMBER_HOURLY_RATE is the budget rate", () => {
-    expect(MEMBER_HOURLY_RATE).toBe(35);
+  it("MEMBER_HOURLY_RATE is the flat member rate (£50)", () => {
+    expect(MEMBER_HOURLY_RATE).toBe(50);
   });
 
   it("defines virtual task categories with labels", () => {
