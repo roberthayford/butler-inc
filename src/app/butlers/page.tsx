@@ -6,7 +6,7 @@ import { ButlerCategoryGrid } from "@/components/landing/ButlerCategoryGrid";
 export const metadata: Metadata = {
   title: "Our Butlers | Premium Concierge Services",
   description:
-    "Six specialist butlers for every need. Same-day courier, childcare, luxury sourcing, property management, budget errands, and bespoke requests. From £35/hr.",
+    "Six specialist butlers for every need. Same-day courier, childcare, luxury sourcing, property management, budget errands, and bespoke requests. From £50/hr.",
 };
 
 export default function ButlersPage() {

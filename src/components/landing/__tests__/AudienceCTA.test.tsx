@@ -49,7 +49,7 @@ describe("AudienceCTA", () => {
       "/members/login"
     );
     expect(
-      screen.queryByText(/Premium concierge across England from £35\/hr/i)
+      screen.queryByText(/Premium concierge across England from £50\/hr/i)
     ).not.toBeInTheDocument();
   });
 
