@@ -33,11 +33,20 @@ function makeSupabaseFake() {
     from(table: string) {
       if (table === "memberships") {
         return {
-          select: () => ({
-            eq: (col: string, val: unknown) => ({
-              maybeSingle: async () => ({ data: memberships.find((m) => m[col] === val) ?? null, error: null }),
-            }),
-          }),
+          select: () => {
+            const filters: Array<[string, unknown]> = [];
+            const chain = {
+              eq(col: string, val: unknown) {
+                filters.push([col, val]);
+                return chain;
+              },
+              maybeSingle: async () => ({
+                data: memberships.find((m) => filters.every(([c, v]) => m[c] === v)) ?? null,
+                error: null,
+              }),
+            };
+            return chain;
+          },
           insert: (row: Record<string, unknown>) => {
             memberships.push(row);
             return { select: () => ({ single: async () => ({ data: row, error: null }) }) };
@@ -97,6 +106,7 @@ describe("handleCheckoutCompleted", () => {
   it("updates an existing admin-created row (no stripe_subscription_id) instead of inserting", async () => {
     const db = makeSupabaseFake();
     db.memberships.push({
+      id: "mem-existing",
       user_id: "user-1",
       tier_id: "tier-essential",
       stripe_subscription_id: null,
@@ -114,7 +124,9 @@ describe("handleCheckoutCompleted", () => {
       stripe_customer_id: "cus_1",
       tier_id: "tier-lite",
       personal_hours_total: 5,
+      personal_hours_used: 0,
       virtual_tasks_total: 3,
+      virtual_tasks_used: 0,
     });
   });
 });

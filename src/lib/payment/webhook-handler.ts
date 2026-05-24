@@ -26,7 +26,10 @@ export async function handleCheckoutCompleted(event: Extract<WebhookEvent, { typ
   if (!d.subscription) return;  // non-subscription checkouts not handled here
   const priceId = d.line_items?.[0]?.price.id ?? "";
   const tier = await lookupTierByPriceId(db, priceId);
-  if (!tier) return;
+  if (!tier) {
+    console.error(`webhook handleCheckoutCompleted: no tier matched priceId=${priceId} (subscription=${d.subscription}, user=${d.client_reference_id}) — membership NOT provisioned`);
+    return;
+  }
   const period = periodFromEvent(d);
 
   // Case 1: idempotent replay — row already exists with this stripe_subscription_id
@@ -42,6 +45,7 @@ export async function handleCheckoutCompleted(event: Extract<WebhookEvent, { typ
     .from("memberships")
     .select()
     .eq("user_id", d.client_reference_id)
+    .eq("status", "active")
     .maybeSingle();
 
   const patch = {
@@ -55,6 +59,7 @@ export async function handleCheckoutCompleted(event: Extract<WebhookEvent, { typ
     virtual_tasks_used: 0,
     cancel_at_period_end: false,
     paused_at: null,
+    updated_at: new Date().toISOString(),
     ...period,
   };
 
