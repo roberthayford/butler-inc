@@ -19,7 +19,7 @@ describe("VirtualRequestForm", () => {
 
   it("renders description textarea", () => {
     render(<VirtualRequestForm onSubmit={onSubmit} isSubmitting={false} />);
-    expect(screen.getByLabelText(/What do you need/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Describe your request/i)).toBeInTheDocument();
   });
 
   it("renders optional date and time fields", () => {
@@ -41,7 +41,7 @@ describe("VirtualRequestForm", () => {
     fireEvent.click(screen.getByText("Taxi & Airport"));
 
     // Fill description
-    fireEvent.change(screen.getByLabelText(/What do you need/i), {
+    fireEvent.change(screen.getByLabelText(/Describe your request/i), {
       target: { value: "Airport pickup from Heathrow T5 at 3pm" },
     });
 
