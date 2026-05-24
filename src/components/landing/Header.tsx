@@ -93,7 +93,7 @@ export function Header() {
                   Sign In
                 </Link>
                 <Link
-                  href="/members/signup"
+                  href="/membership"
                   className="text-sm px-4 py-2 rounded-sm bg-brass text-charcoal hover:bg-brass-muted transition-colors"
                 >
                   Join
@@ -173,7 +173,7 @@ export function Header() {
                       Sign In
                     </Link>
                     <Link
-                      href="/members/signup"
+                      href="/membership"
                       className="block text-brass-text hover:text-brass-muted py-3"
                       onClick={() => setMobileOpen(false)}
                     >

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -29,6 +29,8 @@ type SignupForm = z.infer<typeof signupSchema>;
 
 export function SignupPage() {
   const router = useRouter();
+  const params = useSearchParams();
+  const next = params.get("next");
 
   const form = useForm<SignupForm>({
     resolver: zodResolver(signupSchema),
@@ -50,7 +52,7 @@ export function SignupPage() {
     }
 
     toast.success("Account created! Please check your email to verify.");
-    router.push("/members/login");
+    router.push(next ?? "/members/login");
   };
 
   return (
