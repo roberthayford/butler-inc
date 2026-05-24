@@ -47,6 +47,10 @@ describe("Membership types", () => {
       billingPeriodStart: "2026-04-01",
       billingPeriodEnd: "2026-04-30",
       status: "active",
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      cancelAtPeriodEnd: false,
+      pausedAt: null,
       createdAt: "2026-03-31T00:00:00Z",
       updatedAt: "2026-03-31T00:00:00Z",
     };

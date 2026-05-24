@@ -13,6 +13,10 @@ interface MembershipRow {
   billing_period_start: string;
   billing_period_end: string;
   status: string;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  cancel_at_period_end: boolean;
+  paused_at: string | null;
   created_at: string;
   updated_at: string;
   membership_tiers: {
@@ -56,6 +60,10 @@ function toMembership(row: MembershipRow): Membership {
     billingPeriodStart: row.billing_period_start,
     billingPeriodEnd: row.billing_period_end,
     status: row.status as Membership["status"],
+    stripeCustomerId: row.stripe_customer_id,
+    stripeSubscriptionId: row.stripe_subscription_id,
+    cancelAtPeriodEnd: row.cancel_at_period_end,
+    pausedAt: row.paused_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
