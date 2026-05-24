@@ -32,6 +32,23 @@ const checkoutSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  try {
+    return await handlePost(request);
+  } catch (err) {
+    console.error("[create-checkout-session] unhandled error:", err);
+    return NextResponse.json(
+      {
+        error:
+          err instanceof Error
+            ? `Checkout setup failed: ${err.message}`
+            : "Checkout setup failed",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+async function handlePost(request: NextRequest) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   const limit = bookingLimiter.check(ip);
   if (!limit.allowed) {
@@ -184,7 +201,7 @@ export async function POST(request: NextRequest) {
     bookingReference,
     amount: priceResult.total,
     currency: "gbp",
-    description: `${pricing.name} — ${data.serviceDate}, ${data.startTime}–${data.endTime} (${priceResult.durationHours} hours)`,
+    description: `${pricing.name}, ${data.serviceDate}, ${data.startTime}-${data.endTime} (${priceResult.durationHours} hours)`,
     customerEmail,
     metadata: {
       booking_id: bookingId,

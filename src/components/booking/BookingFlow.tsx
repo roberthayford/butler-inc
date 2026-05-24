@@ -16,6 +16,22 @@ import { BUTLER_PRICING } from "@/data/pricing-config";
 import { GENIE_SERVICE } from "@/data/booking-config";
 import { localDateTimeToUtcIso } from "@/lib/pricing/time-slots";
 
+/**
+ * Reads a useful error message from a failed fetch response without throwing.
+ * Tries JSON first, falls back to a status-based message. Without this guard
+ * a non-JSON response body (e.g. a default Next.js 500 HTML page) makes
+ * `res.json()` throw Safari's cryptic "The string did not match the expected
+ * pattern" message and surfaces it verbatim in the toast.
+ */
+async function readErrorMessage(res: Response, fallback: string): Promise<string> {
+  try {
+    const body = await res.json();
+    return body?.error ?? fallback;
+  } catch {
+    return `${fallback} (HTTP ${res.status})`;
+  }
+}
+
 interface BookingFlowProps {
   butlerType: ButlerTypeKey;
 }
@@ -78,8 +94,7 @@ export function BookingFlow({ butlerType }: BookingFlowProps) {
       });
 
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error ?? "Booking failed");
+        throw new Error(await readErrorMessage(res, "Booking failed"));
       }
 
       const { url } = await res.json();
@@ -107,8 +122,7 @@ export function BookingFlow({ butlerType }: BookingFlowProps) {
       });
 
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error ?? "Booking failed");
+        throw new Error(await readErrorMessage(res, "Booking failed"));
       }
 
       const { reference } = await res.json();

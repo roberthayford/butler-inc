@@ -33,6 +33,23 @@ function generateReference(): string {
 }
 
 export async function POST(request: NextRequest) {
+  try {
+    return await handlePost(request);
+  } catch (err) {
+    console.error("[bookings] unhandled error:", err);
+    return NextResponse.json(
+      {
+        error:
+          err instanceof Error
+            ? `Booking failed: ${err.message}`
+            : "Booking failed",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+async function handlePost(request: NextRequest) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   const limit = bookingLimiter.check(ip);
   if (!limit.allowed) {
@@ -136,11 +153,11 @@ export async function POST(request: NextRequest) {
 
       const isGenie = data.serviceOption === "genie";
       const adminSubject = isGenie
-        ? `URGENT: Genie Wish ${reference} — Immediate Attention`
-        : `New Booking: ${reference} — ${data.butlerType} Butler`;
+        ? `URGENT: Genie Wish ${reference} · Immediate Attention`
+        : `New Booking: ${reference} · ${data.butlerType} Butler`;
       const customerSubject = isGenie
-        ? `Wish Received: ${reference} — Butlers Inc.`
-        : `Booking Confirmed: ${reference} — Butlers Inc.`;
+        ? `Wish Received: ${reference} · Butlers Inc.`
+        : `Booking Confirmed: ${reference} · Butlers Inc.`;
 
       console.log("[after] Sending emails to:", "hello@butlersinc.com", "and", customerEmail);
       const results = await Promise.all([
