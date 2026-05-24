@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { phoneNumberSchema } from "@/lib/phone";
+import { PlanManager } from "@/components/membership/PlanManager";
 
 const profileSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -139,6 +140,12 @@ export default function SettingsPage() {
         <h1 className="text-3xl font-serif font-bold text-optical-white tracking-tight mb-8">
           Account Settings
         </h1>
+
+        {/* Plan Section */}
+        <section className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-sm p-6 mb-6">
+          <h2 className="text-lg font-serif font-semibold text-optical-white mb-4">Plan</h2>
+          <PlanManager />
+        </section>
 
         {/* Profile Section */}
         <section className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-sm p-6 mb-6">
