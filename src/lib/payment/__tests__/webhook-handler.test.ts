@@ -229,3 +229,51 @@ describe("handleCheckoutCompleted", () => {
     });
   });
 });
+
+import { handleInvoicePaid, handleInvoicePaymentFailed } from "../webhook-handler";
+import type { InvoiceData } from "../types";
+
+function makeInvoiceEvent(type: "invoice.paid", overrides?: Partial<InvoiceData & { created: number }>): Extract<WebhookEvent, { type: "invoice.paid" }>;
+function makeInvoiceEvent(type: "invoice.payment_failed", overrides?: Partial<InvoiceData & { created: number }>): Extract<WebhookEvent, { type: "invoice.payment_failed" }>;
+function makeInvoiceEvent(type: "invoice.paid" | "invoice.payment_failed", overrides: Partial<InvoiceData & { created: number }> = {}) {
+  const { created = 1717000000, ...rest } = overrides;
+  return {
+    type,
+    created,
+    data: {
+      id: "in_1",
+      customer: "cus_1",
+      subscription: "sub_1",
+      period_start: created,
+      period_end: created + 30 * 24 * 60 * 60,
+      status: type === "invoice.paid" ? "paid" : "open",
+      ...rest,
+    },
+  };
+}
+
+describe("handleInvoicePaid", () => {
+  it("extends billing_period_end and resets usage counters", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({ id: "m1", stripe_subscription_id: "sub_1", status: "active", personal_hours_used: 4, virtual_tasks_used: 2, billing_period_end: "2020-01-01T00:00:00.000Z", updated_at: new Date(0).toISOString() });
+    await handleInvoicePaid(makeInvoiceEvent("invoice.paid"), db as never);
+    expect(db.memberships[0]).toMatchObject({ personal_hours_used: 0, virtual_tasks_used: 0 });
+    expect(db.memberships[0].billing_period_end).not.toBe("2020-01-01T00:00:00.000Z");
+  });
+
+  it("revives a past_due membership to active when payment succeeds", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({ id: "m1", stripe_subscription_id: "sub_1", status: "past_due", personal_hours_used: 0, virtual_tasks_used: 0, billing_period_end: "2020-01-01T00:00:00.000Z", updated_at: new Date(0).toISOString() });
+    await handleInvoicePaid(makeInvoiceEvent("invoice.paid"), db as never);
+    expect(db.memberships[0].status).toBe("active");
+  });
+});
+
+describe("handleInvoicePaymentFailed", () => {
+  it("sets status='past_due'", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({ id: "m1", stripe_subscription_id: "sub_1", status: "active", updated_at: new Date(0).toISOString() });
+    await handleInvoicePaymentFailed(makeInvoiceEvent("invoice.payment_failed"), db as never);
+    expect(db.memberships[0].status).toBe("past_due");
+  });
+});

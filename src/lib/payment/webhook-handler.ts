@@ -119,3 +119,26 @@ export async function handleSubscriptionDeleted(event: Extract<WebhookEvent, { t
     updated_at: new Date().toISOString(),
   }).eq("id", row.id);
 }
+
+export async function handleInvoicePaid(event: Extract<WebhookEvent, { type: "invoice.paid" }>, db: DB) {
+  const d = event.data;
+  if (!d.subscription) return;
+  const row = await findRowBySub(db, d.subscription);
+  if (!row) return;
+  await db.from("memberships").update({
+    status: "active",
+    billing_period_start: new Date(d.period_start * 1000).toISOString(),
+    billing_period_end: new Date(d.period_end * 1000).toISOString(),
+    personal_hours_used: 0,
+    virtual_tasks_used: 0,
+    updated_at: new Date().toISOString(),
+  }).eq("id", row.id);
+}
+
+export async function handleInvoicePaymentFailed(event: Extract<WebhookEvent, { type: "invoice.payment_failed" }>, db: DB) {
+  const d = event.data;
+  if (!d.subscription) return;
+  const row = await findRowBySub(db, d.subscription);
+  if (!row) return;
+  await db.from("memberships").update({ status: "past_due", updated_at: new Date().toISOString() }).eq("id", row.id);
+}
