@@ -72,9 +72,10 @@ export function PricedBookingForm({
     setValue,
     setError,
     reset,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<PricedBookingFormData>({
     resolver: zodResolver(user ? pricedBookingBaseSchema : signedOutPricedBookingSchema),
+    mode: "onChange",
     defaultValues: {
       startTime: "",
       endTime: "",
@@ -350,7 +351,7 @@ export function PricedBookingForm({
 
         <Button
           type="submit"
-          disabled={isSubmitting || !isFormReady}
+          disabled={isSubmitting || !isFormReady || !isValid}
           className="w-full py-6 text-lg bg-brass text-charcoal hover:bg-brass-muted font-medium disabled:opacity-50"
         >
           {isSubmitting

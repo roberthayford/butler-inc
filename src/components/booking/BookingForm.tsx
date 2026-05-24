@@ -68,9 +68,10 @@ export function BookingForm({
     control,
     setValue,
     reset,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<BookingFormData>({
     resolver: zodResolver(user ? bookingFormBaseSchema : signedOutBookingFormSchema),
+    mode: "onChange",
     defaultValues: {
       dayOption: "advance",
       timeSlot: "morning",
@@ -313,7 +314,7 @@ export function BookingForm({
 
       <Button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || !isValid}
         className="w-full py-6 text-lg bg-brass text-charcoal hover:bg-brass-muted font-medium"
       >
         {isSubmitting ? "Sending your request..." : "Request Your Butler"}
