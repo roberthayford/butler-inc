@@ -2,7 +2,18 @@ import type {
   PaymentGateway,
   CheckoutSessionRequest,
   CheckoutSessionResult,
-} from "@/lib/pricing/types";
+  SubscriptionCheckoutRequest,
+  PortalSessionRequest,
+  WebhookEvent,
+} from "@/lib/payment/types";
+
+const HANDLED_TYPES = new Set([
+  "checkout.session.completed",
+  "customer.subscription.updated",
+  "customer.subscription.deleted",
+  "invoice.paid",
+  "invoice.payment_failed",
+]);
 
 export class MockPaymentGateway implements PaymentGateway {
   private sessions = new Set<string>();
@@ -42,5 +53,52 @@ export class MockPaymentGateway implements PaymentGateway {
       verified: true,
       paymentIntentId: `mock_pi_${Date.now()}`,
     };
+  }
+
+  async createSubscriptionCheckoutSession(
+    req: SubscriptionCheckoutRequest
+  ): Promise<CheckoutSessionResult> {
+    const sessionId = `mock_sub_session_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const params = new URLSearchParams({
+      type: "subscription",
+      session_id: sessionId,
+      tier: req.tier,
+      price_id: req.priceId,
+      user_id: req.userId,
+      email: req.customerEmail,
+      success_url: req.successUrl,
+      cancel_url: req.cancelUrl,
+    });
+    return { sessionId, url: `/payment/simulate?${params.toString()}` };
+  }
+
+  async createPortalSession(
+    req: PortalSessionRequest
+  ): Promise<{ url: string }> {
+    const params = new URLSearchParams({
+      customer_id: req.customerId,
+      return_url: req.returnUrl,
+    });
+    return { url: `/payment/simulate-portal?${params.toString()}` };
+  }
+
+  async pauseSubscription(_subscriptionId: string): Promise<void> {
+    // Mock: no-op — synthetic webhook from the portal simulator will sync state
+  }
+
+  async resumeSubscription(_subscriptionId: string): Promise<void> {
+    // Mock: no-op — synthetic webhook from the portal simulator will sync state
+  }
+
+  async parseWebhookEvent(
+    rawBody: string,
+    _signature: string | null
+  ): Promise<WebhookEvent> {
+    const parsed = JSON.parse(rawBody);
+    const type = parsed.type as string;
+    if (HANDLED_TYPES.has(type)) {
+      return parsed as WebhookEvent;
+    }
+    return { type: "unhandled", created: parsed.created ?? Date.now() / 1000, rawType: type };
   }
 }

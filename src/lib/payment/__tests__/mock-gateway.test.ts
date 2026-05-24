@@ -113,4 +113,58 @@ describe("MockPaymentGateway", () => {
     const second = await gateway.verifyPayment(session.sessionId);
     expect(second.verified).toBe(false);
   });
+
+  describe("subscription methods", () => {
+    it("createSubscriptionCheckoutSession returns a mock simulator URL with the right params", async () => {
+      const gw = new MockPaymentGateway();
+      const result = await gw.createSubscriptionCheckoutSession({
+        tier: "lite",
+        priceId: "mock_lite",
+        userId: "user-123",
+        customerEmail: "test@example.com",
+        successUrl: "https://example.com/success?session_id={CHECKOUT_SESSION_ID}",
+        cancelUrl: "https://example.com/membership",
+      });
+      expect(result.url).toMatch(/\/payment\/simulate\?/);
+      expect(result.url).toContain("type=subscription");
+      expect(result.url).toContain("tier=lite");
+      expect(result.url).toContain("user_id=user-123");
+      expect(result.sessionId).toMatch(/^mock_sub_session_/);
+    });
+
+    it("createPortalSession returns a mock portal URL", async () => {
+      const gw = new MockPaymentGateway();
+      const result = await gw.createPortalSession({
+        customerId: "mock_cus_123",
+        returnUrl: "https://example.com/members/settings",
+      });
+      expect(result.url).toMatch(/\/payment\/simulate-portal\?/);
+      expect(result.url).toContain("customer_id=mock_cus_123");
+    });
+
+    it("pauseSubscription + resumeSubscription toggle in-memory state without throwing", async () => {
+      const gw = new MockPaymentGateway();
+      await expect(gw.pauseSubscription("mock_sub_123")).resolves.toBeUndefined();
+      await expect(gw.resumeSubscription("mock_sub_123")).resolves.toBeUndefined();
+    });
+
+    it("parseWebhookEvent accepts an unsigned body in mock mode and returns the parsed event", async () => {
+      const gw = new MockPaymentGateway();
+      const body = JSON.stringify({
+        type: "checkout.session.completed",
+        created: 1717000000,
+        data: { id: "cs_123", client_reference_id: "user-1", customer: "cus_1", subscription: "sub_1", current_period_start: 1717000000, current_period_end: 1719678400, line_items: [{ price: { id: "mock_lite" } }] },
+      });
+      const event = await gw.parseWebhookEvent(body, null);
+      expect(event.type).toBe("checkout.session.completed");
+    });
+
+    it("parseWebhookEvent returns { type: 'unhandled' } for unknown event types", async () => {
+      const gw = new MockPaymentGateway();
+      const body = JSON.stringify({ type: "customer.created", created: 1717000000, data: {} });
+      const event = await gw.parseWebhookEvent(body, null);
+      expect(event.type).toBe("unhandled");
+      expect(event).toMatchObject({ rawType: "customer.created" });
+    });
+  });
 });
