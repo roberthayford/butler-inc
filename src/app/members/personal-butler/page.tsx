@@ -87,7 +87,7 @@ export default function PersonalButlerPage() {
                 const pricing = BUTLER_PRICING[service.id as ButlerTypeKey];
                 const isSelfService = pricing?.bookingType === "self_service";
                 const memberPrice = isSelfService ? MEMBER_HOURLY_RATE : pricing?.hourlyRate;
-                const priceLabel = isSelfService ? `£${memberPrice}/hr` : "Consultation";
+                const priceLabel = isSelfService ? `£${memberPrice}/hr` : "Price upon consultation";
 
                 return (
                   <button

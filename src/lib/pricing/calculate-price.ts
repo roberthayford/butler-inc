@@ -1,4 +1,5 @@
 import type { UrgencyMultiplier, PriceCalculation } from "./types";
+import { MEMBER_HOURLY_RATE } from "@/data/membership-config";
 
 export function timeToMinutes(time: string): number {
   const [hours, mins] = time.split(":").map(Number);
@@ -114,32 +115,43 @@ export interface PricePreviewInput {
   endTime: string;
   serviceDate: string;
   multipliers: UrgencyMultiplier[];
+  /**
+   * When true: hourly rate is overridden to MEMBER_HOURLY_RATE, urgency
+   * multiplier is forced to 1.0, and the label becomes "Member rate".
+   * Active membership status must be verified server-side before trusting
+   * a client-supplied true.
+   */
+  isMember?: boolean;
 }
 
 export function calculatePricePreview(
   input: PricePreviewInput
 ): Omit<PriceCalculation, "butlerType" | "tierName" | "currency"> {
-  const { hourlyRate, startTime, endTime, serviceDate, multipliers } = input;
+  const { startTime, endTime, serviceDate, multipliers, isMember } = input;
 
   const durationHours = calculateDurationHours(startTime, endTime);
+
+  const effectiveRate = isMember ? MEMBER_HOURLY_RATE : input.hourlyRate;
 
   const serviceDateTime = new Date(`${serviceDate}T${startTime}:00`);
   const hoursNotice =
     (serviceDateTime.getTime() - Date.now()) / (1000 * 60 * 60);
 
-  const urgency = determineUrgencyMultiplier(hoursNotice, multipliers);
+  const urgency = isMember
+    ? { id: "member", multiplier: 1.0, label: "Member rate", displayColour: null }
+    : determineUrgencyMultiplier(hoursNotice, multipliers);
 
-  const subtotal = hourlyRate * durationHours;
+  const subtotal = effectiveRate * durationHours;
   const total = Math.round(subtotal * urgency.multiplier * 100) / 100;
 
-  let breakdown = `£${hourlyRate}/hr × ${durationHours}hrs`;
+  let breakdown = `£${effectiveRate}/hr × ${durationHours}hrs`;
   if (urgency.multiplier !== 1.0) {
     breakdown += ` × ${urgency.multiplier}`;
   }
   breakdown += ` = £${total.toFixed(2)}`;
 
   return {
-    hourlyRate,
+    hourlyRate: effectiveRate,
     durationHours,
     urgencyMultiplier: urgency.multiplier,
     urgencyLabel: urgency.label,

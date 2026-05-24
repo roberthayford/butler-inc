@@ -58,8 +58,8 @@ describe("PersonalButlerPage", () => {
 
   it("shows member pricing for self-service butlers", async () => {
     render(<PersonalButlerPage />);
-    const priceLabels = await screen.findAllByText("£35/hr");
-    // base, baby, busy, budget all show £35/hr for members
+    const priceLabels = await screen.findAllByText("£50/hr");
+    // base, baby, busy, budget all show £50/hr (flat member rate) for members
     expect(priceLabels.length).toBeGreaterThanOrEqual(3);
   });
 

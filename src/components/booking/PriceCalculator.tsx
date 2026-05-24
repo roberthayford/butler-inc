@@ -43,10 +43,10 @@ export function PriceCalculator({
     ? format(parseISO(serviceDate), "EEEE d MMMM yyyy")
     : null;
 
-  const hasUrgency =
-    pricePreview &&
-    pricePreview.urgencyMultiplier !== 1.0 &&
-    pricePreview.urgencyLabel;
+  // Render the pill whenever there's a label, even at multiplier 1.0.
+  // This covers the "Member rate" badge (multiplier 1.0 but a meaningful
+  // label) without affecting the standard tier (label is null).
+  const hasUrgency = pricePreview && pricePreview.urgencyLabel;
 
   return (
     <div className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-sm overflow-hidden">
@@ -150,7 +150,9 @@ export function PriceCalculator({
                     }}
                   >
                     {pricePreview.urgencyMultiplier > 1 ? "\u26A1" : "\u2714"}{" "}
-                    {pricePreview.urgencyLabel}: {pricePreview.urgencyMultiplier}x applied
+                    {pricePreview.urgencyMultiplier === 1.0
+                      ? pricePreview.urgencyLabel
+                      : `${pricePreview.urgencyLabel}: ${pricePreview.urgencyMultiplier}x applied`}
                   </span>
                 </motion.div>
               )}

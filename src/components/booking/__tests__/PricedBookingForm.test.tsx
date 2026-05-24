@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@/test/test-utils";
 import { useAuth } from "@/context/AuthContext";
+import { useMembership } from "@/hooks/useMembership";
 import { PricedBookingForm } from "../PricedBookingForm";
 
 vi.mock("@/context/AuthContext", () => ({
@@ -12,6 +13,16 @@ vi.mock("@/context/AuthContext", () => ({
     signUp: vi.fn(),
     signIn: vi.fn(),
     signOut: vi.fn(),
+  }),
+}));
+
+vi.mock("@/hooks/useMembership", () => ({
+  useMembership: vi.fn().mockReturnValue({
+    membership: null,
+    isLoading: false,
+    isMember: false,
+    personalHoursRemaining: 0,
+    virtualTasksRemaining: 0,
   }),
 }));
 
@@ -99,6 +110,48 @@ describe("PricedBookingForm", () => {
       expect(screen.getByPlaceholderText("Jane Smith")).toHaveValue("");
       expect(screen.getByPlaceholderText("you@example.com")).toHaveValue("");
       expect(screen.getByPlaceholderText("07700 900000")).toHaveValue("");
+    });
+  });
+
+  describe("member pricing", () => {
+    function setMemberAuth(isActiveMember: boolean) {
+      vi.mocked(useAuth).mockReturnValue({
+        user: { id: "user-1", email: "kim@example.com", user_metadata: { name: "Kim", phone: "07700 123456" } } as never,
+        session: null,
+        loading: false,
+        supabase: {} as never,
+        signUp: vi.fn(),
+        signIn: vi.fn(),
+        signOut: vi.fn(),
+      });
+      vi.mocked(useMembership).mockReturnValue({
+        membership: isActiveMember
+          ? ({ status: "active" } as never)
+          : null,
+        isLoading: false,
+        isMember: isActiveMember,
+        personalHoursRemaining: isActiveMember ? 10 : 0,
+        virtualTasksRemaining: isActiveMember ? 5 : 0,
+      });
+    }
+
+    it("calls useMembership and renders cleanly for an active member", async () => {
+      setMemberAuth(true);
+      render(<PricedBookingForm {...defaultProps} />);
+      // Form mounts and shows the date picker / fields, no crash
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText("07700 900000")).toBeInTheDocument();
+      });
+      expect(useMembership).toHaveBeenCalled();
+    });
+
+    it("calls useMembership and renders cleanly for a non-member", async () => {
+      setMemberAuth(false);
+      render(<PricedBookingForm {...defaultProps} />);
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText("07700 900000")).toBeInTheDocument();
+      });
+      expect(useMembership).toHaveBeenCalled();
     });
   });
 });
