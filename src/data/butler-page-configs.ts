@@ -93,13 +93,13 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             ],
         },
         commonRequests: [
-            'Contract signing across London—collected and delivered same afternoon',
+            'Contract signing across London, collected and delivered same afternoon',
             "Prescription collection from pharmacy when you're unwell",
             'Birthday gift delivery you forgot to order',
             'Queue standing for limited releases or ticket lines',
             'Important documents from solicitor to client',
             'Keys collected from estate agent on moving day',
-            'Urgent shopping—forgotten ingredients, replacement charger, specific item needed today',
+            'Urgent shopping: forgotten ingredients, replacement charger, specific item needed today',
         ],
         trustIndicators: [
             { text: 'DBS checked and reference verified' },
@@ -206,7 +206,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             ],
         },
         commonRequests: [
-            'Rare Scotch only sold in a tiny Highland shop—sourced and delivered',
+            'Rare Scotch only sold in a tiny Highland shop, sourced and delivered',
             'Anniversary dinner at a fully-booked Michelin restaurant',
             'Front-row seats to sold-out West End shows',
             'Custom gift curation for high-net-worth clients',
@@ -306,7 +306,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             steps: [
                 {
                     title: 'Flexible booking',
-                    description: 'Choose a date range—we fit it in when it\'s most cost-effective for you.',
+                    description: 'Choose a date range, and we fit it in when it\'s most cost-effective for you.',
                 },
                 {
                     title: 'Best rates',
@@ -338,7 +338,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
         seo: {
             title: 'Custom Concierge Requests | Bespoke Butler | Tailored Solutions',
             description:
-                'For requests that don\'t fit a category. Complex coordination, special occasions, unique challenges. Tell us what you need—we\'ll make it happen.',
+                'For requests that don\'t fit a category. Complex coordination, special occasions, unique challenges. Tell us what you need. We\'ll make it happen.',
             keywords: [
                 'bespoke concierge London',
                 'custom butler service',
@@ -350,7 +350,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
         hero: {
             headline: 'Tell us what you need. We\'ll figure it out.',
             subheading:
-                'For requests that don\'t fit a category—complex, creative, or completely unique.',
+                'For requests that don\'t fit a category. Complex, creative, or completely unique.',
             useCases: [
                 'Coordinate a surprise proposal across three locations',
                 'Plan and execute a private dinner party for 20',

@@ -43,7 +43,7 @@ export function BookingConfirmationEmail({
         />
       </Head>
       <Preview>
-        Your Butlers Inc. booking {reference} is confirmed — we&apos;ll be in touch within 30 minutes.
+        Your Butlers Inc. booking {reference} is confirmed. We&apos;ll be in touch within 30 minutes.
       </Preview>
       <Body style={{ backgroundColor: "#FCFBF9", margin: 0, padding: "40px 0" }}>
         <Container
@@ -124,7 +124,7 @@ export function BookingConfirmationEmail({
 
             {/* Detail rows */}
             <DetailRow label="Service" value={`${butlerType} Butler`} />
-            <DetailRow label="Booking" value={isGenie ? "Genie — Urgent Request" : (serviceOption ?? "Bespoke")} />
+            <DetailRow label="Booking" value={isGenie ? "Genie · Urgent Request" : (serviceOption ?? "Bespoke")} />
             <DetailRow label="Date" value={formattedDate} />
             <DetailRow label="Time" value={timeSlotLabel} />
 

@@ -359,7 +359,7 @@ export function PricedBookingForm({
         >
           {isSubmitting
             ? "Processing..."
-            : `Continue to Payment${pricePreview ? ` — £${pricePreview.total.toFixed(2)}` : ""}`}
+            : `Continue to Payment${pricePreview ? ` · £${pricePreview.total.toFixed(2)}` : ""}`}
         </Button>
 
         {/* Mobile price summary */}

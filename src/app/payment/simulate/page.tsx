@@ -155,11 +155,11 @@ function SubscriptionApproval({
                   </p>
                   <ul className="space-y-1">
                     <li className="text-optical-white text-sm flex items-center gap-2">
-                      <span className="text-brass-text">—</span>
+                      <span className="text-brass-text">·</span>
                       {tier.personalHoursIncluded} personal butler hours / month
                     </li>
                     <li className="text-optical-white text-sm flex items-center gap-2">
-                      <span className="text-brass-text">—</span>
+                      <span className="text-brass-text">·</span>
                       {tier.virtualTasksIncluded} virtual butler tasks / month
                     </li>
                   </ul>
@@ -194,7 +194,7 @@ function SubscriptionApproval({
             >
               {processing
                 ? "Processing..."
-                : `Approve subscription — £${tier?.monthlyPrice ?? "?"}/mo`}
+                : `Approve subscription · £${tier?.monthlyPrice ?? "?"}/mo`}
             </motion.button>
 
             <button

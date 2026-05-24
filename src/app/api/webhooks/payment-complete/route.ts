@@ -152,14 +152,14 @@ export async function POST(request: NextRequest) {
         resend.emails.send({
           from: "Butlers Inc. <bookings@butlersinc.com>",
           to: booking.customer_email,
-          subject: `Booking Confirmed: ${booking.booking_reference} — Butlers Inc.`,
+          subject: `Booking Confirmed: ${booking.booking_reference} · Butlers Inc.`,
           html: confirmHtml,
           text: confirmText,
         }),
         resend.emails.send({
           from: "Butlers Inc. <bookings@butlersinc.com>",
           to: "hello@butlersinc.com",
-          subject: `New Booking: ${booking.booking_reference} — ${booking.butler_type} Butler`,
+          subject: `New Booking: ${booking.booking_reference} · ${booking.butler_type} Butler`,
           html: notifyHtml,
           text: notifyText,
         }),

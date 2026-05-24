@@ -36,7 +36,7 @@ export function CheckoutActivating() {
   if (timedOut) {
     return (
       <div className="text-center">
-        <p className="text-optical-white text-lg mb-2">Taking longer than usual — your membership should appear shortly.</p>
+        <p className="text-optical-white text-lg mb-2">Taking longer than usual. Your membership should appear shortly.</p>
         <Link href="/members/dashboard" className="text-brass-text underline">Go to dashboard</Link>
       </div>
     );
