@@ -151,6 +151,44 @@ describe("handleSubscriptionUpdated", () => {
     await handleSubscriptionUpdated(makeSubEvent("customer.subscription.updated", { created: now - 100, cancel_at_period_end: true }), db as never);
     expect(db.memberships[0].cancel_at_period_end).toBe(false);
   });
+
+  // ── Phase B pins ──
+  // These tests pin behaviour the Phase A handler already implements, so the
+  // future PlanManager surface (which depends on these transitions) does not
+  // silently regress.
+
+  it("(Phase B) cancel_at_period_end=false reactivates a pending-cancel sub", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({ id: "m1", user_id: "u1", stripe_subscription_id: "sub_1", status: "active", cancel_at_period_end: true, updated_at: new Date(0).toISOString() });
+    await handleSubscriptionUpdated(makeSubEvent("customer.subscription.updated", { cancel_at_period_end: false }), db as never);
+    expect(db.memberships[0]).toMatchObject({ cancel_at_period_end: false, status: "active" });
+  });
+
+  it("(Phase B) Stripe status='paused' is mapped to local status='paused'", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({ id: "m1", user_id: "u1", stripe_subscription_id: "sub_1", status: "active", cancel_at_period_end: false, updated_at: new Date(0).toISOString() });
+    await handleSubscriptionUpdated(makeSubEvent("customer.subscription.updated", { status: "paused" }), db as never);
+    expect(db.memberships[0].status).toBe("paused");
+  });
+
+  it("(Phase B) Stripe status flips paused -> active on resume", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({ id: "m1", user_id: "u1", stripe_subscription_id: "sub_1", status: "paused", cancel_at_period_end: false, updated_at: new Date(0).toISOString() });
+    await handleSubscriptionUpdated(makeSubEvent("customer.subscription.updated", { status: "active" }), db as never);
+    expect(db.memberships[0].status).toBe("active");
+  });
+
+  it("(Phase B) idempotent: replaying the same updated event leaves state unchanged after the first apply", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({ id: "m1", user_id: "u1", stripe_subscription_id: "sub_1", status: "active", cancel_at_period_end: false, updated_at: new Date(0).toISOString() });
+    const event = makeSubEvent("customer.subscription.updated", { cancel_at_period_end: true });
+    await handleSubscriptionUpdated(event, db as never);
+    const afterFirst = { ...db.memberships[0] };
+    await handleSubscriptionUpdated(event, db as never);
+    // Second apply may overwrite updated_at but the meaningful fields are identical
+    expect(db.memberships[0].cancel_at_period_end).toBe(afterFirst.cancel_at_period_end);
+    expect(db.memberships[0].status).toBe(afterFirst.status);
+  });
 });
 
 describe("handleSubscriptionDeleted", () => {
