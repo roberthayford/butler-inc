@@ -118,13 +118,13 @@ describe("readActiveMembership", () => {
     expect(result.isActive).toBe(false);
   });
 
-  it("filters anon query with status IN active/past_due (defense in depth, RLS scoped too)", async () => {
+  it("filters anon query with status IN active/past_due/paused/cancelled (PlanManager needs all four)", async () => {
     const anon = mockAnonClient({ data: currentPeriodMembership, error: null });
     const svc = mockServiceClient({ data: null, error: null });
     await readActiveMembership("user-1", anon as never, svc as never, TODAY);
     const chain = anon.from.mock.results[0]!.value;
     expect(chain.eq).toHaveBeenCalledWith("user_id", "user-1");
-    expect(chain.in).toHaveBeenCalledWith("status", ["active", "past_due"]);
+    expect(chain.in).toHaveBeenCalledWith("status", ["active", "past_due", "paused", "cancelled"]);
   });
 
   it("returns past_due row for display but isActive=false (payment failing, member pricing suspended)", async () => {
@@ -144,6 +144,40 @@ describe("readActiveMembership", () => {
     // But member pricing is not applied
     expect(result.isActive).toBe(false);
     // Service client is never called — no period reset for past_due rows
+    expect(svc.from).not.toHaveBeenCalled();
+  });
+
+  it("returns paused row for PlanManager but isActive=false (no member pricing, no rollover)", async () => {
+    const pausedMembership: MembershipRow = {
+      id: "mem-1",
+      status: "paused",
+      personal_hours_used: 3,
+      virtual_tasks_used: 1,
+      billing_period_start: "2026-05-01",
+      billing_period_end: "2026-05-31",
+    };
+    const anon = mockAnonClient({ data: pausedMembership, error: null });
+    const svc = mockServiceClient({ data: null, error: null });
+    const result = await readActiveMembership("user-1", anon as never, svc as never, TODAY);
+    expect(result.membership).toBe(pausedMembership);
+    expect(result.isActive).toBe(false);
+    expect(svc.from).not.toHaveBeenCalled();
+  });
+
+  it("returns cancelled row for PlanManager but isActive=false", async () => {
+    const cancelledMembership: MembershipRow = {
+      id: "mem-1",
+      status: "cancelled",
+      personal_hours_used: 0,
+      virtual_tasks_used: 0,
+      billing_period_start: "2026-04-01",
+      billing_period_end: "2026-04-30",
+    };
+    const anon = mockAnonClient({ data: cancelledMembership, error: null });
+    const svc = mockServiceClient({ data: null, error: null });
+    const result = await readActiveMembership("user-1", anon as never, svc as never, TODAY);
+    expect(result.membership).toBe(cancelledMembership);
+    expect(result.isActive).toBe(false);
     expect(svc.from).not.toHaveBeenCalled();
   });
 });

@@ -32,7 +32,7 @@ export async function readActiveMembership(
     .from("memberships")
     .select("*, membership_tiers(*)")
     .eq("user_id", userId)
-    .in("status", ["active", "past_due"])
+    .in("status", ["active", "past_due", "paused", "cancelled"])
     .maybeSingle();
 
   if (error || !data) return { membership: null, isActive: false };
@@ -49,6 +49,12 @@ export async function readActiveMembership(
   // past_due: return the row for dashboard display but never grant member
   // pricing — the customer's payment is failing and access is suspended.
   if (row.status === "past_due") {
+    return { membership: row, isActive: false };
+  }
+
+  // paused / cancelled: visible to PlanManager but not "active" for any
+  // pricing or booking-gate purpose. No rollover, no member benefits.
+  if (row.status === "paused" || row.status === "cancelled") {
     return { membership: row, isActive: false };
   }
 
