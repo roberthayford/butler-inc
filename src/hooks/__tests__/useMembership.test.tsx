@@ -154,4 +154,29 @@ describe("useMembership", () => {
       );
     });
   });
+
+  it("dedupes across two quick mounts on a shared QueryClient (staleTime regression)", async () => {
+    mockFetch({ membership: buildMockMembership(), isActive: true });
+
+    // Shared QueryClient across both renders — simulates two components
+    // (e.g. MembershipBanner + Dashboard) subscribing to the same query
+    // on the same page.
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+    );
+
+    const { result: a } = renderHook(() => useMembership(), { wrapper });
+    const { result: b } = renderHook(() => useMembership(), { wrapper });
+
+    await waitFor(() => {
+      expect(a.current.isLoading).toBe(false);
+      expect(b.current.isLoading).toBe(false);
+    });
+
+    // Both subscribers resolved; only one network round-trip should have
+    // fired. With staleTime=60_000 a second mount within the freshness
+    // window reuses the cached entry.
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
 });

@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMembership } from "@/hooks/useMembership";
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
+import { stashPortalSnapshot } from "@/lib/membership/portal-snapshot";
 import type { Membership } from "@/types/membership";
 
 type PlanView =
@@ -203,6 +205,17 @@ export function PlanManager() {
         return;
       }
       const { url } = (await res.json()) as { url: string };
+      // Stash AFTER the portal session is confirmed and immediately before
+      // navigation — if the fetch failed we'd otherwise leave a stale
+      // snapshot that the next /members/settings visit would consume and
+      // toast against unrelated current state.
+      if (membership) {
+        stashPortalSnapshot({
+          status: membership.status,
+          tierSlug: membership.tier.slug,
+          cancelAtPeriodEnd: membership.cancelAtPeriodEnd,
+        });
+      }
       window.location.assign(url);
     } catch {
       setError("Something went wrong. Please try again.");
@@ -225,6 +238,7 @@ export function PlanManager() {
         return;
       }
       await queryClient.invalidateQueries({ queryKey: ["membership", user?.id] });
+      toast.success(action === "pause" ? "Membership paused" : "Membership resumed");
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {

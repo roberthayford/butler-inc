@@ -138,4 +138,20 @@ describe("POST /api/webhooks/stripe", () => {
     const res = await POST(webhookRequest('{}', { "stripe-signature": "t=123,v1=fake" }));
     expect(res.status).toBe(503);
   });
+
+  it("dispatches subscription.updated events to the updated handler", async () => {
+    process.env.PAYMENT_GATEWAY = "mock";
+    mockParse.mockResolvedValue({ type: "customer.subscription.updated", created: 1, data: { id: "sub_x" } });
+    const res = await POST(mockSigned('{"type":"customer.subscription.updated"}'));
+    expect(res.status).toBe(200);
+    expect(mockHandlers.handleSubscriptionUpdated).toHaveBeenCalled();
+  });
+
+  it("dispatches invoice.paid events to the invoice paid handler", async () => {
+    process.env.PAYMENT_GATEWAY = "mock";
+    mockParse.mockResolvedValue({ type: "invoice.paid", created: 1, data: { id: "in_x", subscription: "sub_x" } });
+    const res = await POST(mockSigned('{"type":"invoice.paid"}'));
+    expect(res.status).toBe(200);
+    expect(mockHandlers.handleInvoicePaid).toHaveBeenCalled();
+  });
 });

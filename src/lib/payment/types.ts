@@ -81,25 +81,36 @@ export interface InvoiceData {
   status: "draft" | "open" | "paid" | "uncollectible" | "void";
 }
 
+/**
+ * `id` is Stripe's webhook event id (e.g. `evt_1NXa…`). Stripe sends the
+ * SAME id on every retry of a given event, so it is a perfect idempotency
+ * key. The mock simulator now injects `id: evt_mock_<uuid>` on every fired
+ * event too, so the lifecycle notifier can use a single event_id source of
+ * truth across both gateways. Marked optional only for backward compat
+ * with older mock event payloads that didn't include it.
+ */
 export type WebhookEvent =
   | {
       type: "checkout.session.completed";
       created: number;
+      id?: string;
       data: CheckoutSessionData;
     }
   | {
       type: "customer.subscription.updated";
       created: number;
+      id?: string;
       data: SubscriptionData;
     }
   | {
       type: "customer.subscription.deleted";
       created: number;
+      id?: string;
       data: SubscriptionData;
     }
-  | { type: "invoice.paid"; created: number; data: InvoiceData }
-  | { type: "invoice.payment_failed"; created: number; data: InvoiceData }
-  | { type: "unhandled"; created: number; rawType: string };
+  | { type: "invoice.paid"; created: number; id?: string; data: InvoiceData }
+  | { type: "invoice.payment_failed"; created: number; id?: string; data: InvoiceData }
+  | { type: "unhandled"; created: number; id?: string; rawType: string };
 
 // ── gateway interface ────────────────────────────────────────
 export interface PaymentGateway {

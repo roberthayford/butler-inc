@@ -1,5 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { WebhookEvent, CheckoutSessionData, SubscriptionData } from "./types";
+import { detectTransition, type MembershipRow } from "@/lib/membership/lifecycle-transitions";
+import { notifyLifecycle } from "@/lib/membership/lifecycle-notifier";
+import type { TierSlug } from "@/types/membership";
 
 type DB = SupabaseClient;
 
@@ -10,7 +13,36 @@ function priceIdToSlug(priceId: string): string {
 async function lookupTierByPriceId(db: DB, priceId: string) {
   const slug = priceIdToSlug(priceId);
   const { data } = await db.from("membership_tiers").select().eq("slug", slug).maybeSingle();
-  return data as { id: string; personal_hours_included: number; virtual_tasks_included: number } | null;
+  return data as { id: string; slug: string; personal_hours_included: number; virtual_tasks_included: number } | null;
+}
+
+/**
+ * Resolves a `tier_id` to a `TierSlug`, or `null` when the tier cannot be
+ * resolved. Returning `null` propagates through `detectTransition` and
+ * suppresses the lifecycle notification — a wrong tier name in a
+ * customer-facing email is worse than no email.
+ */
+async function tierSlugLookup(db: DB, tierId: string | null): Promise<TierSlug | null> {
+  if (!tierId) {
+    console.warn("lifecycle.tier_slug_lookup.null_tier_id", { tierId });
+    return null;
+  }
+  const { data } = await db.from("membership_tiers").select("slug").eq("id", tierId).maybeSingle();
+  const slug = data?.slug as TierSlug | undefined;
+  if (!slug) {
+    console.warn("lifecycle.tier_slug_lookup.unknown_tier_id", { tierId });
+    return null;
+  }
+  return slug;
+}
+
+async function readRecipient(db: DB, userId: string): Promise<{ email: string; name: string } | null> {
+  // Service-role admin client only.
+  const adminAuth = (db as unknown as { auth: { admin: { getUserById: (id: string) => Promise<{ data: { user: { email?: string; user_metadata?: { name?: string } } | null } }> } } }).auth.admin;
+  const { data } = await adminAuth.getUserById(userId);
+  const user = data?.user;
+  if (!user?.email) return null;
+  return { email: user.email, name: (user.user_metadata?.name as string) ?? user.email };
 }
 
 function periodFromEvent(d: CheckoutSessionData) {
@@ -20,10 +52,43 @@ function periodFromEvent(d: CheckoutSessionData) {
   };
 }
 
+function asMembershipRow(row: Record<string, unknown>): MembershipRow {
+  return {
+    id: row.id as string,
+    user_id: row.user_id as string,
+    status: row.status as string,
+    tier_id: (row.tier_id as string | null) ?? null,
+    cancel_at_period_end: Boolean(row.cancel_at_period_end),
+    billing_period_end: row.billing_period_end as string,
+    stripe_subscription_id: (row.stripe_subscription_id as string | null) ?? null,
+    updated_at: row.updated_at as string,
+    personal_hours_total: (row.personal_hours_total as number) ?? 0,
+    virtual_tasks_total: (row.virtual_tasks_total as number) ?? 0,
+  };
+}
+
+async function safelyNotify(args: Parameters<typeof notifyLifecycle>[0], db: DB) {
+  try {
+    await notifyLifecycle(args, db);
+  } catch (err) {
+    console.error("lifecycle.notify.failed", err);
+  }
+}
+
+/**
+ * Construct an idempotency key for the lifecycle email log. Prefers
+ * `event.id` (stable across Stripe retries AND mock simulator's
+ * `evt_mock_<uuid>`); falls back to a constructed key for legacy mock
+ * payloads that did not include an `id` field.
+ */
+function eventIdFor(event: WebhookEvent, fallbackKey: string): string {
+  return event.id ?? fallbackKey;
+}
+
 export async function handleCheckoutCompleted(event: Extract<WebhookEvent, { type: "checkout.session.completed" }>, db: DB) {
   const d = event.data;
   if (!d.client_reference_id) return;
-  if (!d.subscription) return;  // non-subscription checkouts not handled here
+  if (!d.subscription) return;
   const priceId = d.line_items?.[0]?.price.id ?? "";
   const tier = await lookupTierByPriceId(db, priceId);
   if (!tier) {
@@ -32,21 +97,11 @@ export async function handleCheckoutCompleted(event: Extract<WebhookEvent, { typ
   }
   const period = periodFromEvent(d);
 
-  // Case 1: idempotent replay — row already exists with this stripe_subscription_id
-  const { data: existingBySub } = await db
-    .from("memberships")
-    .select()
-    .eq("stripe_subscription_id", d.subscription)
-    .maybeSingle();
+  const { data: existingBySub } = await db.from("memberships").select().eq("stripe_subscription_id", d.subscription).maybeSingle();
   if (existingBySub) return;
 
-  // Case 2: existing admin-created row for this user (no stripe IDs) — attach
-  const { data: existingByUser } = await db
-    .from("memberships")
-    .select()
-    .eq("user_id", d.client_reference_id)
-    .eq("status", "active")
-    .maybeSingle();
+  const { data: existingByUser } = await db.from("memberships").select().eq("user_id", d.client_reference_id).eq("status", "active").maybeSingle();
+  const priorRow = existingByUser ? asMembershipRow(existingByUser as Record<string, unknown>) : null;
 
   const patch = {
     tier_id: tier.id,
@@ -63,45 +118,59 @@ export async function handleCheckoutCompleted(event: Extract<WebhookEvent, { typ
     ...period,
   };
 
+  let updatedRow: Record<string, unknown> | null = null;
   if (existingByUser) {
-    await db.from("memberships").update(patch).eq("id", existingByUser.id);
+    const { data } = await db.from("memberships").update(patch).eq("id", existingByUser.id).select().maybeSingle();
+    updatedRow = data;
+  } else {
+    const { data } = await db.from("memberships").insert({ user_id: d.client_reference_id, ...patch }).select().maybeSingle();
+    updatedRow = data;
+  }
+  if (!updatedRow) {
+    console.error("handleCheckoutCompleted: post-write select returned no row — provisioning may have failed silently", {
+      user_id: d.client_reference_id,
+      subscription: d.subscription,
+      had_existing: Boolean(existingByUser),
+    });
     return;
   }
 
-  // Case 3: fresh INSERT
-  await db.from("memberships").insert({ user_id: d.client_reference_id, ...patch });
+  const recipient = await readRecipient(db, d.client_reference_id);
+  if (!recipient) {
+    console.warn("handleCheckoutCompleted: recipient lookup returned null — welcome email skipped", {
+      user_id: d.client_reference_id,
+    });
+    return;
+  }
+  const transition = detectTransition({
+    event, priorRow, updatedRow: asMembershipRow(updatedRow),
+    tierSlugLookup: () => tier.slug as TierSlug,
+  });
+  await safelyNotify({ eventId: eventIdFor(event, `evt_checkout_${d.id}`), transition, recipient, subscriptionId: d.subscription }, db);
 }
 
 function statusFromStripe(s: SubscriptionData["status"]): "active" | "paused" | "cancelled" | "past_due" {
   if (s === "canceled" || s === "unpaid" || s === "incomplete_expired") return "cancelled";
   if (s === "paused") return "paused";
   if (s === "past_due" || s === "incomplete") return "past_due";
-  return "active";  // active, trialing
+  return "active";
 }
 
 async function findRowBySub(db: DB, subscriptionId: string) {
   const { data } = await db.from("memberships").select().eq("stripe_subscription_id", subscriptionId).maybeSingle();
-  return data as {
-    id: string;
-    updated_at: string;
-    tier_id: string | null;
-    status: string;
-    personal_hours_used: number;
-    virtual_tasks_used: number;
-  } | null;
+  return data as Record<string, unknown> | null;
 }
 
 export async function handleSubscriptionUpdated(event: Extract<WebhookEvent, { type: "customer.subscription.updated" }>, db: DB) {
   const d = event.data;
   const row = await findRowBySub(db, d.id);
   if (!row) return;
-
-  // Stale-event guard
-  if (new Date(row.updated_at).getTime() / 1000 > event.created) return;
+  if (new Date(row.updated_at as string).getTime() / 1000 > event.created) return;
 
   const newPriceId = d.items.data[0]?.price.id;
   const newTier = newPriceId ? await lookupTierByPriceId(db, newPriceId) : null;
   const newStatus = statusFromStripe(d.status);
+  const priorRow = asMembershipRow(row);
 
   const patch: Record<string, unknown> = {
     status: newStatus,
@@ -111,8 +180,6 @@ export async function handleSubscriptionUpdated(event: Extract<WebhookEvent, { t
     updated_at: new Date().toISOString(),
   };
 
-  // paused_at lifecycle: stamp on transition INTO paused, clear on any
-  // transition OUT of paused. Mirrors handleSubscriptionDeleted's clear.
   if (newStatus === "paused" && row.status !== "paused") {
     patch.paused_at = new Date().toISOString();
   } else if (newStatus !== "paused" && row.status === "paused") {
@@ -123,27 +190,63 @@ export async function handleSubscriptionUpdated(event: Extract<WebhookEvent, { t
     patch.tier_id = newTier.id;
     patch.personal_hours_total = newTier.personal_hours_included;
     patch.virtual_tasks_total = newTier.virtual_tasks_included;
-    // Clamp usage to the new (potentially lower) limits — the CHECK constraint
-    // (migration 005) forbids personal_hours_used > personal_hours_total, so
-    // a downgrade without clamping would silently fail the UPDATE.
-    if (row.personal_hours_used > newTier.personal_hours_included) {
-      patch.personal_hours_used = newTier.personal_hours_included;
-    }
-    if (row.virtual_tasks_used > newTier.virtual_tasks_included) {
-      patch.virtual_tasks_used = newTier.virtual_tasks_included;
-    }
+    if ((row.personal_hours_used as number) > newTier.personal_hours_included) patch.personal_hours_used = newTier.personal_hours_included;
+    if ((row.virtual_tasks_used as number) > newTier.virtual_tasks_included) patch.virtual_tasks_used = newTier.virtual_tasks_included;
   }
-  await db.from("memberships").update(patch).eq("id", row.id);
+  const { data: updated } = await db.from("memberships").update(patch).eq("id", row.id as string).select().maybeSingle();
+  if (!updated) {
+    console.error("handleSubscriptionUpdated: post-update select returned no row", {
+      subscription: d.id, user_id: row.user_id,
+    });
+    return;
+  }
+
+  const recipient = await readRecipient(db, row.user_id as string);
+  if (!recipient) {
+    console.warn("handleSubscriptionUpdated: recipient lookup returned null — notification skipped", {
+      user_id: row.user_id, subscription: d.id,
+    });
+    return;
+  }
+  // Resolve OLD slug from priorRow.tier_id; NEW slug from the freshly-resolved
+  // tier (newTier?.slug) or falls back to old when there was no tier change.
+  // Either lookup returning null cleanly suppresses any plan_changed email
+  // through detectTransition's null-guard.
+  const oldSlug = await tierSlugLookup(db, priorRow.tier_id);
+  const newSlug = (newTier?.slug as TierSlug | undefined) ?? oldSlug;
+  const transition = detectTransition({
+    event, priorRow, updatedRow: asMembershipRow(updated),
+    tierSlugLookup: (id) => id === priorRow.tier_id ? oldSlug : newSlug,
+  });
+  await safelyNotify({ eventId: eventIdFor(event, `evt_subupd_${d.id}_${event.created}`), transition, recipient, subscriptionId: d.id }, db);
 }
 
 export async function handleSubscriptionDeleted(event: Extract<WebhookEvent, { type: "customer.subscription.deleted" }>, db: DB) {
   const row = await findRowBySub(db, event.data.id);
   if (!row) return;
-  await db.from("memberships").update({
-    status: "cancelled",
-    paused_at: null,
-    updated_at: new Date().toISOString(),
-  }).eq("id", row.id);
+  const priorRow = asMembershipRow(row);
+  const { data: updated } = await db.from("memberships").update({
+    status: "cancelled", paused_at: null, updated_at: new Date().toISOString(),
+  }).eq("id", row.id as string).select().maybeSingle();
+  if (!updated) {
+    console.error("handleSubscriptionDeleted: post-update select returned no row", {
+      subscription: event.data.id, user_id: row.user_id,
+    });
+    return;
+  }
+
+  const slug = await tierSlugLookup(db, priorRow.tier_id);
+  const recipient = await readRecipient(db, row.user_id as string);
+  if (!recipient) {
+    console.warn("handleSubscriptionDeleted: recipient lookup returned null — notification skipped", {
+      user_id: row.user_id, subscription: event.data.id,
+    });
+    return;
+  }
+  const transition = detectTransition({
+    event, priorRow, updatedRow: asMembershipRow(updated), tierSlugLookup: () => slug,
+  });
+  await safelyNotify({ eventId: eventIdFor(event, `evt_subdel_${event.data.id}_${event.created}`), transition, recipient, subscriptionId: event.data.id }, db);
 }
 
 export async function handleInvoicePaid(event: Extract<WebhookEvent, { type: "invoice.paid" }>, db: DB) {
@@ -151,9 +254,8 @@ export async function handleInvoicePaid(event: Extract<WebhookEvent, { type: "in
   if (!d.subscription) return;
   const row = await findRowBySub(db, d.subscription);
   if (!row) return;
-
-  // Stale-event guard — mirrors handleSubscriptionUpdated
-  if (new Date(row.updated_at).getTime() / 1000 > event.created) return;
+  if (new Date(row.updated_at as string).getTime() / 1000 > event.created) return;
+  const priorRow = asMembershipRow(row);
 
   const patch: Record<string, unknown> = {
     billing_period_start: new Date(d.period_start * 1000).toISOString(),
@@ -162,11 +264,27 @@ export async function handleInvoicePaid(event: Extract<WebhookEvent, { type: "in
     virtual_tasks_used: 0,
     updated_at: new Date().toISOString(),
   };
-  // Only revive to active if not currently paused — preserves manual pause state
-  if (row.status !== "paused") {
-    patch.status = "active";
+  if (row.status !== "paused") patch.status = "active";
+  const { data: updated } = await db.from("memberships").update(patch).eq("id", row.id as string).select().maybeSingle();
+  if (!updated) {
+    console.error("handleInvoicePaid: post-update select returned no row", {
+      invoice: d.id, subscription: d.subscription, user_id: row.user_id,
+    });
+    return;
   }
-  await db.from("memberships").update(patch).eq("id", row.id);
+
+  const slug = await tierSlugLookup(db, priorRow.tier_id);
+  const recipient = await readRecipient(db, row.user_id as string);
+  if (!recipient) {
+    console.warn("handleInvoicePaid: recipient lookup returned null — notification skipped", {
+      user_id: row.user_id, invoice: d.id,
+    });
+    return;
+  }
+  const transition = detectTransition({
+    event, priorRow, updatedRow: asMembershipRow(updated), tierSlugLookup: () => slug,
+  });
+  await safelyNotify({ eventId: eventIdFor(event, `evt_invpaid_${d.id}`), transition, recipient, subscriptionId: d.subscription }, db);
 }
 
 export async function handleInvoicePaymentFailed(event: Extract<WebhookEvent, { type: "invoice.payment_failed" }>, db: DB) {
@@ -174,11 +292,26 @@ export async function handleInvoicePaymentFailed(event: Extract<WebhookEvent, { 
   if (!d.subscription) return;
   const row = await findRowBySub(db, d.subscription);
   if (!row) return;
+  if (new Date(row.updated_at as string).getTime() / 1000 > event.created) return;
+  const priorRow = asMembershipRow(row);
+  const { data: updated } = await db.from("memberships").update({ status: "past_due", updated_at: new Date().toISOString() }).eq("id", row.id as string).select().maybeSingle();
+  if (!updated) {
+    console.error("handleInvoicePaymentFailed: post-update select returned no row", {
+      invoice: d.id, subscription: d.subscription, user_id: row.user_id,
+    });
+    return;
+  }
 
-  // Stale-event guard — mirrors handleSubscriptionUpdated / handleInvoicePaid.
-  // Out-of-order delivery (failed payment retried after a later successful
-  // payment) must not flip a healthy active row back to past_due.
-  if (new Date(row.updated_at).getTime() / 1000 > event.created) return;
-
-  await db.from("memberships").update({ status: "past_due", updated_at: new Date().toISOString() }).eq("id", row.id);
+  const slug = await tierSlugLookup(db, priorRow.tier_id);
+  const recipient = await readRecipient(db, row.user_id as string);
+  if (!recipient) {
+    console.warn("handleInvoicePaymentFailed: recipient lookup returned null — notification skipped", {
+      user_id: row.user_id, invoice: d.id,
+    });
+    return;
+  }
+  const transition = detectTransition({
+    event, priorRow, updatedRow: asMembershipRow(updated), tierSlugLookup: () => slug,
+  });
+  await safelyNotify({ eventId: eventIdFor(event, `evt_invfail_${d.id}`), transition, recipient, subscriptionId: d.subscription }, db);
 }
