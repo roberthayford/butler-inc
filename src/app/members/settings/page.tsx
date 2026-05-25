@@ -45,6 +45,20 @@ export default function SettingsPage() {
   const [passwordError, setPasswordError] = useState("");
   const [passwordSaving, setPasswordSaving] = useState(false);
 
+  // IMPORTANT: this useEffect must be declared BEFORE the early returns below.
+  // When auth flips from loading=true → loading=false the early-return path
+  // skips the useEffect on the first render and includes it on the second,
+  // tripping React #310 ("Rendered more hooks than during the previous render")
+  // in production builds.
+  useEffect(() => {
+    if (userId) {
+      resetProfileForm({
+        name: userName,
+        phone: userPhone,
+      });
+    }
+  }, [resetProfileForm, userId, userName, userPhone]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-charcoal flex items-center justify-center">
@@ -57,15 +71,6 @@ export default function SettingsPage() {
     router.push("/members/login");
     return null;
   }
-
-  useEffect(() => {
-    if (userId) {
-      resetProfileForm({
-        name: userName,
-        phone: userPhone,
-      });
-    }
-  }, [resetProfileForm, userId, userName, userPhone]);
 
   const handleProfileSave = async (data: ProfileForm) => {
     try {
