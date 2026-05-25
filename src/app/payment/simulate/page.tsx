@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { getTierBySlug } from "@/data/membership-config";
 import type { TierSlug } from "@/types/membership";
+import { approveSubscription } from "./actions";
 
 // ---------------------------------------------------------------------------
 // Subscription approval sub-component
@@ -34,47 +35,26 @@ function SubscriptionApproval({
     setProcessing(true);
     setError(null);
 
-    try {
-      const created = Math.floor(Date.now() / 1000);
-      const thirtyDays = 30 * 24 * 60 * 60;
+    // Signing happens in the server action (MOCK_WEBHOOK_SECRET stays
+    // server-side). The action returns a flat { ok, error? } envelope so we
+    // don't have to parse the webhook route's error shape on the client.
+    const result = await approveSubscription({
+      sessionId,
+      userId: userId ?? "",
+      priceId: priceId ?? "",
+    });
 
-      const syntheticEvent = {
-        type: "checkout.session.completed",
-        created,
-        data: {
-          id: sessionId,
-          client_reference_id: userId ?? "",
-          customer: `mock_cus_${userId ?? "unknown"}`,
-          subscription: `mock_sub_${userId ?? "unknown"}_${created}`,
-          current_period_start: created,
-          current_period_end: created + thirtyDays,
-          line_items: [{ price: { id: priceId ?? "" } }],
-        },
-      };
-
-      const res = await fetch("/api/webhooks/stripe", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-mock-signature": "1",
-        },
-        body: JSON.stringify(syntheticEvent),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? "Subscription processing failed");
-      }
-
-      const resolvedUrl = (successUrl ?? "/members/dashboard").replace(
-        "{CHECKOUT_SESSION_ID}",
-        sessionId
-      );
-      window.location.href = resolvedUrl;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+    if (!result.ok) {
+      setError(result.error);
       setProcessing(false);
+      return;
     }
+
+    const resolvedUrl = (successUrl ?? "/members/dashboard").replace(
+      "{CHECKOUT_SESSION_ID}",
+      sessionId
+    );
+    window.location.href = resolvedUrl;
   };
 
   const handleCancel = () => {

@@ -1,25 +1,32 @@
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { signMockWebhook } from "@/lib/payment/mock-webhook-signature";
 
 export const dynamic = "force-dynamic";
 
 async function getOrigin(): Promise<string> {
   const h = await headers();
-  const proto = h.get("x-forwarded-proto") ?? "https";
+  // Default to "http" so local dev (npm run dev, no proxy) doesn't TLS-loopback
+  // into itself. Vercel sets x-forwarded-proto explicitly when proxying.
+  const proto = h.get("x-forwarded-proto") ?? "http";
   const host = h.get("host") ?? "localhost:3000";
   return `${proto}://${host}`;
 }
 
 async function fireWebhook(body: object): Promise<void> {
   const origin = await getOrigin();
+  const json = JSON.stringify(body);
+  // signMockWebhook throws if MOCK_WEBHOOK_SECRET is unset — fail fast so the
+  // simulator never silently sends an unsigned event the webhook route would reject.
+  const signature = signMockWebhook(json);
   await fetch(`${origin}/api/webhooks/stripe`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-mock-signature": "1",
+      "x-mock-signature": signature,
     },
-    body: JSON.stringify(body),
+    body: json,
   });
 }
 
