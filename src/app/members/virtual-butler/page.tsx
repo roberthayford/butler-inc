@@ -5,7 +5,6 @@ import { useAuth } from "@/context/AuthContext";
 import { useMembership } from "@/hooks/useMembership";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { TierBadge } from "@/components/membership/TierBadge";
@@ -102,14 +101,6 @@ export default function VirtualButlerPage() {
   return (
     <div className="min-h-screen bg-charcoal">
       <div className="max-w-2xl mx-auto px-6 py-12">
-        {/* Back nav */}
-        <Link
-          href="/members/dashboard"
-          className="text-warm-gray text-sm hover:text-optical-white transition-colors mb-6 inline-block"
-        >
-          &larr; Back to Dashboard
-        </Link>
-
         {/* Header */}
         <div className="flex items-center gap-3 mb-2">
           <h1 className="text-3xl font-serif font-bold text-optical-white tracking-tight">

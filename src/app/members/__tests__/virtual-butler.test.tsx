@@ -56,10 +56,4 @@ describe("VirtualButlerPage", () => {
     render(<VirtualButlerPage />);
     expect(await screen.findByText(/Request History/i)).toBeInTheDocument();
   });
-
-  it("has a back link to dashboard", async () => {
-    render(<VirtualButlerPage />);
-    const backLink = await screen.findByRole("link", { name: /Back to Dashboard/i });
-    expect(backLink).toHaveAttribute("href", "/members/dashboard");
-  });
 });

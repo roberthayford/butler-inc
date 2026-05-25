@@ -2,7 +2,6 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { useMembership } from "@/hooks/useMembership";
-import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -28,9 +27,8 @@ interface Booking {
 }
 
 export default function MemberDashboard() {
-  const { user, loading, signOut, supabase } = useAuth();
+  const { user, loading, supabase } = useAuth();
   const { membership, isLoading: memberLoading, isMember } = useMembership();
-  const router = useRouter();
 
   const { data: bookings, isLoading: bookingsLoading } = useQuery({
     queryKey: ["bookings", user?.id],
@@ -46,11 +44,6 @@ export default function MemberDashboard() {
     enabled: !!user,
   });
 
-  const handleSignOut = async () => {
-    await signOut();
-    router.push("/");
-  };
-
   if (loading || memberLoading) {
     return (
       <div className="min-h-screen bg-charcoal flex items-center justify-center">
@@ -61,32 +54,7 @@ export default function MemberDashboard() {
 
   return (
     <div className="min-h-screen bg-charcoal">
-      <header className="border-b border-primary-foreground/10 px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="text-xl font-serif font-bold text-optical-white">
-          Butlers Inc.
-        </Link>
-        <div className="flex items-center gap-4">
-          <span className="text-warm-gray text-sm">
-            {user?.user_metadata?.name ?? user?.email}
-          </span>
-          <Link
-            href="/members/settings"
-            className="text-warm-gray text-sm hover:text-optical-white transition-colors"
-          >
-            Settings
-          </Link>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSignOut}
-            className="border-primary-foreground/20 text-optical-white hover:bg-primary-foreground/10"
-          >
-            Sign Out
-          </Button>
-        </div>
-      </header>
-
-      <main className="max-w-4xl mx-auto px-6 py-12">
+      <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Welcome + Tier */}
         <div className="flex items-center gap-3 mb-8">
           <h1 className="text-3xl font-serif font-bold text-optical-white tracking-tight">
@@ -237,7 +205,7 @@ export default function MemberDashboard() {
             </div>
           )}
         </section>
-      </main>
+      </div>
     </div>
   );
 }

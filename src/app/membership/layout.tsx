@@ -1,15 +1,7 @@
-import type { Metadata } from "next";
 import { Header } from "@/components/landing/Header";
 import { Footer } from "@/components/landing/Footer";
 
-export const metadata: Metadata = {
-  title: {
-    default: "Members",
-    template: "%s | Butlers Inc.",
-  },
-};
-
-export default function MembersLayout({
+export default function MembershipLayout({
   children,
 }: {
   children: React.ReactNode;

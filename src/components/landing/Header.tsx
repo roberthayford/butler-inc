@@ -2,16 +2,21 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/context/AuthContext";
 import { isAdmin } from "@/lib/admin";
+import { useSignOutFlow } from "@/hooks/useSignOutFlow";
 import { Menu, X } from "lucide-react";
+import { AccountMenu } from "./AccountMenu";
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, loading } = useAuth();
   const showAdmin = !loading && user && isAdmin(user.email ?? undefined);
+  const pathname = usePathname();
+  const suppressAuthCTAs = pathname === "/members/login" || pathname === "/members/signup";
   const menuRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
 
@@ -68,23 +73,8 @@ export function Header() {
               Our Butlers
             </Link>
             {loading ? null : user ? (
-              <>
-                {showAdmin && (
-                  <Link
-                    href="/admin"
-                    className="text-optical-white/80 hover:text-optical-white transition-colors text-sm"
-                  >
-                    Admin
-                  </Link>
-                )}
-                <Link
-                  href="/members/dashboard"
-                  className="text-sm px-4 py-2 rounded-sm bg-brass text-charcoal hover:bg-brass-muted transition-colors"
-                >
-                  Dashboard
-                </Link>
-              </>
-            ) : (
+              <AccountMenu />
+            ) : suppressAuthCTAs ? null : (
               <>
                 <Link
                   href="/members/login"
@@ -145,25 +135,11 @@ export function Header() {
                   Our Butlers
                 </Link>
                 {loading ? null : user ? (
-                  <>
-                    {showAdmin && (
-                      <Link
-                        href="/admin"
-                        className="block text-optical-white/80 hover:text-optical-white py-3"
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        Admin
-                      </Link>
-                    )}
-                    <Link
-                      href="/members/dashboard"
-                      className="block text-brass-text hover:text-brass-muted py-3"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      Dashboard
-                    </Link>
-                  </>
-                ) : (
+                  <MobileAccountSection
+                    showAdmin={!!showAdmin}
+                    onItemClick={() => setMobileOpen(false)}
+                  />
+                ) : suppressAuthCTAs ? null : (
                   <>
                     <Link
                       href="/members/login"
@@ -186,6 +162,56 @@ export function Header() {
           )}
         </AnimatePresence>
       </header>
+    </>
+  );
+}
+
+function MobileAccountSection({
+  showAdmin,
+  onItemClick,
+}: {
+  showAdmin: boolean;
+  onItemClick: () => void;
+}) {
+  const runSignOut = useSignOutFlow();
+
+  const handleSignOut = async () => {
+    onItemClick();
+    await runSignOut();
+  };
+
+  return (
+    <>
+      <Link
+        href="/members/dashboard"
+        className="block text-brass-text hover:text-brass-muted py-3"
+        onClick={onItemClick}
+      >
+        Dashboard
+      </Link>
+      <Link
+        href="/members/settings"
+        className="block text-optical-white/80 hover:text-optical-white py-3"
+        onClick={onItemClick}
+      >
+        Settings
+      </Link>
+      {showAdmin && (
+        <Link
+          href="/admin"
+          className="block text-optical-white/80 hover:text-optical-white py-3"
+          onClick={onItemClick}
+        >
+          Admin
+        </Link>
+      )}
+      <button
+        type="button"
+        onClick={handleSignOut}
+        className="block w-full text-left text-optical-white/80 hover:text-optical-white py-3"
+      >
+        Sign Out
+      </button>
     </>
   );
 }

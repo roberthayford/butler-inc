@@ -70,10 +70,4 @@ describe("PersonalButlerPage", () => {
     expect(await screen.findByTestId("booking-flow")).toBeInTheDocument();
     expect(screen.getByText("BookingFlow:base")).toBeInTheDocument();
   });
-
-  it("has a back link to dashboard", async () => {
-    render(<PersonalButlerPage />);
-    const backLink = await screen.findByRole("link", { name: /Back to Dashboard/i });
-    expect(backLink).toHaveAttribute("href", "/members/dashboard");
-  });
 });

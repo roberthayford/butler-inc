@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
@@ -134,14 +133,6 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-charcoal">
       <div className="max-w-xl mx-auto px-6 py-12">
-        {/* Back nav */}
-        <Link
-          href="/members/dashboard"
-          className="text-warm-gray text-sm hover:text-optical-white transition-colors mb-6 inline-block"
-        >
-          &larr; Back to Dashboard
-        </Link>
-
         <h1 className="text-3xl font-serif font-bold text-optical-white tracking-tight mb-8">
           Account Settings
         </h1>
