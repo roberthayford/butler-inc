@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMembership } from "@/hooks/useMembership";
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
+import { stashPortalSnapshot } from "@/lib/membership/portal-snapshot";
 import type { Membership } from "@/types/membership";
 
 type PlanView =
@@ -193,6 +195,13 @@ export function PlanManager() {
     setError(null);
     setBusy(true);
     try {
+      if (membership) {
+        stashPortalSnapshot({
+          status: membership.status,
+          tierSlug: membership.tier.slug,
+          cancelAtPeriodEnd: membership.cancelAtPeriodEnd,
+        });
+      }
       const res = await fetch("/api/membership/portal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -225,6 +234,7 @@ export function PlanManager() {
         return;
       }
       await queryClient.invalidateQueries({ queryKey: ["membership", user?.id] });
+      toast.success(action === "pause" ? "Membership paused" : "Membership resumed");
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {

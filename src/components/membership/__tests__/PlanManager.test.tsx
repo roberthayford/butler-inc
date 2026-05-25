@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { render } from "@/test/test-utils";
+import { toast } from "sonner";
 import { PlanManager } from "../PlanManager";
 
 const { mockUseMembership, mockUseAuth } = vi.hoisted(() => ({
@@ -11,6 +12,7 @@ const { mockUseMembership, mockUseAuth } = vi.hoisted(() => ({
 
 vi.mock("@/hooks/useMembership", () => ({ useMembership: mockUseMembership }));
 vi.mock("@/context/AuthContext", () => ({ useAuth: mockUseAuth }));
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 function setMembership(membership: unknown, isMember = false) {
   mockUseMembership.mockReturnValue({
@@ -233,5 +235,65 @@ describe("PlanManager — action handlers", () => {
     render(<PlanManager />);
     await userEvent.click(screen.getByRole("button", { name: /Pause membership/i }));
     expect(await screen.findByText(/Something went wrong/i)).toBeInTheDocument();
+  });
+});
+
+describe("PlanManager — toasts + portal snapshot", () => {
+  const baseTierForSnap = {
+    id: "tier-lite",
+    slug: "lite" as const,
+    name: "Lite",
+    description: "Perfect for occasional butler needs",
+    personalHoursIncluded: 10,
+    virtualTasksIncluded: 5,
+    monthlyPrice: 500,
+    displayOrder: 1,
+    isActive: true,
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    sessionStorage.clear();
+    mockUseMembership.mockReturnValue({
+      isLoading: false,
+      membership: {
+        status: "active",
+        tier: baseTierForSnap,
+        personalHoursTotal: 10,
+        personalHoursUsed: 2,
+        billingPeriodEnd: "2026-06-25T00:00:00Z",
+        stripeSubscriptionId: "sub_abc",
+        cancelAtPeriodEnd: false,
+        virtualTasksTotal: 5,
+        virtualTasksUsed: 1,
+        pausedAt: null,
+      },
+      isMember: true,
+    });
+    mockUseAuth.mockReturnValue({ user: { id: "u1" } });
+  });
+
+  afterEach(() => vi.clearAllMocks());
+
+  it("toasts 'Membership paused' on successful pause", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({}) }));
+    render(<PlanManager />);
+    await userEvent.click(screen.getByRole("button", { name: /Pause membership/i }));
+    await vi.waitFor(() => expect(toast.success).toHaveBeenCalledWith("Membership paused"));
+    vi.unstubAllGlobals();
+  });
+
+  it("stashes a portal snapshot before navigating to portal", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({ url: "https://portal.example" }) }));
+    Object.defineProperty(window, "location", { value: { assign: vi.fn() }, writable: true });
+    render(<PlanManager />);
+    await userEvent.click(screen.getByRole("button", { name: /Manage subscription/i }));
+    await vi.waitFor(() => {
+      const raw = sessionStorage.getItem("butlers.portal.snapshot.v1");
+      expect(raw).toBeTruthy();
+      const snap = JSON.parse(raw as string);
+      expect(snap).toMatchObject({ status: "active", tierSlug: "lite", cancelAtPeriodEnd: false });
+    });
+    vi.unstubAllGlobals();
   });
 });
