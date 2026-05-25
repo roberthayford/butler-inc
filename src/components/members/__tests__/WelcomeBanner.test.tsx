@@ -39,4 +39,15 @@ describe("WelcomeBanner", () => {
     const { container } = render(<WelcomeBanner />);
     expect(container).toBeEmptyDOMElement();
   });
+  it("stays visible after a re-render with the ?welcome flag stripped (dashboard router.replace race)", () => {
+    // Mount with welcome=1 → banner appears
+    searchParamsMock.mockReturnValue(new URLSearchParams("welcome=1"));
+    const { rerender } = render(<WelcomeBanner />);
+    expect(screen.getByText(/Welcome to Lite/i)).toBeInTheDocument();
+    // Simulate dashboard's router.replace("/members/dashboard") stripping the param
+    searchParamsMock.mockReturnValue(new URLSearchParams(""));
+    rerender(<WelcomeBanner />);
+    // Regression: previously the banner unmounted on this re-render.
+    expect(screen.getByText(/Welcome to Lite/i)).toBeInTheDocument();
+  });
 });

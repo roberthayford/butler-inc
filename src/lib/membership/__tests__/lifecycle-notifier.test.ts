@@ -2,21 +2,22 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const sendMock = vi.fn();
-const insertMock = vi.fn();
+const upsertMock = vi.fn();
 const updateMock = vi.fn();
 const deleteMock = vi.fn();
 
 vi.mock("resend", () => ({ Resend: vi.fn().mockImplementation(() => ({ emails: { send: sendMock } })) }));
 
-function makeDb() {
-  insertMock.mockReturnValue({ select: () => ({ maybeSingle: () => Promise.resolve({ data: { event_id: "evt_1" } }) }) });
-  updateMock.mockReturnValue({ eq: () => ({ eq: () => ({ eq: () => Promise.resolve({ data: null }) }) }) });
-  deleteMock.mockReturnValue({ eq: () => ({ eq: () => ({ eq: () => Promise.resolve({ data: null }) }) }) });
+function makeDb(opts: { upsertResult?: { data: unknown; error: unknown } } = {}) {
+  const upsertResult = opts.upsertResult ?? { data: { event_id: "evt_1" }, error: null };
   return {
     from: vi.fn().mockImplementation((table: string) => {
       if (table !== "lifecycle_email_log") throw new Error("unexpected table " + table);
       return {
-        insert: (rows: unknown) => { insertMock(rows); return { select: () => ({ maybeSingle: () => Promise.resolve({ data: { event_id: "evt_1" } }) }) }; },
+        upsert: (rows: unknown, options: unknown) => {
+          upsertMock(rows, options);
+          return { select: () => ({ maybeSingle: () => Promise.resolve(upsertResult) }) };
+        },
         update: (patch: unknown) => { updateMock(patch); return { eq: () => ({ eq: () => ({ eq: () => Promise.resolve({ data: null }) }) }) }; },
         delete: () => { deleteMock(); return { eq: () => ({ eq: () => ({ eq: () => Promise.resolve({ data: null }) }) }) }; },
       };
@@ -54,19 +55,41 @@ describe("notifyLifecycle", () => {
     expect(adminCall?.[0].subject).toBe("New Lite member: Ada");
   });
 
-  it("skips Resend when the lifecycle_email_log insert returns no row (duplicate)", async () => {
-    const db = {
-      from: vi.fn().mockReturnValue({
-        insert: () => ({ select: () => ({ maybeSingle: () => Promise.resolve({ data: null }) }) }),
-      }),
-    };
+  it("skips Resend when the lifecycle_email_log upsert ignores a duplicate (data null, error null)", async () => {
     await notifyLifecycle({
       eventId: "evt_dup",
       transition: { kind: "paused", tierSlug: "lite" },
       recipient: { email: "ada@example.com", name: "Ada" },
       subscriptionId: "sub_abc",
-    }, db as never);
+    }, makeDb({ upsertResult: { data: null, error: null } }) as never);
     expect(sendMock).not.toHaveBeenCalled();
+  });
+
+  it("logs and skips Resend when the upsert errors (DB failure, distinct from duplicate)", async () => {
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    await notifyLifecycle({
+      eventId: "evt_dberr",
+      transition: { kind: "paused", tierSlug: "lite" },
+      recipient: { email: "ada@example.com", name: "Ada" },
+      subscriptionId: "sub_abc",
+    }, makeDb({ upsertResult: { data: null, error: { message: "connection reset", code: "08006" } } }) as never);
+    expect(sendMock).not.toHaveBeenCalled();
+    expect(errSpy).toHaveBeenCalledWith("lifecycle.email.log_insert_failed", expect.objectContaining({ eventId: "evt_dberr" }));
+    errSpy.mockRestore();
+  });
+
+  it("upsert is invoked with the correct onConflict + ignoreDuplicates options", async () => {
+    sendMock.mockResolvedValue({ data: { id: "x" }, error: null });
+    await notifyLifecycle({
+      eventId: "evt_opts",
+      transition: { kind: "paused", tierSlug: "lite" },
+      recipient: { email: "ada@example.com", name: "Ada" },
+      subscriptionId: "sub_abc",
+    }, makeDb() as never);
+    expect(upsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({ event_id: "evt_opts", transition: "paused", recipient: "member" }),
+      expect.objectContaining({ onConflict: "event_id,transition,recipient", ignoreDuplicates: true }),
+    );
   });
 
   it("on Resend 5xx, deletes the log row so Stripe retry can re-attempt", async () => {
@@ -92,6 +115,28 @@ describe("notifyLifecycle", () => {
     expect(deleteMock).not.toHaveBeenCalled();
     expect(errSpy).toHaveBeenCalledWith("lifecycle.email.permanent_failure", expect.any(Object));
     errSpy.mockRestore();
+  });
+
+  it("on Resend 429 (rate limit), treats as transient and deletes the log row so Stripe retry re-attempts", async () => {
+    sendMock.mockResolvedValue({ data: null, error: { name: "rate_limit_exceeded", message: "Too many", statusCode: 429 } });
+    await notifyLifecycle({
+      eventId: "evt_429",
+      transition: { kind: "paused", tierSlug: "lite" },
+      recipient: { email: "ada@example.com", name: "Ada" },
+      subscriptionId: "sub_abc",
+    }, makeDb() as never);
+    expect(deleteMock).toHaveBeenCalled();
+  });
+
+  it("on Resend 408 (request timeout), treats as transient and deletes the log row", async () => {
+    sendMock.mockResolvedValue({ data: null, error: { name: "timeout", message: "Timed out", statusCode: 408 } });
+    await notifyLifecycle({
+      eventId: "evt_408",
+      transition: { kind: "paused", tierSlug: "lite" },
+      recipient: { email: "ada@example.com", name: "Ada" },
+      subscriptionId: "sub_abc",
+    }, makeDb() as never);
+    expect(deleteMock).toHaveBeenCalled();
   });
 
   it("does not throw when transition is noop", async () => {

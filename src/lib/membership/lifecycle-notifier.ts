@@ -126,6 +126,10 @@ function adminRenderer(t: Transition, member: { email: string; name: string }, s
 
 function isPermanentResendError(error: { statusCode?: number } | null | undefined): boolean {
   if (!error?.statusCode) return false;
+  // 429 (rate limit) and 408 (request timeout) are transient — they should
+  // be retried via the next Stripe webhook delivery rather than kept as
+  // permanent failures that block all future attempts.
+  if (error.statusCode === 429 || error.statusCode === 408) return false;
   return error.statusCode >= 400 && error.statusCode < 500;
 }
 
@@ -139,12 +143,26 @@ async function sendOne(args: {
   rendered: RenderedEmail;
 }) {
   const { db, resend, eventId, transitionKind, recipientKind, to, rendered } = args;
+  // Use upsert with ignoreDuplicates so a PK conflict (idempotent replay)
+  // returns { data: null, error: null } and is cleanly distinguishable from
+  // a real insert failure (network, RLS, etc.) which surfaces in `error`.
   const insertRes = await db
     .from("lifecycle_email_log")
-    .insert({ event_id: eventId, transition: transitionKind, recipient: recipientKind })
+    .upsert(
+      { event_id: eventId, transition: transitionKind, recipient: recipientKind },
+      { onConflict: "event_id,transition,recipient", ignoreDuplicates: true },
+    )
     .select()
     .maybeSingle();
-  // On conflict the row is not returned; treat as already-sent and skip.
+  if (insertRes.error) {
+    // Real insert failure (network, RLS, schema). Surface it; the next
+    // Stripe webhook retry will attempt the insert again.
+    console.error("lifecycle.email.log_insert_failed", {
+      eventId, transitionKind, recipientKind, error: insertRes.error,
+    });
+    return;
+  }
+  // Duplicate (PK conflict) — already sent on a prior delivery; skip.
   if (!insertRes.data) return;
   const send = await resend.emails.send({
     from: FROM,

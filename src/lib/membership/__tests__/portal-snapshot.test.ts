@@ -18,8 +18,17 @@ describe("portal-snapshot", () => {
     sessionStorage.setItem("butlers.portal.snapshot.v1", "not-json");
     expect(consumePortalSnapshot()).toBeNull();
   });
-  it("diff: cancelled wins over other flips", () => {
+  it("diff: cancelled wins over other flips (from active)", () => {
     expect(diffSnapshot({ status: "active", tierSlug: "lite", cancelAtPeriodEnd: false }, { status: "cancelled", tierSlug: "lite", cancelAtPeriodEnd: false })).toEqual({ kind: "cancelled" });
+  });
+  it("diff: paused → cancelled is detected (regression: previously fell through to no_change)", () => {
+    expect(diffSnapshot({ status: "paused", tierSlug: "lite", cancelAtPeriodEnd: false }, { status: "cancelled", tierSlug: "lite", cancelAtPeriodEnd: false })).toEqual({ kind: "cancelled" });
+  });
+  it("diff: past_due → cancelled is detected", () => {
+    expect(diffSnapshot({ status: "past_due", tierSlug: "lite", cancelAtPeriodEnd: false }, { status: "cancelled", tierSlug: "lite", cancelAtPeriodEnd: false })).toEqual({ kind: "cancelled" });
+  });
+  it("diff: cancelled on both sides → no_change (already terminal)", () => {
+    expect(diffSnapshot({ status: "cancelled", tierSlug: "lite", cancelAtPeriodEnd: false }, { status: "cancelled", tierSlug: "lite", cancelAtPeriodEnd: false })).toEqual({ kind: "no_change" });
   });
   it("diff: cancel_scheduled", () => {
     expect(diffSnapshot({ status: "active", tierSlug: "lite", cancelAtPeriodEnd: false }, { status: "active", tierSlug: "lite", cancelAtPeriodEnd: true })).toEqual({ kind: "cancel_scheduled" });

@@ -30,7 +30,10 @@ export function consumePortalSnapshot(): Snapshot | null {
 }
 
 export function diffSnapshot(prev: Snapshot, curr: Snapshot): SnapshotDiff {
-  if (prev.status === "active" && curr.status === "cancelled") return { kind: "cancelled" };
+  // `!== "cancelled"` covers both active→cancelled AND paused→cancelled (a
+  // paused member who cancels via the portal). The earlier `=== "active"`
+  // check missed the paused case and fell through to "no_change".
+  if (prev.status !== "cancelled" && curr.status === "cancelled") return { kind: "cancelled" };
   if (!prev.cancelAtPeriodEnd && curr.cancelAtPeriodEnd) return { kind: "cancel_scheduled" };
   if (prev.cancelAtPeriodEnd && !curr.cancelAtPeriodEnd) return { kind: "cancel_reversed" };
   if (prev.tierSlug !== curr.tierSlug) return { kind: "plan_changed", toTier: curr.tierSlug };

@@ -89,6 +89,29 @@ describe("Settings page portal-return toast", () => {
     expect(toast.success).not.toHaveBeenCalled();
     expect(toast.info).not.toHaveBeenCalled();
   });
+
+  it("preserves the snapshot when membership is null on mount and only fires the toast once membership loads (regression: previously consumed and lost the snap)", async () => {
+    stashPortalSnapshot({ status: "active", tierSlug: "lite", cancelAtPeriodEnd: false });
+    // First render: membership query is still in-flight.
+    useMembershipMock.mockReturnValue({ membership: null });
+    const { rerender } = renderPage();
+    // Give the snapshot-consumption effect a tick to run.
+    await new Promise((r) => setTimeout(r, 30));
+    expect(toast.success).not.toHaveBeenCalled();
+    // Membership resolves: simulate React Query returning new data.
+    useMembershipMock.mockReturnValue({
+      membership: {
+        status: "active", tier: { slug: "pro", name: "Pro" },
+        billingPeriodEnd: "2026-06-25T00:00:00Z", cancelAtPeriodEnd: false,
+      },
+    });
+    rerender(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <SettingsPage />
+      </QueryClientProvider>
+    );
+    await vi.waitFor(() => expect(toast.success).toHaveBeenCalledWith("Plan changed to pro"));
+  });
 });
 
 describe("Settings page unauthenticated redirect", () => {

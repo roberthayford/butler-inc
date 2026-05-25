@@ -13,14 +13,24 @@ export function WelcomeBanner() {
   const { membership } = useMembership();
   const [dismissed, setDismissed] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  // Capture the ?welcome=1 flag once at mount. The dashboard page reads the
+  // same flag and calls router.replace('/members/dashboard') to strip it
+  // after firing the welcome toast — without this latch, the URL change
+  // would re-evaluate `sp.get("welcome")` and unmount this banner within a
+  // single render cycle, defeating its purpose.
+  const [shouldShow, setShouldShow] = useState(false);
 
   useEffect(() => {
     setHydrated(true);
     setDismissed(localStorage.getItem(KEY) === "1");
+    if (sp?.get("welcome") === "1") setShouldShow(true);
+    // Intentionally run once on mount — we WANT the URL strip to be ignored
+    // by this banner; visibility is controlled by `shouldShow` + `dismissed`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!hydrated) return null;
-  if (sp?.get("welcome") !== "1") return null;
+  if (!shouldShow) return null;
   if (dismissed) return null;
 
   const tierName = membership?.tier?.name ?? "Butlers Inc";

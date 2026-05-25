@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -74,35 +74,102 @@ export default function SettingsPage() {
     }
   }, [loading, user, router]);
 
+  // Refs that mirror the latest membership and user id so the polling loop
+  // below can read fresh values without re-creating the effect (the loop
+  // intentionally has stable scheduling; we just want each tick to see the
+  // most recent data after React Query refetches).
+  const membershipRef = useRef(membership);
+  membershipRef.current = membership;
+  const userIdRef = useRef(user?.id);
+  userIdRef.current = user?.id;
+
   // Portal-return diff toast — also declared before early returns per React #310.
+  //
+  // Implementation notes (each fixes a distinct bug found in code review):
+  // 1. Snapshot is consumed in its own effect that runs once on mount and
+  //    stashes the result in a ref. The polling effect then waits for
+  //    `membership` to be available before starting — so a slow membership
+  //    fetch no longer destroys the snapshot.
+  // 2. Polling depends on `Boolean(membership)` (stable boolean), not the
+  //    membership object itself, so it starts exactly once when membership
+  //    first becomes available and isn't torn down on every refetch.
+  // 3. `tick()` reads membership via `membershipRef.current` — fresh on
+  //    every iteration, not the stale closure capture.
+  // 4. The user id used in `invalidateQueries` reads from `userIdRef.current`,
+  //    matching whatever the real React Query key currently is.
+  // 5. The effect returns a cleanup that cancels any in-flight setTimeout
+  //    so orphan ticks don't fire after the component unmounts.
+  const snapshotRef = useRef<Snapshot | null>(null);
+  const snapshotConsumedRef = useRef(false);
+  const pollStartedRef = useRef(false);
+
   useEffect(() => {
-    const snap = consumePortalSnapshot();
+    if (snapshotConsumedRef.current) return;
+    snapshotConsumedRef.current = true;
+    snapshotRef.current = consumePortalSnapshot();
+  }, []);
+
+  useEffect(() => {
+    const snap = snapshotRef.current;
     if (!snap) return;
     if (!membership) return;
+    if (pollStartedRef.current) return;
+    pollStartedRef.current = true;
 
     let attempts = 0;
     const MAX = 6;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
     const tick = () => {
+      if (cancelled) return;
+      const m = membershipRef.current;
+      if (!m) {
+        timer = setTimeout(tick, 800);
+        return;
+      }
       const curr: Snapshot = {
-        status: membership.status,
-        tierSlug: membership.tier.slug,
-        cancelAtPeriodEnd: membership.cancelAtPeriodEnd,
+        status: m.status,
+        tierSlug: m.tier.slug,
+        cancelAtPeriodEnd: m.cancelAtPeriodEnd,
       };
       const diff = diffSnapshot(snap, curr);
-      if (diff.kind === "plan_changed") return toast.success(`Plan changed to ${curr.tierSlug}`);
-      if (diff.kind === "cancel_scheduled") return toast.success(`Cancellation scheduled for ${new Date(membership.billingPeriodEnd).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`);
-      if (diff.kind === "cancel_reversed") return toast.success("Cancellation reversed");
-      if (diff.kind === "cancelled") return toast.success("Membership cancelled");
+      if (diff.kind === "plan_changed") {
+        toast.success(`Plan changed to ${curr.tierSlug}`);
+        return;
+      }
+      if (diff.kind === "cancel_scheduled") {
+        toast.success(`Cancellation scheduled for ${new Date(m.billingPeriodEnd).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`);
+        return;
+      }
+      if (diff.kind === "cancel_reversed") {
+        toast.success("Cancellation reversed");
+        return;
+      }
+      if (diff.kind === "cancelled") {
+        toast.success("Membership cancelled");
+        return;
+      }
       attempts += 1;
       if (attempts >= MAX) {
-        return toast.info("We've updated your subscription. Check your email for confirmation.");
+        toast.info("We've updated your subscription. Check your email for confirmation.");
+        return;
       }
-      queryClient.invalidateQueries({ queryKey: ["membership", user?.id] });
-      setTimeout(tick, 800);
+      const uid = userIdRef.current;
+      if (uid) queryClient.invalidateQueries({ queryKey: ["membership", uid] });
+      timer = setTimeout(tick, 800);
     };
     tick();
+
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+    // Boolean(membership) flips false→true exactly once when the React Query
+    // first resolves; subsequent refetches don't change this and so don't
+    // re-trigger the effect.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [Boolean(membership)]);
 
   if (loading) {
     return (

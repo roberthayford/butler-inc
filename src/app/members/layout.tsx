@@ -13,11 +13,16 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
   return (
     <>
       <Header />
-      <MembershipBanner />
-      <Suspense fallback={null}>
-        <WelcomeBanner />
-      </Suspense>
-      <main className="pt-2">{children}</main>
+      {/* pt-20 clears the fixed Header (~80px). Banners live inside main so
+          their spacing is additive over pt-20, and the happy-path (no
+          banner) still gets the full header clearance. */}
+      <main className="pt-20">
+        <MembershipBanner />
+        <Suspense fallback={null}>
+          <WelcomeBanner />
+        </Suspense>
+        {children}
+      </main>
       <Footer />
     </>
   );
