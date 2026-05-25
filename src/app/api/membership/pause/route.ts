@@ -37,11 +37,15 @@ export async function POST(request: NextRequest) {
   }
   const { action } = parsed.data;
 
+  // .order().limit(1) defends against multi-row maybeSingle errors when a
+  // re-subscribed user has both a cancelled history row and a fresh active row.
   const { data: row } = await supabase
     .from("memberships")
     .select("id, user_id, status, stripe_subscription_id, cancel_at_period_end")
     .eq("user_id", user.id)
     .in("status", ["active", "past_due", "paused", "cancelled"])
+    .order("created_at", { ascending: false })
+    .limit(1)
     .maybeSingle();
 
   if (!row || !row.stripe_subscription_id) {

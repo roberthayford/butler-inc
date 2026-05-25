@@ -18,6 +18,8 @@ function mockAnonClient(result: { data: MembershipRow | null; error: { code?: st
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     in: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
     maybeSingle: vi.fn().mockResolvedValue(result),
   };
   return {
@@ -126,6 +128,20 @@ describe("readActiveMembership", () => {
     const chain = anon.from.mock.results[0]!.value;
     expect(chain.eq).toHaveBeenCalledWith("user_id", "user-1");
     expect(chain.in).toHaveBeenCalledWith("status", ["active", "past_due", "paused", "cancelled"]);
+  });
+
+  it("orders by created_at desc and limits to 1 row so multi-row (cancelled + active) doesn't crash maybeSingle", async () => {
+    // Migration 008's partial unique index doesn't cover cancelled rows, so a
+    // user who cancelled then re-subscribed legitimately has both a cancelled
+    // historical row and a fresh active row. .in() matches both; without
+    // .limit(1) the .maybeSingle() returns PGRST116 and the reader silently
+    // returns null (= membership disappears in dashboard / PlanManager).
+    const anon = mockAnonClient({ data: currentPeriodMembership, error: null });
+    const svc = mockServiceClient({ data: null, error: null });
+    await readActiveMembership("user-1", anon as never, svc as never, TODAY);
+    const chain = anon.from.mock.results[0]!.value;
+    expect(chain.order).toHaveBeenCalledWith("created_at", { ascending: false });
+    expect(chain.limit).toHaveBeenCalledWith(1);
   });
 
   it("returns past_due row for display but isActive=false (payment failing, member pricing suspended)", async () => {

@@ -28,11 +28,17 @@ export async function readActiveMembership(
 }> {
   if (!userId) return { membership: null, isActive: false };
 
+  // Cancelled rows accumulate as history (one per past subscription), so the
+  // .in() above can match multiple rows for a re-subscribed user. .limit(1)
+  // ensures .maybeSingle() never sees PGRST116; .order(created_at desc) makes
+  // "current state" deterministic — the most recent row wins.
   const { data, error } = await anonClient
     .from("memberships")
     .select("*, membership_tiers(*)")
     .eq("user_id", userId)
     .in("status", ["active", "past_due", "paused", "cancelled"])
+    .order("created_at", { ascending: false })
+    .limit(1)
     .maybeSingle();
 
   if (error || !data) return { membership: null, isActive: false };

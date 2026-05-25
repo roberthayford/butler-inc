@@ -18,7 +18,11 @@ vi.mock("@/lib/supabase/server", () => ({
     from: () => ({
       select: () => ({
         eq: () => ({
-          in: () => ({ maybeSingle: mockSupabaseSelect }),
+          in: () => ({
+            order: () => ({
+              limit: () => ({ maybeSingle: mockSupabaseSelect }),
+            }),
+          }),
         }),
       }),
       update: (patch: unknown) => ({
