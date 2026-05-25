@@ -2,11 +2,10 @@
 
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import type { User } from "@supabase/supabase-js";
 import { useAuth } from "@/context/AuthContext";
 import { isAdmin } from "@/lib/admin";
+import { useSignOutFlow } from "@/hooks/useSignOutFlow";
 
 function getInitials(user: User): string {
   const name = (user.user_metadata?.name as string | undefined)?.trim();
@@ -19,8 +18,8 @@ function getInitials(user: User): string {
 }
 
 export function AccountMenu() {
-  const { user, signOut } = useAuth();
-  const router = useRouter();
+  const { user } = useAuth();
+  const runSignOut = useSignOutFlow();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -57,13 +56,7 @@ export function AccountMenu() {
 
   const handleSignOut = async () => {
     setOpen(false);
-    try {
-      await signOut();
-      toast.success("Signed out");
-      router.push("/");
-    } catch {
-      toast.error("Sign out failed. Try again.");
-    }
+    await runSignOut();
   };
 
   const handleMenuKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {

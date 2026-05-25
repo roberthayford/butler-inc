@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { isAdmin } from "@/lib/admin";
+import { useSignOutFlow } from "@/hooks/useSignOutFlow";
 import { Menu, X } from "lucide-react";
 import { AccountMenu } from "./AccountMenu";
 
@@ -173,18 +173,11 @@ function MobileAccountSection({
   showAdmin: boolean;
   onItemClick: () => void;
 }) {
-  const { signOut } = useAuth();
-  const router = useRouter();
+  const runSignOut = useSignOutFlow();
 
   const handleSignOut = async () => {
     onItemClick();
-    try {
-      await signOut();
-      toast.success("Signed out");
-      router.push("/");
-    } catch {
-      toast.error("Sign out failed. Try again.");
-    }
+    await runSignOut();
   };
 
   return (

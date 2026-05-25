@@ -1,12 +1,24 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen } from "@/test/test-utils";
+import { render, screen, fireEvent, waitFor } from "@/test/test-utils";
 import * as navigation from "next/navigation";
 import { Header } from "../Header";
 
-const { pathnameRef, useAuthMock, isAdminMock } = vi.hoisted(() => ({
+const {
+  pathnameRef,
+  useAuthMock,
+  isAdminMock,
+  mockSignOut,
+  mockPush,
+  toastSuccess,
+  toastError,
+} = vi.hoisted(() => ({
   pathnameRef: { current: "/" },
   useAuthMock: vi.fn(),
   isAdminMock: vi.fn(),
+  mockSignOut: vi.fn(),
+  mockPush: vi.fn(),
+  toastSuccess: vi.fn(),
+  toastError: vi.fn(),
 }));
 
 vi.mock("@/context/AuthContext", () => ({
@@ -18,25 +30,26 @@ vi.mock("@/lib/admin", () => ({
 }));
 
 vi.mock("sonner", () => ({
-  toast: { success: vi.fn(), error: vi.fn() },
+  toast: { success: toastSuccess, error: toastError },
 }));
 
-const loggedOut = { user: null, loading: false, signOut: vi.fn() };
+const loggedOut = { user: null, loading: false, signOut: mockSignOut };
 const loggedIn = {
   user: { email: "ada@example.com", user_metadata: { name: "Ada" } },
   loading: false,
-  signOut: vi.fn(),
+  signOut: mockSignOut,
 };
-const loading = { user: null, loading: true, signOut: vi.fn() };
+const loading = { user: null, loading: true, signOut: mockSignOut };
 
 describe("Header", () => {
   beforeEach(() => {
     pathnameRef.current = "/";
     vi.clearAllMocks();
     isAdminMock.mockReturnValue(false);
+    mockSignOut.mockResolvedValue(undefined);
     vi.spyOn(navigation, "usePathname").mockImplementation(() => pathnameRef.current);
     vi.spyOn(navigation, "useRouter").mockReturnValue({
-      push: vi.fn(),
+      push: mockPush,
       replace: vi.fn(),
       back: vi.fn(),
       forward: vi.fn(),
@@ -106,5 +119,16 @@ describe("Header", () => {
     render(<Header />);
     expect(screen.queryByRole("link", { name: /sign in/i })).toBeNull();
     expect(screen.queryByRole("button", { name: /account menu/i })).toBeNull();
+  });
+
+  it("mobile Sign Out calls signOut, toasts success, and pushes to /", async () => {
+    useAuthMock.mockReturnValue(loggedIn);
+    render(<Header />);
+    fireEvent.click(screen.getByRole("button", { name: /open menu/i }));
+    const signOutButton = await screen.findByRole("button", { name: /sign out/i });
+    fireEvent.click(signOutButton);
+    await waitFor(() => expect(mockSignOut).toHaveBeenCalledTimes(1));
+    expect(toastSuccess).toHaveBeenCalledWith("Signed out");
+    expect(mockPush).toHaveBeenCalledWith("/");
   });
 });
