@@ -46,4 +46,19 @@ describe("hasSufficientMemberHours", () => {
     const pastDue = { personal_hours_total: 15, personal_hours_used: 5, status: "past_due" };
     expect(hasSufficientMemberHours(pastDue, 1)).toBe(false);
   });
+
+  it("(Phase B) false when status is paused, even if hours remain", () => {
+    const paused = { personal_hours_total: 15, personal_hours_used: 5, status: "paused" };
+    expect(hasSufficientMemberHours(paused, 1)).toBe(false);
+  });
+
+  it("(Phase B) false when status is cancelled, even if hours remain", () => {
+    const cancelled = { personal_hours_total: 15, personal_hours_used: 5, status: "cancelled" };
+    expect(hasSufficientMemberHours(cancelled, 1)).toBe(false);
+  });
+
+  it("(Phase B) true when status is active and hours remain (explicit active case)", () => {
+    const active = { personal_hours_total: 15, personal_hours_used: 5, status: "active" };
+    expect(hasSufficientMemberHours(active, 1)).toBe(true);
+  });
 });

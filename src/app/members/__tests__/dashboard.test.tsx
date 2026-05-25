@@ -165,3 +165,85 @@ describe("Dashboard — no membership", () => {
     expect(screen.getByRole("link", { name: /see plans/i })).toHaveAttribute("href", "/membership");
   });
 });
+
+// Code-review fix #4: distinguish paused / cancelled / past_due from "no membership".
+// Previously all four collapsed into the generic "Choose a plan" CTA, which on a
+// paused row led the user to /membership → fresh checkout → duplicate row (triggers
+// the multi-row trap from finding #3).
+
+function makeNonActiveMembership(status: "paused" | "cancelled" | "past_due") {
+  return {
+    id: "mem-1",
+    userId: "user-1",
+    tierId: "tier-frequent",
+    tier: {
+      id: "tier-frequent", slug: "frequent", name: "Frequent",
+      description: "", personalHoursIncluded: 20, virtualTasksIncluded: 10,
+      monthlyPrice: 1000, displayOrder: 2, isActive: true,
+    },
+    personalHoursTotal: 20, personalHoursUsed: 7,
+    virtualTasksTotal: 10, virtualTasksUsed: 3,
+    billingPeriodStart: "2026-05-01", billingPeriodEnd: "2026-05-31",
+    status,
+    createdAt: "2026-04-30T00:00:00Z", updatedAt: "2026-05-20T00:00:00Z",
+  };
+}
+
+describe("Dashboard — paused membership", () => {
+  beforeEach(() => {
+    mockMembership.mockImplementation(() => ({
+      membership: makeNonActiveMembership("paused") as unknown as ReturnType<typeof mockMembership>["membership"],
+      isLoading: false,
+      isMember: false,
+      personalHoursRemaining: 13,
+      virtualTasksRemaining: 7,
+    }));
+  });
+
+  it("renders a 'Membership paused' panel pointing at /members/settings (NOT /membership)", async () => {
+    render(<MemberDashboard />);
+    expect(await screen.findByText(/Membership paused/i)).toBeInTheDocument();
+    const link = screen.getByRole("link", { name: /Manage in settings/i });
+    expect(link).toHaveAttribute("href", "/members/settings");
+    // Critically: must NOT render the generic "Choose a plan" — that would lead
+    // the user to create a duplicate subscription.
+    expect(screen.queryByText(/choose a plan/i)).not.toBeInTheDocument();
+  });
+});
+
+describe("Dashboard — cancelled membership", () => {
+  beforeEach(() => {
+    mockMembership.mockImplementation(() => ({
+      membership: makeNonActiveMembership("cancelled") as unknown as ReturnType<typeof mockMembership>["membership"],
+      isLoading: false,
+      isMember: false,
+      personalHoursRemaining: 0,
+      virtualTasksRemaining: 0,
+    }));
+  });
+
+  it("renders a 'Membership ended' panel with a 'Subscribe again' link to /membership", async () => {
+    render(<MemberDashboard />);
+    expect(await screen.findByText(/Membership ended/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Subscribe again/i })).toHaveAttribute("href", "/membership");
+  });
+});
+
+describe("Dashboard — past_due membership", () => {
+  beforeEach(() => {
+    mockMembership.mockImplementation(() => ({
+      membership: makeNonActiveMembership("past_due") as unknown as ReturnType<typeof mockMembership>["membership"],
+      isLoading: false,
+      isMember: false,
+      personalHoursRemaining: 13,
+      virtualTasksRemaining: 7,
+    }));
+  });
+
+  it("renders a payment-issue panel pointing at /members/settings", async () => {
+    render(<MemberDashboard />);
+    expect(await screen.findByText(/couldn.t charge your card/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Update payment/i })).toHaveAttribute("href", "/members/settings");
+    expect(screen.queryByText(/choose a plan/i)).not.toBeInTheDocument();
+  });
+});

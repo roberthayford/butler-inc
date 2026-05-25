@@ -28,11 +28,17 @@ export async function readActiveMembership(
 }> {
   if (!userId) return { membership: null, isActive: false };
 
+  // Cancelled rows accumulate as history (one per past subscription), so the
+  // .in() above can match multiple rows for a re-subscribed user. .limit(1)
+  // ensures .maybeSingle() never sees PGRST116; .order(created_at desc) makes
+  // "current state" deterministic — the most recent row wins.
   const { data, error } = await anonClient
     .from("memberships")
     .select("*, membership_tiers(*)")
     .eq("user_id", userId)
-    .in("status", ["active", "past_due"])
+    .in("status", ["active", "past_due", "paused", "cancelled"])
+    .order("created_at", { ascending: false })
+    .limit(1)
     .maybeSingle();
 
   if (error || !data) return { membership: null, isActive: false };
@@ -44,6 +50,7 @@ export async function readActiveMembership(
     virtual_tasks_used: number;
     billing_period_start: string;
     billing_period_end: string;
+    stripe_subscription_id?: string | null;
   };
 
   // past_due: return the row for dashboard display but never grant member
@@ -52,12 +59,27 @@ export async function readActiveMembership(
     return { membership: row, isActive: false };
   }
 
+  // paused / cancelled: visible to PlanManager but not "active" for any
+  // pricing or booking-gate purpose. No rollover, no member benefits.
+  if (row.status === "paused" || row.status === "cancelled") {
+    return { membership: row, isActive: false };
+  }
+
   // Period covers today → no reset needed
   if (!hasPeriodExpired(row.billing_period_end, today)) {
     return { membership: row, isActive: true };
   }
 
-  // Lazy reset via service client (bypasses RLS)
+  // Stripe-managed memberships: the invoice.paid webhook is the source of
+  // truth for period rollover. Skipping lazy rollover here preserves
+  // personal_hours_used across pause/resume cycles (where billing_period_end
+  // can drift into the past during the pause). Webhook will reconcile.
+  if (row.stripe_subscription_id) {
+    return { membership: row, isActive: true };
+  }
+
+  // Lazy reset via service client (bypasses RLS) — admin-created fallback
+  // for rows with no Stripe subscription to drive period rollover.
   const reset = resetUsageForNewPeriod(
     {
       personalHoursUsed: row.personal_hours_used,

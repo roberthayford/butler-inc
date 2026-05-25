@@ -81,7 +81,14 @@ function statusFromStripe(s: SubscriptionData["status"]): "active" | "paused" | 
 
 async function findRowBySub(db: DB, subscriptionId: string) {
   const { data } = await db.from("memberships").select().eq("stripe_subscription_id", subscriptionId).maybeSingle();
-  return data as { id: string; updated_at: string; tier_id: string | null; status: string } | null;
+  return data as {
+    id: string;
+    updated_at: string;
+    tier_id: string | null;
+    status: string;
+    personal_hours_used: number;
+    virtual_tasks_used: number;
+  } | null;
 }
 
 export async function handleSubscriptionUpdated(event: Extract<WebhookEvent, { type: "customer.subscription.updated" }>, db: DB) {
@@ -94,18 +101,37 @@ export async function handleSubscriptionUpdated(event: Extract<WebhookEvent, { t
 
   const newPriceId = d.items.data[0]?.price.id;
   const newTier = newPriceId ? await lookupTierByPriceId(db, newPriceId) : null;
+  const newStatus = statusFromStripe(d.status);
 
   const patch: Record<string, unknown> = {
-    status: statusFromStripe(d.status),
+    status: newStatus,
     cancel_at_period_end: d.cancel_at_period_end,
     billing_period_start: new Date(d.current_period_start * 1000).toISOString(),
     billing_period_end: new Date(d.current_period_end * 1000).toISOString(),
     updated_at: new Date().toISOString(),
   };
+
+  // paused_at lifecycle: stamp on transition INTO paused, clear on any
+  // transition OUT of paused. Mirrors handleSubscriptionDeleted's clear.
+  if (newStatus === "paused" && row.status !== "paused") {
+    patch.paused_at = new Date().toISOString();
+  } else if (newStatus !== "paused" && row.status === "paused") {
+    patch.paused_at = null;
+  }
+
   if (newTier && newTier.id !== row.tier_id) {
     patch.tier_id = newTier.id;
     patch.personal_hours_total = newTier.personal_hours_included;
     patch.virtual_tasks_total = newTier.virtual_tasks_included;
+    // Clamp usage to the new (potentially lower) limits — the CHECK constraint
+    // (migration 005) forbids personal_hours_used > personal_hours_total, so
+    // a downgrade without clamping would silently fail the UPDATE.
+    if (row.personal_hours_used > newTier.personal_hours_included) {
+      patch.personal_hours_used = newTier.personal_hours_included;
+    }
+    if (row.virtual_tasks_used > newTier.virtual_tasks_included) {
+      patch.virtual_tasks_used = newTier.virtual_tasks_included;
+    }
   }
   await db.from("memberships").update(patch).eq("id", row.id);
 }
@@ -148,5 +174,11 @@ export async function handleInvoicePaymentFailed(event: Extract<WebhookEvent, { 
   if (!d.subscription) return;
   const row = await findRowBySub(db, d.subscription);
   if (!row) return;
+
+  // Stale-event guard — mirrors handleSubscriptionUpdated / handleInvoicePaid.
+  // Out-of-order delivery (failed payment retried after a later successful
+  // payment) must not flip a healthy active row back to past_due.
+  if (new Date(row.updated_at).getTime() / 1000 > event.created) return;
+
   await db.from("memberships").update({ status: "past_due", updated_at: new Date().toISOString() }).eq("id", row.id);
 }

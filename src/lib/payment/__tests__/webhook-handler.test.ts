@@ -151,6 +151,126 @@ describe("handleSubscriptionUpdated", () => {
     await handleSubscriptionUpdated(makeSubEvent("customer.subscription.updated", { created: now - 100, cancel_at_period_end: true }), db as never);
     expect(db.memberships[0].cancel_at_period_end).toBe(false);
   });
+
+  // ── Phase B pins ──
+  // These tests pin behaviour the Phase A handler already implements, so the
+  // future PlanManager surface (which depends on these transitions) does not
+  // silently regress.
+
+  it("(Phase B) cancel_at_period_end=false reactivates a pending-cancel sub", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({ id: "m1", user_id: "u1", stripe_subscription_id: "sub_1", status: "active", cancel_at_period_end: true, updated_at: new Date(0).toISOString() });
+    await handleSubscriptionUpdated(makeSubEvent("customer.subscription.updated", { cancel_at_period_end: false }), db as never);
+    expect(db.memberships[0]).toMatchObject({ cancel_at_period_end: false, status: "active" });
+  });
+
+  it("(Phase B) Stripe status='paused' is mapped to local status='paused'", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({ id: "m1", user_id: "u1", stripe_subscription_id: "sub_1", status: "active", cancel_at_period_end: false, updated_at: new Date(0).toISOString() });
+    await handleSubscriptionUpdated(makeSubEvent("customer.subscription.updated", { status: "paused" }), db as never);
+    expect(db.memberships[0].status).toBe("paused");
+  });
+
+  it("(Phase B) Stripe status flips paused -> active on resume", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({ id: "m1", user_id: "u1", stripe_subscription_id: "sub_1", status: "paused", cancel_at_period_end: false, updated_at: new Date(0).toISOString() });
+    await handleSubscriptionUpdated(makeSubEvent("customer.subscription.updated", { status: "active" }), db as never);
+    expect(db.memberships[0].status).toBe("active");
+  });
+
+  it("(Phase B) idempotent: replaying the same updated event leaves state unchanged after the first apply", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({ id: "m1", user_id: "u1", stripe_subscription_id: "sub_1", status: "active", cancel_at_period_end: false, updated_at: new Date(0).toISOString() });
+    const event = makeSubEvent("customer.subscription.updated", { cancel_at_period_end: true });
+    await handleSubscriptionUpdated(event, db as never);
+    const afterFirst = { ...db.memberships[0] };
+    await handleSubscriptionUpdated(event, db as never);
+    // Second apply may overwrite updated_at but the meaningful fields are identical
+    expect(db.memberships[0].cancel_at_period_end).toBe(afterFirst.cancel_at_period_end);
+    expect(db.memberships[0].status).toBe(afterFirst.status);
+  });
+
+  // ── Code-review fix #8 ──
+  it("clears paused_at when status transitions paused -> active (resume via Stripe Portal)", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({
+      id: "m1", user_id: "u1", stripe_subscription_id: "sub_1",
+      status: "paused", paused_at: "2026-05-20T12:00:00.000Z",
+      cancel_at_period_end: false, updated_at: new Date(0).toISOString(),
+    });
+    await handleSubscriptionUpdated(makeSubEvent("customer.subscription.updated", { status: "active" }), db as never);
+    expect(db.memberships[0].status).toBe("active");
+    expect(db.memberships[0].paused_at).toBeNull();
+  });
+
+  it("stamps paused_at when status transitions active -> paused (pause via Stripe Portal)", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({
+      id: "m1", user_id: "u1", stripe_subscription_id: "sub_1",
+      status: "active", paused_at: null,
+      cancel_at_period_end: false, updated_at: new Date(0).toISOString(),
+    });
+    await handleSubscriptionUpdated(makeSubEvent("customer.subscription.updated", { status: "paused" }), db as never);
+    expect(db.memberships[0].status).toBe("paused");
+    expect(typeof db.memberships[0].paused_at).toBe("string");
+  });
+
+  // ── Code-review fix #5 ──
+  it("clamps personal_hours_used and virtual_tasks_used when downgrading to a smaller tier", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({
+      id: "m1", user_id: "u1", stripe_subscription_id: "sub_1",
+      tier_id: "tier-pro", status: "active", cancel_at_period_end: false,
+      personal_hours_used: 30, virtual_tasks_used: 12,
+      updated_at: new Date(0).toISOString(),
+    });
+    // Pro -> Lite. Lite has personal_hours_included=10, virtual_tasks_included=5.
+    await handleSubscriptionUpdated(
+      makeSubEvent("customer.subscription.updated", { items: { data: [{ price: { id: "mock_lite" } }] } }),
+      db as never,
+    );
+    expect(db.memberships[0].tier_id).toBe("tier-lite");
+    expect(db.memberships[0].personal_hours_total).toBe(10);
+    expect(db.memberships[0].personal_hours_used).toBe(10); // clamped from 30
+    expect(db.memberships[0].virtual_tasks_total).toBe(5);
+    expect(db.memberships[0].virtual_tasks_used).toBe(5); // clamped from 12
+  });
+
+  it("does NOT clamp when the new tier has equal-or-greater allowance (upgrade is safe)", async () => {
+    const db = makeSupabaseFake();
+    db.memberships.push({
+      id: "m1", user_id: "u1", stripe_subscription_id: "sub_1",
+      tier_id: "tier-lite", status: "active", cancel_at_period_end: false,
+      personal_hours_used: 8, virtual_tasks_used: 4,
+      updated_at: new Date(0).toISOString(),
+    });
+    // Lite -> Frequent (20h / 10 tasks). Used values (8, 4) fit; no clamp needed.
+    await handleSubscriptionUpdated(
+      makeSubEvent("customer.subscription.updated", { items: { data: [{ price: { id: "mock_frequent" } }] } }),
+      db as never,
+    );
+    expect(db.memberships[0].tier_id).toBe("tier-frequent");
+    expect(db.memberships[0].personal_hours_used).toBe(8);
+    expect(db.memberships[0].virtual_tasks_used).toBe(4);
+  });
+});
+
+// ── Code-review fix #6 ──
+describe("handleInvoicePaymentFailed stale-event guard", () => {
+  it("ignores stale invoice.payment_failed events (event.created older than row's updated_at)", async () => {
+    const db = makeSupabaseFake();
+    const now = Math.floor(Date.now() / 1000);
+    db.memberships.push({
+      id: "m1", user_id: "u1", stripe_subscription_id: "sub_1",
+      status: "active", updated_at: new Date(now * 1000).toISOString(),
+    });
+    // Stale event from before row.updated_at — must NOT flip status to past_due.
+    await handleInvoicePaymentFailed(
+      makeInvoiceEvent("invoice.payment_failed", { created: now - 100 }),
+      db as never,
+    );
+    expect(db.memberships[0].status).toBe("active");
+  });
 });
 
 describe("handleSubscriptionDeleted", () => {
