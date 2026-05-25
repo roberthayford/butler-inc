@@ -11,14 +11,14 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn(), info: vi.fn(), error: vi.f
 const useMembershipMock = vi.fn();
 vi.mock("@/hooks/useMembership", () => ({ useMembership: () => useMembershipMock() }));
 
-vi.mock("@/context/AuthContext", () => ({
-  useAuth: () => ({
-    user: { id: "u1", email: "ada@example.com", user_metadata: { name: "Ada", phone: "" } },
-    loading: false,
-    supabase: { auth: { updateUser: vi.fn() } },
-  }),
+const useAuthMock = vi.fn();
+vi.mock("@/context/AuthContext", () => ({ useAuth: () => useAuthMock() }));
+
+const routerPushMock = vi.fn();
+const routerReplaceMock = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: routerPushMock, replace: routerReplaceMock }),
 }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), replace: vi.fn() }) }));
 
 vi.mock("react-hook-form", async (importOriginal) => {
   const actual = await importOriginal<typeof import("react-hook-form")>();
@@ -45,7 +45,14 @@ function renderPage() {
   return render(<QueryClientProvider client={qc}><SettingsPage /></QueryClientProvider>);
 }
 
-beforeEach(() => sessionStorage.clear());
+beforeEach(() => {
+  sessionStorage.clear();
+  useAuthMock.mockReturnValue({
+    user: { id: "u1", email: "ada@example.com", user_metadata: { name: "Ada", phone: "" } },
+    loading: false,
+    supabase: { auth: { updateUser: vi.fn() } },
+  });
+});
 afterEach(() => vi.clearAllMocks());
 
 describe("Settings page portal-return toast", () => {
@@ -81,5 +88,37 @@ describe("Settings page portal-return toast", () => {
     await new Promise((r) => setTimeout(r, 50));
     expect(toast.success).not.toHaveBeenCalled();
     expect(toast.info).not.toHaveBeenCalled();
+  });
+});
+
+describe("Settings page unauthenticated redirect", () => {
+  // Note: jsdom + vi.fn() router cannot reproduce the "Cannot update a
+  // component while rendering" warning React fires when router.push() is
+  // called synchronously during render — the mocked push is a plain
+  // tracked function, not a real Router state update. These tests
+  // regress on the behaviour (a redirect happens, and only after the
+  // loading flag resolves), not on the precise timing. Browser QA
+  // confirms the warning is gone with the useEffect-based fix.
+  it("redirects unauthenticated users to /members/login", async () => {
+    useAuthMock.mockReturnValue({
+      user: null,
+      loading: false,
+      supabase: { auth: { updateUser: vi.fn() } },
+    });
+    useMembershipMock.mockReturnValue({ membership: null });
+    renderPage();
+    await vi.waitFor(() => expect(routerPushMock).toHaveBeenCalledWith("/members/login"));
+  });
+
+  it("does not redirect while auth is still loading", async () => {
+    useAuthMock.mockReturnValue({
+      user: null,
+      loading: true,
+      supabase: { auth: { updateUser: vi.fn() } },
+    });
+    useMembershipMock.mockReturnValue({ membership: null });
+    renderPage();
+    await new Promise((r) => setTimeout(r, 30));
+    expect(routerPushMock).not.toHaveBeenCalled();
   });
 });

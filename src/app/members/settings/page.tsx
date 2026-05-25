@@ -63,6 +63,17 @@ export default function SettingsPage() {
     }
   }, [resetProfileForm, userId, userName, userPhone]);
 
+  // Redirect unauthenticated users — must be in an effect, not during render.
+  // Calling router.push() synchronously during render trips React's
+  // "Cannot update a component while rendering a different component" warning
+  // and is a Rules-of-React violation. The hook is declared above the early
+  // returns to keep the hook list stable across loading flips (React #310).
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/members/login");
+    }
+  }, [loading, user, router]);
+
   // Portal-return diff toast — also declared before early returns per React #310.
   useEffect(() => {
     const snap = consumePortalSnapshot();
@@ -102,7 +113,8 @@ export default function SettingsPage() {
   }
 
   if (!user) {
-    router.push("/members/login");
+    // The redirect is dispatched from the useEffect above. Render nothing
+    // while the navigation kicks in.
     return null;
   }
 
