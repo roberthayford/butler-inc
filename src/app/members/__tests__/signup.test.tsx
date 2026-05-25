@@ -25,7 +25,7 @@ describe("SignupPage", () => {
     );
   });
 
-  it("redirects to ?next= after successful signup", async () => {
+  it("after successful signup, navigates to /members/signup/check-email with email and next params", async () => {
     global.fetch = vi.fn(async () => ({ ok: true, json: async () => ({ ok: true }) } as Response));
     render(<SignupPage />);
     fireEvent.change(screen.getByLabelText(/full name/i), { target: { value: "Jane" } });
@@ -33,6 +33,28 @@ describe("SignupPage", () => {
     fireEvent.change(screen.getByLabelText(/password/i), { target: { value: "supersecret" } });
     fireEvent.change(screen.getByLabelText(/phone/i), { target: { value: "07123456789" } });
     fireEvent.click(screen.getByRole("button", { name: /create account/i }));
-    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/membership/checkout/lite"));
+    await waitFor(() =>
+      expect(mockPush).toHaveBeenCalledWith(
+        "/members/signup/check-email?email=jane%40example.com&next=%2Fmembership%2Fcheckout%2Flite",
+      ),
+    );
+  });
+
+  it("after successful signup with no next param, navigates to check-email with only email", async () => {
+    vi.spyOn(navigation, "useSearchParams").mockReturnValue(
+      new URLSearchParams("") as unknown as ReturnType<typeof navigation.useSearchParams>,
+    );
+    global.fetch = vi.fn(async () => ({ ok: true, json: async () => ({ ok: true }) } as Response));
+    render(<SignupPage />);
+    fireEvent.change(screen.getByLabelText(/full name/i), { target: { value: "Jane" } });
+    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: "jane@example.com" } });
+    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: "supersecret" } });
+    fireEvent.change(screen.getByLabelText(/phone/i), { target: { value: "07123456789" } });
+    fireEvent.click(screen.getByRole("button", { name: /create account/i }));
+    await waitFor(() =>
+      expect(mockPush).toHaveBeenCalledWith(
+        "/members/signup/check-email?email=jane%40example.com",
+      ),
+    );
   });
 });

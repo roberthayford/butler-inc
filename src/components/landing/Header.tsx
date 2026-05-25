@@ -10,13 +10,19 @@ import { useSignOutFlow } from "@/hooks/useSignOutFlow";
 import { Menu, X } from "lucide-react";
 import { AccountMenu } from "./AccountMenu";
 
+const AUTH_PAGE_PATHS: ReadonlySet<string> = new Set([
+  "/members/login",
+  "/members/signup",
+  "/members/signup/check-email",
+]);
+
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, loading } = useAuth();
   const showAdmin = !loading && user && isAdmin(user.email ?? undefined);
   const pathname = usePathname();
-  const suppressAuthCTAs = pathname === "/members/login" || pathname === "/members/signup";
+  const suppressAuthCTAs = AUTH_PAGE_PATHS.has(pathname);
   const menuRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
 
