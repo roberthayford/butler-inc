@@ -24,6 +24,7 @@ Required in `.env.local`:
 - `RESEND_API_KEY` — transactional email
 - `DEV_BYPASS_DB=true` — use in-memory booking store instead of Supabase (dev only)
 - `ADMIN_EMAILS` — comma-separated admin emails (optional, has defaults in `src/lib/admin.ts`)
+- `MEMBERSHIP_ADMIN_NOTIFY_EMAIL` — admin recipient for membership lifecycle notifications (new member, payment failed, pause, cancellation scheduled, cancellation final). Resolution order: this var, then `BOOKING_ADMIN_NOTIFY_EMAIL`, then first email in `ADMIN_EMAILS`.
 - `NEXT_PUBLIC_SITE_URL` — canonical site origin used as fallback for Supabase `emailRedirectTo`. Set **per Vercel environment** (Production: `https://butlersinc.com`, Preview: `https://staging.butlersinc.com`). Server route handlers prefer the incoming request origin and fall back to this var via `getSiteUrl()` in `src/lib/site-url.ts`.
 - `PAYMENT_GATEWAY` — `mock` (default) or `stripe`. Selects which `PaymentGateway` implementation `getPaymentGateway()` returns. `/api/webhooks/stripe` now **requires** an explicit value (returns 500 if unset, preventing silent downgrade to mock mode in production).
 - `MOCK_WEBHOOK_SECRET` — **required** in every environment that runs `PAYMENT_GATEWAY=mock` (local, Preview, Staging). Used by `signMockWebhook()` in `/payment/simulate-portal` to sign synthetic events with HMAC-SHA256, and verified by `verifyMockWebhook()` in `/api/webhooks/stripe`. **Closes the pre-fix accept-any-value `x-mock-signature: 1` gate** that let attackers forge events on internet-facing staging. Generate per env: `openssl rand -hex 32`. Treat as a secret, do not commit.
@@ -117,9 +118,24 @@ src/components/
   landing/                      # Header, Hero, Footer (4-col / 9-link), HowItWorks, ButlerCategoryGrid
   booking/                      # BookingFlow, BookingForm, ServiceOptionSelector, PricedBookingForm
   membership/                   # TierBadge, UsageGauge, VirtualRequestForm, TierCard, TierComparison, PlanManager (7-variant settings panel)
+  members/
+    MembershipBanner.tsx        # Persistent banner for past_due / paused / pending-cancel; mounted from members/layout
+    WelcomeBanner.tsx           # One-shot welcome card on ?welcome=1
   admin/                        # AdminTabs, MemberManager, ButlerContentEditor
   genie/                        # GenieDrawer, GenieStickyBar (persistent CTA)
   ui/                           # shadcn primitives
+
+src/emails/
+  membership/
+    components/MembershipEmailLayout.tsx
+    WelcomeEmail.tsx / RenewalReceiptEmail.tsx / PaymentFailedEmail.tsx /
+    PauseConfirmedEmail.tsx / ResumeConfirmedEmail.tsx /
+    CancellationScheduledEmail.tsx / CancellationFinalEmail.tsx /
+    PlanChangedEmail.tsx
+    admin/AdminEmailLayout.tsx
+    admin/NewMemberNotification.tsx / PaymentFailedNotification.tsx /
+    admin/PauseNotification.tsx / CancelScheduledNotification.tsx /
+    admin/CancellationFinalNotification.tsx
 
 src/data/                       # Static config
   services.ts                   # Service definitions
@@ -135,6 +151,10 @@ src/lib/
   payment/                      # gateway.ts (provider pattern), mock-gateway.ts, stripe-gateway.ts (stub), types.ts (PaymentGateway + WebhookEvent union), webhook-handler.ts (5 handlers), booking-repository.ts (atomic hours decrement, dev singleton on globalThis), require-gateway-configured.ts (shared 500 guard for routes that hit the gateway)
   pricing/                      # calculate-price.ts (member-aware), time-slots.ts, booking-reference.ts
   membership/                   # membership-reader.ts (server-side read), period-rollover.ts (UIOLO), member-hours.ts (atomic decrement helper), tier-pricing.ts (Stripe price ID resolver)
+                                #   lifecycle-transitions.ts      — Pure transition detection from webhook event + row diff
+                                #   lifecycle-notifier.ts         — Orchestrator: idempotency log + Resend send + error handling
+                                #   admin-recipient.ts            — MEMBERSHIP_ADMIN_NOTIFY_EMAIL → BOOKING_ADMIN_NOTIFY_EMAIL → ADMIN_EMAILS[0]
+                                #   portal-snapshot.ts            — sessionStorage pre/post-portal snapshot + diff
   dates/                        # today-uk.ts — UK-aware "today" for period-boundary logic
   rate-limit.ts                 # In-memory per-IP rate limiting for API routes
   admin.ts                      # Admin email allowlist + isAdmin()
@@ -176,6 +196,9 @@ docs/plans/                     # Design docs and implementation plans
 - **DevBookingStore singleton on `globalThis`:** `getBookingRepository()` pins the dev in-memory store on `globalThis.__butlersDevStore` (not a module-level `let`) so the same instance is reused across route handlers in Next.js App Router dev mode. Without this, `/api/create-checkout-session` and `/api/webhooks/payment-complete` see different stores and bookings vanish between requests.
 - **Route-level error JSON envelope:** `/api/create-checkout-session` and `/api/bookings` wrap their entire handler body in a try/catch that always returns JSON 500 with the underlying error message (also logged via `console.error`). Pairs with the client-side `readErrorMessage` helper in `BookingFlow.tsx` which falls back to `Failed (HTTP <status>)` when the response body isn't JSON. Prevents Safari's cryptic `JSON.parse → "The string did not match the expected pattern"` toast when an upstream throws synchronously.
 - **Self-serve plan management (Phase B):** `src/components/membership/PlanManager.tsx` derives one of 7 view variants from the single `Membership` row (none / active-self / active-admin / pending-cancel / paused / past_due / cancelled). Portal actions (Manage / Reactivate / Update payment) hit `POST /api/membership/portal` which returns a Stripe Customer Portal URL; the browser navigates. Pause/Resume hit `POST /api/membership/pause` which calls the gateway, then writes the DB synchronously via a status-guarded conditional UPDATE (race-safe). Mock portal lives at `/payment/simulate-portal` (server component with `<form action={serverAction}>` buttons firing synthetic webhooks). Lazy UIOLO rollover in `readActiveMembership` is **skipped for Stripe-managed memberships** (those with `stripe_subscription_id`) — `invoice.paid` is the source of truth there; admin-created rows (sub_id NULL) keep the lazy rollover fallback. `hasSufficientMemberHours` blocks all non-active statuses (paused / past_due / cancelled all fall through to non-member pricing).
+- **Lifecycle notifications:** Every membership webhook handler in `src/lib/payment/webhook-handler.ts` calls `notifyLifecycle(...)` after its DB write. Transition detection is a pure function in `src/lib/membership/lifecycle-transitions.ts` returning a discriminated `Transition` union. The notifier (`src/lib/membership/lifecycle-notifier.ts`) inserts into `lifecycle_email_log` first (composite PK `(event_id, transition, recipient)`); on conflict it skips the Resend send. Resend 5xx/network failures DELETE the log row so the next Stripe retry re-attempts; Resend 4xx (permanent) failures KEEP the row to prevent retry storms and log `lifecycle.email.permanent_failure`. Notifier errors are swallowed by each webhook handler's try/catch so DB-write correctness is never blocked on email plumbing.
+- **Membership banner reach:** `<MembershipBanner />` is mounted in `src/app/members/layout.tsx`, so the past_due / paused / pending-cancel state is visible across every `/members/*` page, not only the settings page. `<WelcomeBanner />` (gated by `?welcome=1` + a localStorage flag) lives in the same layout, wrapped in `<Suspense>` because it uses `useSearchParams`.
+- **Portal-return acknowledgement:** `PlanManager` calls `stashPortalSnapshot(membership)` before navigating to Stripe Portal; on return to `/members/settings`, the page calls `consumePortalSnapshot()` and diffs against current membership state to toast the specific change (plan_changed, cancel_scheduled, cancel_reversed, cancelled). If the webhook hasn't landed within ~5s, falls back to a generic info toast.
 
 ## Bug Resolution Log
 
