@@ -53,4 +53,10 @@ describe("MemberDashboard — header cleanup", () => {
     render(<MemberDashboard />);
     expect(screen.queryByRole("link", { name: /^settings$/i })).toBeNull();
   });
+
+  it("empty-bookings 'Book a Butler' CTA links to /butlers, not the homepage", () => {
+    render(<MemberDashboard />);
+    const bookButlerLink = screen.getByRole("link", { name: /book a butler/i });
+    expect(bookButlerLink).toHaveAttribute("href", "/butlers");
+  });
 });
