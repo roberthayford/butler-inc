@@ -51,8 +51,9 @@ export function SignupPage() {
       return;
     }
 
-    toast.success("Account created! Please check your email to verify.");
-    router.push(next ?? "/members/login");
+    const params = new URLSearchParams({ email: data.email });
+    if (next) params.set("next", next);
+    router.push(`/members/signup/check-email?${params.toString()}`);
   };
 
   return (
