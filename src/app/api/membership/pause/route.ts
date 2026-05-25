@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getPaymentGateway } from "@/lib/payment/gateway";
 import { requireGatewayConfigured } from "@/lib/payment/require-gateway-configured";
 
@@ -109,7 +109,13 @@ export async function POST(request: NextRequest) {
       ? { status: "paused", paused_at: nowIso, updated_at: nowIso }
       : { status: "active", paused_at: null, updated_at: nowIso };
 
-  const { data: updated } = await supabase
+  // Service-role client for the UPDATE: migration 002's RLS policy on
+  // memberships only grants FOR ALL to a hard-coded admin-email list, so a
+  // user-scoped UPDATE silently affects zero rows. The .eq('id', row.id) +
+  // .eq('status', expectedStatus) guards still scope the write to the row we
+  // just authorized + the expected current state.
+  const admin = createServiceClient();
+  const { data: updated } = await admin
     .from("memberships")
     .update(patch)
     .eq("id", row.id)

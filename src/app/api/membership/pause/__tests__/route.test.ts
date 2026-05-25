@@ -13,6 +13,7 @@ const {
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
+  // Auth-scoped client: SELECT only (RLS allows users to read their own row).
   createClient: vi.fn(async () => ({
     auth: { getUser: mockGetUser },
     from: () => ({
@@ -25,6 +26,12 @@ vi.mock("@/lib/supabase/server", () => ({
           }),
         }),
       }),
+    }),
+  })),
+  // Service-role client: UPDATE bypasses RLS (no user-scoped UPDATE policy
+  // exists on the memberships table).
+  createServiceClient: vi.fn(() => ({
+    from: () => ({
       update: (patch: unknown) => ({
         eq: () => ({
           eq: () => ({
@@ -173,6 +180,16 @@ describe("POST /api/membership/pause — pause", () => {
       status: "paused",
       paused_at: expect.any(String),
     }));
+  });
+
+  it("uses the service-role client for the UPDATE (RLS on memberships has no user-scoped UPDATE policy)", async () => {
+    const { createClient, createServiceClient } = await import("@/lib/supabase/server");
+    (createClient as ReturnType<typeof vi.fn>).mockClear();
+    (createServiceClient as ReturnType<typeof vi.fn>).mockClear();
+    await POST(req({ action: "pause" }));
+    // SELECT uses the auth client; UPDATE must use the service client.
+    expect(createClient).toHaveBeenCalled();
+    expect(createServiceClient).toHaveBeenCalled();
   });
 });
 
