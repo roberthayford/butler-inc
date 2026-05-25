@@ -1,8 +1,11 @@
 "use client";
 
+import { Suspense, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useMembership } from "@/hooks/useMembership";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { services } from "@/data/services";
@@ -26,9 +29,11 @@ interface Booking {
   created_at: string;
 }
 
-export default function MemberDashboard() {
+export function MemberDashboard() {
   const { user, loading, supabase } = useAuth();
   const { membership, isLoading: memberLoading, isMember } = useMembership();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   const { data: bookings, isLoading: bookingsLoading } = useQuery({
     queryKey: ["bookings", user?.id],
@@ -43,6 +48,13 @@ export default function MemberDashboard() {
     },
     enabled: !!user,
   });
+
+  useEffect(() => {
+    if (searchParams?.get("welcome") === "1" && membership?.tier?.name) {
+      toast.success(`Welcome to ${membership.tier.name}, your hours are ready`);
+      router.replace("/members/dashboard");
+    }
+  }, [searchParams, router, membership?.tier?.name]);
 
   if (loading || memberLoading) {
     return (
@@ -207,5 +219,13 @@ export default function MemberDashboard() {
         </section>
       </div>
     </div>
+  );
+}
+
+export default function MemberDashboardPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-charcoal" />}>
+      <MemberDashboard />
+    </Suspense>
   );
 }
