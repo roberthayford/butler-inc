@@ -27,9 +27,17 @@ function makeSupabaseFake() {
     { id: "tier-pro", slug: "pro", personal_hours_included: 55, virtual_tasks_included: 25 },
   ];
   const tierBySlug = (slug: string) => tiers.find((t) => t.slug === slug);
+  const tierById = (id: string) => tiers.find((t) => t.id === id);
   return {
     memberships,
     tiers,
+    // auth.admin stub — readRecipient calls getUserById; return null user so
+    // notifyLifecycle short-circuits gracefully (no email sent in unit tests).
+    auth: {
+      admin: {
+        getUserById: async (_id: string) => ({ data: { user: null }, error: null }),
+      },
+    },
     from(table: string) {
       if (table === "memberships") {
         return {
@@ -49,13 +57,23 @@ function makeSupabaseFake() {
           },
           insert: (row: Record<string, unknown>) => {
             memberships.push(row);
-            return { select: () => ({ single: async () => ({ data: row, error: null }) }) };
+            return {
+              select: () => ({
+                single: async () => ({ data: row, error: null }),
+                maybeSingle: async () => ({ data: row, error: null }),
+              }),
+            };
           },
           update: (patch: Record<string, unknown>) => ({
             eq: (col: string, val: unknown) => {
               const target = memberships.find((m) => m[col] === val);
               if (target) Object.assign(target, patch);
-              return { select: () => ({ single: async () => ({ data: target, error: null }) }) };
+              return {
+                select: () => ({
+                  single: async () => ({ data: target, error: null }),
+                  maybeSingle: async () => ({ data: target ?? null, error: null }),
+                }),
+              };
             },
           }),
         };
@@ -65,11 +83,22 @@ function makeSupabaseFake() {
           select: () => ({
             eq: (col: string, val: unknown) => ({
               maybeSingle: async () => ({
-                data: col === "slug" ? tierBySlug(val as string) : null,
+                data: col === "slug"
+                  ? (tierBySlug(val as string) ?? null)
+                  : col === "id"
+                    ? (tierById(val as string) ?? null)
+                    : null,
                 error: null,
               }),
             }),
           }),
+        };
+      }
+      // lifecycle_email_log — notifyLifecycle hits this; we just no-op it so
+      // the handler tests stay focused on membership-state assertions.
+      if (table === "lifecycle_email_log") {
+        return {
+          insert: () => ({ select: () => ({ maybeSingle: async () => ({ data: null }) }) }),
         };
       }
       throw new Error(`unexpected table ${table}`);
