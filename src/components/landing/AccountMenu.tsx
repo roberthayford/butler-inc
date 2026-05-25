@@ -82,7 +82,7 @@ export function AccountMenu() {
   const showAdmin = isAdmin(user.email ?? undefined);
 
   return (
-    <div className="relative">
+    <div className="relative shrink-0">
       <button
         ref={triggerRef}
         type="button"
@@ -90,7 +90,7 @@ export function AccountMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Account menu"
-        className="w-9 h-9 rounded-full border border-brass/60 bg-charcoal text-brass-text text-sm font-medium flex items-center justify-center hover:bg-brass/10 transition-colors focus-visible:outline-2 focus-visible:outline-brass"
+        className="shrink-0 inline-flex items-center justify-center w-9 h-9 aspect-square rounded-full border border-brass/60 bg-charcoal text-brass-text text-sm font-medium leading-none hover:bg-brass/10 transition-colors focus-visible:outline-2 focus-visible:outline-brass"
       >
         {getInitials(user)}
       </button>
