@@ -22,7 +22,12 @@ export function WelcomeBanner() {
 
   useEffect(() => {
     setHydrated(true);
-    setDismissed(localStorage.getItem(KEY) === "1");
+    // localStorage.getItem can throw in Safari ITP / private browsing.
+    // Treat any failure as "not dismissed" — the banner re-appearing in a
+    // storage-blocked browser is the correct behaviour anyway.
+    let isDismissed = false;
+    try { isDismissed = localStorage.getItem(KEY) === "1"; } catch { /* ITP / quota */ }
+    setDismissed(isDismissed);
     if (sp?.get("welcome") === "1") setShouldShow(true);
     // Intentionally run once on mount — we WANT the URL strip to be ignored
     // by this banner; visibility is controlled by `shouldShow` + `dismissed`.
@@ -37,7 +42,9 @@ export function WelcomeBanner() {
   const hours = membership?.tier?.personalHoursIncluded ?? 0;
 
   function dismiss() {
-    localStorage.setItem(KEY, "1");
+    // setItem can throw QuotaExceededError under Safari ITP / private
+    // browsing; the dismiss flag is a UX nicety, not a correctness boundary.
+    try { localStorage.setItem(KEY, "1"); } catch { /* ITP / quota */ }
     setDismissed(true);
   }
 

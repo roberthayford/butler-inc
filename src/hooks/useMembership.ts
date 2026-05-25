@@ -89,6 +89,18 @@ export function useMembership() {
       return (await res.json()) as MembershipApiResponse;
     },
     enabled: !!user,
+    // Membership state changes infrequently (UIOLO once/month, webhook-driven
+    // status flips). With staleTime=0 (TanStack default) the layout-mounted
+    // MembershipBanner refetched /api/members/me on every client-side nav
+    // between /members/* pages, exercising the UIOLO rollover write path
+    // many times per session. 60s is short enough that portal-return state
+    // catches up naturally without hammering the endpoint.
+    //
+    // The settings page's portal-snapshot polling calls
+    // queryClient.invalidateQueries({ queryKey: ["membership", userId] }),
+    // which forces a refetch regardless of staleTime — so portal-return
+    // diff toasts still work.
+    staleTime: 60_000,
   });
 
   const row = data?.membership ?? null;

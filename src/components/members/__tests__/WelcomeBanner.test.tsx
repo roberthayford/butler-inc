@@ -50,4 +50,22 @@ describe("WelcomeBanner", () => {
     // Regression: previously the banner unmounted on this re-render.
     expect(screen.getByText(/Welcome to Lite/i)).toBeInTheDocument();
   });
+  it("does not crash when localStorage.getItem and setItem throw (Safari ITP / private browsing)", () => {
+    const originalGetItem = Storage.prototype.getItem;
+    const originalSetItem = Storage.prototype.setItem;
+    Storage.prototype.getItem = vi.fn(() => { throw new Error("SecurityError: storage unavailable"); });
+    Storage.prototype.setItem = vi.fn(() => { throw new Error("QuotaExceededError"); });
+    try {
+      searchParamsMock.mockReturnValue(new URLSearchParams("welcome=1"));
+      render(<WelcomeBanner />);
+      // Banner should render (getItem threw → treated as not-dismissed)
+      expect(screen.getByText(/Welcome to Lite/i)).toBeInTheDocument();
+      // Dismiss click should not crash even though setItem throws
+      fireEvent.click(screen.getByRole("button", { name: /dismiss/i }));
+      expect(screen.queryByText(/Welcome to Lite/i)).not.toBeInTheDocument();
+    } finally {
+      Storage.prototype.getItem = originalGetItem;
+      Storage.prototype.setItem = originalSetItem;
+    }
+  });
 });
