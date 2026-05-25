@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getPaymentGateway } from "@/lib/payment/gateway";
 import { createServiceClient } from "@/lib/supabase/server";
 import { requireGatewayConfigured } from "@/lib/payment/require-gateway-configured";
+import { verifyMockWebhook } from "@/lib/payment/mock-webhook-signature";
 import {
   handleCheckoutCompleted,
   handleSubscriptionUpdated,
@@ -23,8 +24,14 @@ export async function POST(request: NextRequest) {
   if (provider === "stripe" && !stripeSig) {
     return NextResponse.json({ error: "missing stripe-signature" }, { status: 400 });
   }
-  if (provider === "mock" && !mockSig) {
-    return NextResponse.json({ error: "missing x-mock-signature" }, { status: 400 });
+  if (provider === "mock") {
+    // HMAC-SHA256(rawBody, MOCK_WEBHOOK_SECRET) required. The pre-fix gate
+    // accepted any non-empty x-mock-signature value, which on internet-facing
+    // staging let any attacker forge events. verifyMockWebhook fails closed
+    // if the secret is unset.
+    if (!verifyMockWebhook(rawBody, mockSig)) {
+      return NextResponse.json({ error: "invalid x-mock-signature" }, { status: 400 });
+    }
   }
 
   let event;

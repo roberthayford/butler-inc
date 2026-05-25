@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { signMockWebhook } from "@/lib/payment/mock-webhook-signature";
 
 export const dynamic = "force-dynamic";
 
@@ -13,13 +14,17 @@ async function getOrigin(): Promise<string> {
 
 async function fireWebhook(body: object): Promise<void> {
   const origin = await getOrigin();
+  const json = JSON.stringify(body);
+  // signMockWebhook throws if MOCK_WEBHOOK_SECRET is unset — fail fast so the
+  // simulator never silently sends an unsigned event the webhook route would reject.
+  const signature = signMockWebhook(json);
   await fetch(`${origin}/api/webhooks/stripe`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-mock-signature": "1",
+      "x-mock-signature": signature,
     },
-    body: JSON.stringify(body),
+    body: json,
   });
 }
 
