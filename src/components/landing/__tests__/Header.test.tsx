@@ -91,6 +91,14 @@ describe("Header", () => {
     expect(screen.queryByRole("link", { name: /^join$/i })).toBeNull();
   });
 
+  it("logged-out user on /members/signup/check-email does NOT see Sign In or Join", () => {
+    pathnameRef.current = "/members/signup/check-email";
+    useAuthMock.mockReturnValue(loggedOut);
+    render(<Header />);
+    expect(screen.queryByRole("link", { name: /sign in/i })).toBeNull();
+    expect(screen.queryByRole("link", { name: /^join$/i })).toBeNull();
+  });
+
   it("logged-out user on /members/dashboard still sees Sign In and Join (suppression scoped to auth pages only)", () => {
     pathnameRef.current = "/members/dashboard";
     useAuthMock.mockReturnValue(loggedOut);
