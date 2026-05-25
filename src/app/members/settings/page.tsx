@@ -10,6 +10,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { phoneNumberSchema } from "@/lib/phone";
 import { PlanManager } from "@/components/membership/PlanManager";
+import { consumePortalSnapshot, diffSnapshot, type Snapshot } from "@/lib/membership/portal-snapshot";
+import { useMembership } from "@/hooks/useMembership";
+import { useQueryClient } from "@tanstack/react-query";
 
 const profileSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -21,6 +24,8 @@ type ProfileForm = z.infer<typeof profileSchema>;
 export default function SettingsPage() {
   const { user, loading, supabase } = useAuth();
   const router = useRouter();
+  const { membership } = useMembership();
+  const queryClient = useQueryClient();
   const userId = user?.id;
   const userName = (user?.user_metadata?.name as string) ?? "";
   const userPhone = (user?.user_metadata?.phone as string) ?? "";
@@ -57,6 +62,36 @@ export default function SettingsPage() {
       });
     }
   }, [resetProfileForm, userId, userName, userPhone]);
+
+  // Portal-return diff toast — also declared before early returns per React #310.
+  useEffect(() => {
+    const snap = consumePortalSnapshot();
+    if (!snap) return;
+    if (!membership) return;
+
+    let attempts = 0;
+    const MAX = 6;
+    const tick = () => {
+      const curr: Snapshot = {
+        status: membership.status,
+        tierSlug: membership.tier.slug,
+        cancelAtPeriodEnd: membership.cancelAtPeriodEnd,
+      };
+      const diff = diffSnapshot(snap, curr);
+      if (diff.kind === "plan_changed") return toast.success(`Plan changed to ${curr.tierSlug}`);
+      if (diff.kind === "cancel_scheduled") return toast.success(`Cancellation scheduled for ${new Date(membership.billingPeriodEnd).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`);
+      if (diff.kind === "cancel_reversed") return toast.success("Cancellation reversed");
+      if (diff.kind === "cancelled") return toast.success("Membership cancelled");
+      attempts += 1;
+      if (attempts >= MAX) {
+        return toast.info("We've updated your subscription. Check your email for confirmation.");
+      }
+      queryClient.invalidateQueries({ queryKey: ["membership", user?.id] });
+      setTimeout(tick, 800);
+    };
+    tick();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (loading) {
     return (
