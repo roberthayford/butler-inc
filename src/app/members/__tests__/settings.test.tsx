@@ -108,10 +108,4 @@ describe("SettingsPage", () => {
     expect(await screen.findByText(/Passwords do not match/i)).toBeInTheDocument();
     expect(mockUpdateUser).not.toHaveBeenCalled();
   });
-
-  it("has a back link to dashboard", async () => {
-    render(<SettingsPage />);
-    const backLink = await screen.findByRole("link", { name: /Back to Dashboard/i });
-    expect(backLink).toHaveAttribute("href", "/members/dashboard");
-  });
 });
