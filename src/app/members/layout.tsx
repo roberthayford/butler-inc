@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Header } from "@/components/landing/Header";
+import { Footer } from "@/components/landing/Footer";
 
 export const metadata: Metadata = {
   title: {
@@ -12,5 +14,11 @@ export default function MembersLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <Header />
+      <main className="pt-20">{children}</main>
+      <Footer />
+    </>
+  );
 }
