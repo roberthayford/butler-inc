@@ -136,6 +136,47 @@ export default function MemberDashboard() {
               />
             </Link>
           </div>
+        ) : membership?.status === "paused" ? (
+          <div className="bg-yellow-900/10 border border-yellow-700/40 rounded-sm p-6 text-center mb-12">
+            <h2 className="font-serif text-2xl text-optical-white mb-2">Membership paused</h2>
+            <p className="text-warm-gray text-sm mb-4">
+              Member pricing is suspended until you resume. Your remaining hours are held.
+            </p>
+            <Link
+              href="/members/settings"
+              className="inline-block bg-brass text-charcoal px-5 py-2.5 rounded-sm font-semibold text-sm"
+            >
+              Manage in settings
+            </Link>
+          </div>
+        ) : membership?.status === "past_due" ? (
+          <div className="bg-red-900/10 border border-red-700/50 rounded-sm p-6 text-center mb-12">
+            <h2 className="font-serif text-2xl text-optical-white mb-2">
+              We couldn&rsquo;t charge your card
+            </h2>
+            <p className="text-warm-gray text-sm mb-4">
+              Update your payment method to restore your member benefits.
+            </p>
+            <Link
+              href="/members/settings"
+              className="inline-block bg-brass text-charcoal px-5 py-2.5 rounded-sm font-semibold text-sm"
+            >
+              Update payment
+            </Link>
+          </div>
+        ) : membership?.status === "cancelled" ? (
+          <div className="bg-white/5 border border-primary-foreground/10 rounded-sm p-6 text-center mb-12">
+            <h2 className="font-serif text-2xl text-optical-white mb-2">Membership ended</h2>
+            <p className="text-warm-gray text-sm mb-4">
+              Your subscription has ended. You can resubscribe any time.
+            </p>
+            <Link
+              href="/membership"
+              className="inline-block bg-brass text-charcoal px-5 py-2.5 rounded-sm font-semibold text-sm"
+            >
+              Subscribe again
+            </Link>
+          </div>
         ) : (
           <div className="bg-white/5 border border-brass/30 rounded-sm p-6 text-center mb-12">
             <h2 className="font-serif text-2xl text-optical-white mb-2">Choose a plan</h2>
