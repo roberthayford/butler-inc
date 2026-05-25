@@ -1,0 +1,74 @@
+import Link from "next/link";
+import { ResendVerificationButton } from "@/components/auth/ResendVerificationButton";
+
+function firstString(v: string | string[] | undefined): string | null {
+  if (Array.isArray(v)) return v[0]?.trim() || null;
+  if (typeof v === "string") return v.trim() || null;
+  return null;
+}
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ email?: string | string[]; next?: string | string[] }>;
+}) {
+  const sp = await searchParams;
+  const email = firstString(sp.email);
+  const next = firstString(sp.next);
+
+  return (
+    <div className="min-h-screen bg-charcoal flex items-center justify-center px-4 py-16">
+      <div className="w-full max-w-md">
+        <div className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-sm p-8 space-y-6">
+          <h1 className="text-3xl font-serif font-bold text-optical-white tracking-tight text-center">
+            Check your email
+          </h1>
+
+          <p className="text-warm-gray text-sm leading-relaxed text-center">
+            {email ? (
+              <>
+                We sent a verification link to{" "}
+                <span className="text-optical-white font-medium">{email}</span>.
+                Click the link to activate your account.
+              </>
+            ) : (
+              <>
+                We sent a verification link to the email you signed up with.
+                Click the link to activate your account.
+              </>
+            )}
+          </p>
+
+          <div className="bg-charcoal/40 border border-primary-foreground/10 rounded-sm p-4">
+            <p className="text-warm-gray text-sm">
+              Can&rsquo;t find it? Check your junk or spam folder.
+            </p>
+          </div>
+
+          <ol className="text-warm-gray text-sm space-y-2 list-decimal list-inside">
+            <li>Click the link in the email</li>
+            <li>We&rsquo;ll sign you in automatically</li>
+            <li>You&rsquo;ll land on your dashboard</li>
+          </ol>
+
+          <ResendVerificationButton email={email} next={next} />
+
+          <div className="flex flex-col sm:flex-row sm:justify-between gap-3 pt-2 text-sm text-center">
+            <Link
+              href="/members/signup"
+              className="text-warm-gray hover:text-optical-white transition-colors"
+            >
+              Wrong email? Start over
+            </Link>
+            <Link
+              href="/members/login"
+              className="text-brass-text hover:text-brass-muted transition-colors"
+            >
+              Already verified? Sign in
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
