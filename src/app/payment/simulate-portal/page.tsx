@@ -36,6 +36,7 @@ async function cancelAction(formData: FormData): Promise<void> {
   const customerId = formData.get("customer_id") as string;
   const now = Math.floor(Date.now() / 1000);
   await fireWebhook({
+    id: `evt_mock_${crypto.randomUUID()}`,
     type: "customer.subscription.updated",
     created: now,
     data: {
@@ -59,6 +60,7 @@ async function changePlanAction(formData: FormData): Promise<void> {
   const priceId = formData.get("price_id") as string;
   const now = Math.floor(Date.now() / 1000);
   await fireWebhook({
+    id: `evt_mock_${crypto.randomUUID()}`,
     type: "customer.subscription.updated",
     created: now,
     data: {
@@ -81,6 +83,7 @@ async function reactivateAction(formData: FormData): Promise<void> {
   const customerId = formData.get("customer_id") as string;
   const now = Math.floor(Date.now() / 1000);
   await fireWebhook({
+    id: `evt_mock_${crypto.randomUUID()}`,
     type: "customer.subscription.updated",
     created: now,
     data: {
@@ -103,6 +106,7 @@ async function updateCardFailAction(formData: FormData): Promise<void> {
   const customerId = formData.get("customer_id") as string;
   const now = Math.floor(Date.now() / 1000);
   await fireWebhook({
+    id: `evt_mock_${crypto.randomUUID()}`,
     type: "invoice.payment_failed",
     created: now,
     data: {
@@ -123,6 +127,7 @@ async function triggerInvoicePaidAction(formData: FormData): Promise<void> {
   const customerId = formData.get("customer_id") as string;
   const now = Math.floor(Date.now() / 1000);
   await fireWebhook({
+    id: `evt_mock_${crypto.randomUUID()}`,
     type: "invoice.paid",
     created: now,
     data: {
