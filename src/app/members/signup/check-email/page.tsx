@@ -1,5 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ResendVerificationButton } from "@/components/auth/ResendVerificationButton";
+
+export const metadata: Metadata = {
+  title: "Check your email",
+};
 
 function firstString(v: string | string[] | undefined): string | null {
   if (Array.isArray(v)) return v[0]?.trim() || null;
@@ -45,7 +50,7 @@ export default async function Page({
             </p>
           </div>
 
-          <ol className="text-warm-gray text-sm space-y-2 list-decimal list-inside">
+          <ol className="text-warm-gray text-sm space-y-2 list-decimal list-inside marker:text-brass-text marker:font-medium">
             <li>Click the link in the email</li>
             <li>We&rsquo;ll sign you in automatically</li>
             <li>You&rsquo;ll land on your dashboard</li>
