@@ -64,7 +64,7 @@ describe("detectTransition", () => {
     const prior = row({ status: "active" });
     const updated = row({ status: "paused" });
     const t = detectTransition({ event, priorRow: prior, updatedRow: updated, tierSlugLookup: lookup });
-    expect(t).toEqual({ kind: "paused", tierSlug: "lite" });
+    expect(t).toEqual({ kind: "paused", tierSlug: "lite", pausedAt: new Date(1716_000_000 * 1000).toISOString() });
   });
 
   it("subscription.updated paused → active → resumed", () => {
@@ -154,7 +154,7 @@ describe("detectTransition", () => {
         pause_collection: null, items: { data: [] } },
     };
     expect(detectTransition({ event, priorRow: row(), updatedRow: row({ status: "cancelled" }), tierSlugLookup: lookup }))
-      .toEqual({ kind: "cancelled", tierSlug: "lite" });
+      .toEqual({ kind: "cancelled", tierSlug: "lite", endedAt: new Date(1716_000_000 * 1000).toISOString() });
   });
 
   it("invoice.paid with identical period → noop", () => {
@@ -202,6 +202,50 @@ describe("detectTransition", () => {
     const prior = row({ status: "past_due" });
     const updated = row({ status: "past_due" });
     expect(detectTransition({ event, priorRow: prior, updatedRow: updated, tierSlugLookup: lookup }))
+      .toEqual({ kind: "noop" });
+  });
+
+  // Regression: tierSlugLookup may return null (admin-created row with
+  // tier_id=null, or unknown/deleted tier). Every event type must return
+  // noop in that case rather than emitting a wrong-tier email.
+  const nullLookup = () => null;
+
+  it("null tier on checkout → noop (was: silently activated as 'lite')", () => {
+    const event: WebhookEvent = {
+      type: "checkout.session.completed", created: 1716_000_000,
+      data: {
+        id: "cs_1", client_reference_id: "u1", customer: "cus_1", subscription: "sub_123",
+        current_period_start: 0, current_period_end: 0,
+        line_items: [{ price: { id: "mock_unknown" } }],
+      },
+    };
+    expect(detectTransition({ event, priorRow: null, updatedRow: row({ tier_id: "tier-unknown" }), tierSlugLookup: nullLookup }))
+      .toEqual({ kind: "noop" });
+  });
+
+  it("null tier on subscription.deleted → noop", () => {
+    const event: WebhookEvent = {
+      type: "customer.subscription.deleted", created: 1716_000_000,
+      data: { id: "sub_123", customer: "cus_1", status: "canceled",
+        cancel_at_period_end: false, current_period_start: 0, current_period_end: 0,
+        pause_collection: null, items: { data: [] } },
+    };
+    expect(detectTransition({ event, priorRow: row(), updatedRow: row({ tier_id: null, status: "cancelled" }), tierSlugLookup: nullLookup }))
+      .toEqual({ kind: "noop" });
+  });
+
+  it("null OLD tier on plan_changed → noop (can't honestly name 'from' tier)", () => {
+    const event: WebhookEvent = {
+      type: "customer.subscription.updated", created: 1716_000_000,
+      data: { id: "sub_123", customer: "cus_1", status: "active",
+        cancel_at_period_end: false, current_period_start: 0, current_period_end: 0,
+        pause_collection: null, items: { data: [{ price: { id: "mock_pro" } }] } },
+    };
+    const prior = row({ tier_id: null });
+    const updated = row({ tier_id: "tier-pro" });
+    // tierSlugLookup returns null for `null` tier_id (prior) and "pro" otherwise.
+    const halfLookup = (id: string | null) => id === null ? null : ("pro" as const);
+    expect(detectTransition({ event, priorRow: prior, updatedRow: updated, tierSlugLookup: halfLookup }))
       .toEqual({ kind: "noop" });
   });
 });

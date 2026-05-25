@@ -19,11 +19,11 @@ export type Transition =
   | { kind: "activated"; tierSlug: TierSlug; hoursTotal: number; tasksTotal: number; renewsAt: string }
   | { kind: "renewed"; tierSlug: TierSlug; periodEnd: string; monthlyPrice: number }
   | { kind: "payment_failed"; tierSlug: TierSlug }
-  | { kind: "paused"; tierSlug: TierSlug }
+  | { kind: "paused"; tierSlug: TierSlug; pausedAt: string }
   | { kind: "resumed"; tierSlug: TierSlug }
   | { kind: "cancel_scheduled"; tierSlug: TierSlug; endsAt: string }
   | { kind: "cancel_reversed"; tierSlug: TierSlug }
-  | { kind: "cancelled"; tierSlug: TierSlug }
+  | { kind: "cancelled"; tierSlug: TierSlug; endedAt: string }
   | { kind: "plan_changed"; fromTierSlug: TierSlug; toTierSlug: TierSlug; newHoursTotal: number; renewsAt: string }
   | { kind: "noop" };
 
@@ -31,7 +31,19 @@ export interface DetectArgs {
   event: WebhookEvent;
   priorRow: MembershipRow | null;
   updatedRow: MembershipRow;
-  tierSlugLookup: (tierId: string | null) => TierSlug;
+  /**
+   * Resolves a `tier_id` to its slug. Return `null` when the tier cannot be
+   * resolved (e.g. admin-created row with `tier_id = null`, or a tier deleted
+   * from `membership_tiers`). When `null` is returned for a transition that
+   * needs a tier name in its email, `detectTransition` returns `{ kind: "noop" }`
+   * rather than silently labelling the membership as "Lite" — a wrong tier
+   * name in a customer-facing email is worse than no email.
+   */
+  tierSlugLookup: (tierId: string | null) => TierSlug | null;
+}
+
+function eventTimeIso(event: WebhookEvent): string {
+  return new Date(event.created * 1000).toISOString();
 }
 
 export function detectTransition({ event, priorRow, updatedRow, tierSlugLookup }: DetectArgs): Transition {
@@ -39,7 +51,7 @@ export function detectTransition({ event, priorRow, updatedRow, tierSlugLookup }
 
   switch (event.type) {
     case "checkout.session.completed": {
-      // Fresh insert (no prior row) OR admin-overlap upgrade (prior had no sub_id)
+      if (!tierSlug) return { kind: "noop" };
       const wasUnattached = priorRow !== null && priorRow.stripe_subscription_id === null;
       if (priorRow === null || wasUnattached) {
         return {
@@ -55,9 +67,10 @@ export function detectTransition({ event, priorRow, updatedRow, tierSlugLookup }
 
     case "customer.subscription.updated": {
       if (!priorRow) return { kind: "noop" };
+      if (!tierSlug) return { kind: "noop" };
       // Priority order: paused > resumed > cancel_scheduled > cancel_reversed > plan_changed
       if (priorRow.status !== "paused" && updatedRow.status === "paused") {
-        return { kind: "paused", tierSlug };
+        return { kind: "paused", tierSlug, pausedAt: eventTimeIso(event) };
       }
       if (priorRow.status === "paused" && updatedRow.status !== "paused") {
         return { kind: "resumed", tierSlug };
@@ -70,6 +83,7 @@ export function detectTransition({ event, priorRow, updatedRow, tierSlugLookup }
       }
       if (priorRow.tier_id !== updatedRow.tier_id) {
         const fromTierSlug = tierSlugLookup(priorRow.tier_id);
+        if (!fromTierSlug) return { kind: "noop" };
         return {
           kind: "plan_changed",
           fromTierSlug,
@@ -82,10 +96,12 @@ export function detectTransition({ event, priorRow, updatedRow, tierSlugLookup }
     }
 
     case "customer.subscription.deleted":
-      return { kind: "cancelled", tierSlug };
+      if (!tierSlug) return { kind: "noop" };
+      return { kind: "cancelled", tierSlug, endedAt: eventTimeIso(event) };
 
     case "invoice.paid": {
       if (!priorRow) return { kind: "noop" };
+      if (!tierSlug) return { kind: "noop" };
       if (priorRow.billing_period_end === updatedRow.billing_period_end) return { kind: "noop" };
       const tier = MEMBERSHIP_TIERS.find((t) => t.slug === tierSlug);
       return {
@@ -97,6 +113,7 @@ export function detectTransition({ event, priorRow, updatedRow, tierSlugLookup }
     }
 
     case "invoice.payment_failed": {
+      if (!tierSlug) return { kind: "noop" };
       if (priorRow?.status === "past_due") return { kind: "noop" };
       return { kind: "payment_failed", tierSlug };
     }

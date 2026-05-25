@@ -296,4 +296,17 @@ describe("PlanManager — toasts + portal snapshot", () => {
     });
     vi.unstubAllGlobals();
   });
+
+  it("does NOT stash a portal snapshot when the portal fetch fails (regression: stale snapshot bug)", async () => {
+    sessionStorage.clear();
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 502, json: () => Promise.resolve({}) }));
+    Object.defineProperty(window, "location", { value: { assign: vi.fn() }, writable: true });
+    render(<PlanManager />);
+    await userEvent.click(screen.getByRole("button", { name: /Manage subscription/i }));
+    // Give the click handler a tick to settle.
+    await new Promise((r) => setTimeout(r, 30));
+    expect(sessionStorage.getItem("butlers.portal.snapshot.v1")).toBeNull();
+    expect(window.location.assign).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
 });

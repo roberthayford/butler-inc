@@ -195,13 +195,6 @@ export function PlanManager() {
     setError(null);
     setBusy(true);
     try {
-      if (membership) {
-        stashPortalSnapshot({
-          status: membership.status,
-          tierSlug: membership.tier.slug,
-          cancelAtPeriodEnd: membership.cancelAtPeriodEnd,
-        });
-      }
       const res = await fetch("/api/membership/portal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -212,6 +205,17 @@ export function PlanManager() {
         return;
       }
       const { url } = (await res.json()) as { url: string };
+      // Stash AFTER the portal session is confirmed and immediately before
+      // navigation — if the fetch failed we'd otherwise leave a stale
+      // snapshot that the next /members/settings visit would consume and
+      // toast against unrelated current state.
+      if (membership) {
+        stashPortalSnapshot({
+          status: membership.status,
+          tierSlug: membership.tier.slug,
+          cancelAtPeriodEnd: membership.cancelAtPeriodEnd,
+        });
+      }
       window.location.assign(url);
     } catch {
       setError("Something went wrong. Please try again.");

@@ -87,7 +87,7 @@ function memberRenderer(t: Transition, name: string): RenderFn | null {
       return null;
     case "cancelled":
       return () => renderEmail(`Your Butlers Inc ${tierName(t.tierSlug)} has ended`,
-        CancellationFinalEmail({ name, tierName: tierName(t.tierSlug), endedAt: formatUk(new Date().toISOString()) }));
+        CancellationFinalEmail({ name, tierName: tierName(t.tierSlug), endedAt: formatUk(t.endedAt) }));
     case "plan_changed":
       return () => renderEmail(`Your plan changed: ${tierName(t.fromTierSlug)} to ${tierName(t.toTierSlug)}`,
         PlanChangedEmail({
@@ -112,13 +112,13 @@ function adminRenderer(t: Transition, member: { email: string; name: string }, s
         PaymentFailedNotification({ name: member.name, email: member.email, tierName: tierName(t.tierSlug) }));
     case "paused":
       return () => renderEmail(`Membership paused: ${member.name} (${tierName(t.tierSlug)})`,
-        PauseNotification({ name: member.name, email: member.email, tierName: tierName(t.tierSlug), pausedAt: formatUk(new Date().toISOString()) }));
+        PauseNotification({ name: member.name, email: member.email, tierName: tierName(t.tierSlug), pausedAt: formatUk(t.pausedAt) }));
     case "cancel_scheduled":
       return () => renderEmail(`Cancellation scheduled: ${member.name} (${tierName(t.tierSlug)})`,
         CancelScheduledNotification({ name: member.name, email: member.email, tierName: tierName(t.tierSlug), endsAt: formatUk(t.endsAt) }));
     case "cancelled":
       return () => renderEmail(`Membership ended: ${member.name} (${tierName(t.tierSlug)})`,
-        CancellationFinalNotification({ name: member.name, email: member.email, tierName: tierName(t.tierSlug), endedAt: formatUk(new Date().toISOString()) }));
+        CancellationFinalNotification({ name: member.name, email: member.email, tierName: tierName(t.tierSlug), endedAt: formatUk(t.endedAt) }));
     default:
       return null;
   }

@@ -58,7 +58,7 @@ describe("notifyLifecycle", () => {
   it("skips Resend when the lifecycle_email_log upsert ignores a duplicate (data null, error null)", async () => {
     await notifyLifecycle({
       eventId: "evt_dup",
-      transition: { kind: "paused", tierSlug: "lite" },
+      transition: { kind: "paused", tierSlug: "lite", pausedAt: "2026-05-25T10:00:00.000Z" },
       recipient: { email: "ada@example.com", name: "Ada" },
       subscriptionId: "sub_abc",
     }, makeDb({ upsertResult: { data: null, error: null } }) as never);
@@ -69,7 +69,7 @@ describe("notifyLifecycle", () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
     await notifyLifecycle({
       eventId: "evt_dberr",
-      transition: { kind: "paused", tierSlug: "lite" },
+      transition: { kind: "paused", tierSlug: "lite", pausedAt: "2026-05-25T10:00:00.000Z" },
       recipient: { email: "ada@example.com", name: "Ada" },
       subscriptionId: "sub_abc",
     }, makeDb({ upsertResult: { data: null, error: { message: "connection reset", code: "08006" } } }) as never);
@@ -82,7 +82,7 @@ describe("notifyLifecycle", () => {
     sendMock.mockResolvedValue({ data: { id: "x" }, error: null });
     await notifyLifecycle({
       eventId: "evt_opts",
-      transition: { kind: "paused", tierSlug: "lite" },
+      transition: { kind: "paused", tierSlug: "lite", pausedAt: "2026-05-25T10:00:00.000Z" },
       recipient: { email: "ada@example.com", name: "Ada" },
       subscriptionId: "sub_abc",
     }, makeDb() as never);
@@ -96,7 +96,7 @@ describe("notifyLifecycle", () => {
     sendMock.mockResolvedValue({ data: null, error: { name: "API_ERROR", message: "Internal", statusCode: 500 } });
     await notifyLifecycle({
       eventId: "evt_2",
-      transition: { kind: "paused", tierSlug: "lite" },
+      transition: { kind: "paused", tierSlug: "lite", pausedAt: "2026-05-25T10:00:00.000Z" },
       recipient: { email: "ada@example.com", name: "Ada" },
       subscriptionId: "sub_abc",
     }, makeDb() as never);
@@ -108,7 +108,7 @@ describe("notifyLifecycle", () => {
     sendMock.mockResolvedValue({ data: null, error: { name: "validation_error", message: "Invalid to", statusCode: 422 } });
     await notifyLifecycle({
       eventId: "evt_3",
-      transition: { kind: "paused", tierSlug: "lite" },
+      transition: { kind: "paused", tierSlug: "lite", pausedAt: "2026-05-25T10:00:00.000Z" },
       recipient: { email: "ada@example.com", name: "Ada" },
       subscriptionId: "sub_abc",
     }, makeDb() as never);
@@ -121,7 +121,7 @@ describe("notifyLifecycle", () => {
     sendMock.mockResolvedValue({ data: null, error: { name: "rate_limit_exceeded", message: "Too many", statusCode: 429 } });
     await notifyLifecycle({
       eventId: "evt_429",
-      transition: { kind: "paused", tierSlug: "lite" },
+      transition: { kind: "paused", tierSlug: "lite", pausedAt: "2026-05-25T10:00:00.000Z" },
       recipient: { email: "ada@example.com", name: "Ada" },
       subscriptionId: "sub_abc",
     }, makeDb() as never);
@@ -132,7 +132,7 @@ describe("notifyLifecycle", () => {
     sendMock.mockResolvedValue({ data: null, error: { name: "timeout", message: "Timed out", statusCode: 408 } });
     await notifyLifecycle({
       eventId: "evt_408",
-      transition: { kind: "paused", tierSlug: "lite" },
+      transition: { kind: "paused", tierSlug: "lite", pausedAt: "2026-05-25T10:00:00.000Z" },
       recipient: { email: "ada@example.com", name: "Ada" },
       subscriptionId: "sub_abc",
     }, makeDb() as never);
