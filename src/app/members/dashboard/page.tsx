@@ -171,7 +171,7 @@ export default function MemberDashboard() {
           ) : !bookings?.length ? (
             <div className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-sm p-8 text-center">
               <p className="text-warm-gray mb-4">No bookings yet.</p>
-              <Link href="/">
+              <Link href="/butlers">
                 <Button className="bg-brass text-charcoal hover:bg-brass-muted">
                   Book a Butler
                 </Button>
