@@ -41,5 +41,7 @@ describe("butler content examples", () => {
     expect(text).not.toContain("Front-row seats");
     expect(text).not.toContain("sold-out West End");
     expect(text).not.toContain("Private viewing arrangements");
+    expect(text).not.toContain("fully-booked Michelin");
+    expect(text).not.toContain("high-net-worth clients");
   });
 });

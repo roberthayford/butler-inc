@@ -7,6 +7,7 @@ import { z } from "zod";
 import { render } from "@react-email/components";
 import { BookingConfirmationEmail } from "@/emails/booking-confirmation";
 import { BookingNotificationEmail } from "@/emails/booking-notification";
+import { formatButlerName } from "@/emails/format";
 import { formatBookingDate, getPriceLabel, getTimeSlotLabel } from "@/lib/utils";
 import { phoneNumberSchema } from "@/lib/phone";
 
@@ -152,9 +153,10 @@ async function handlePost(request: NextRequest) {
       ]);
 
       const isGenie = data.serviceOption === "genie";
+      const butlerName = formatButlerName(data.butlerType);
       const adminSubject = isGenie
         ? `URGENT: Genie Wish ${reference} · Immediate Attention`
-        : `New Booking: ${reference} · ${data.butlerType} Butler`;
+        : `New Booking: ${reference} · ${butlerName}`;
       const customerSubject = isGenie
         ? `Wish Received: ${reference} · Butlers Inc.`
         : `Booking Confirmed: ${reference} · Butlers Inc.`;

@@ -13,6 +13,7 @@ import {
 import { EmailHeader } from "./components/EmailHeader"
 import { EmailFooter } from "./components/EmailFooter"
 import { DetailRow } from "./components/DetailRow"
+import { formatButlerName } from "./format"
 import type { BookingEmailProps } from "./types"
 
 export function BookingConfirmationEmail({
@@ -33,6 +34,7 @@ export function BookingConfirmationEmail({
 }: BookingEmailProps) {
   const hasPricing = totalPrice != null && hourlyRate != null;
   const isGenie = serviceOption === "genie";
+  const butlerName = formatButlerName(butlerType);
   return (
     <Html lang="en">
       <Head>
@@ -123,7 +125,7 @@ export function BookingConfirmationEmail({
             </Section>
 
             {/* Detail rows */}
-            <DetailRow label="Service" value={`${butlerType} Butler`} />
+            <DetailRow label="Service" value={butlerName} />
             <DetailRow label="Booking" value={isGenie ? "Genie · Urgent Request" : (serviceOption ?? "Bespoke")} />
             <DetailRow label="Date" value={formattedDate} />
             <DetailRow label="Time" value={timeSlotLabel} />

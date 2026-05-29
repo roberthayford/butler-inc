@@ -208,9 +208,9 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
         },
         commonRequests: [
             'Rare Scotch only sold in a tiny Highland shop, sourced and delivered',
-            'Anniversary dinner at a fully-booked Michelin restaurant',
+            'Restaurant reservation research and booking support',
             'Private jet and private island bookings',
-            'Custom gift curation for high-net-worth clients',
+            'Custom gift curation for personal and corporate occasions',
             'Stand in arrangement at auction house',
             'Personalised luxury holiday planning and booking',
             'Personal shopper pick up and returns',
