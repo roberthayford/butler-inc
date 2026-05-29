@@ -47,8 +47,7 @@ export function Footer() {
               Butlers Inc.
             </Link>
             <p className="text-warm-gray text-sm mt-3 max-w-xs leading-relaxed">
-              Premium concierge service across England. Your personal butler, on
-              demand.
+              Premium Butler, Concierge Service and Personal Assistant service across the UK and Beyond
             </p>
             <p className="text-warm-gray text-sm mt-4">
               <a

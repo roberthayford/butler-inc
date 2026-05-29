@@ -136,10 +136,10 @@ export function BookingFlow({ butlerType }: BookingFlowProps) {
 
   const selectedTaskLabel =
     selectedService === GENIE_SERVICE.serviceOption
-      ? "Genie in the Butler"
+      ? "Genie In a Butler"
       : selectedService === "bespoke" || selectedService === "other"
-      ? customDescription
-      : BUTLER_TASKS[butlerType].find((t) => t.id === selectedService)?.label;
+        ? customDescription
+        : BUTLER_TASKS[butlerType].find((t) => t.id === selectedService)?.label;
 
   return (
     <div

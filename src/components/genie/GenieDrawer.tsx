@@ -141,7 +141,7 @@ export function GenieDrawer({ open, onClose }: GenieDrawerProps) {
       >
         <div className="sticky top-0 z-10 flex justify-between items-center px-5 pt-4 pb-2 bg-charcoal">
           <span className="text-xs uppercase tracking-[0.25em] text-destructive font-medium">
-            Genie in the Butler
+            Genie In a Butler
           </span>
           <button
             onClick={onClose}

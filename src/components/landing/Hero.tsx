@@ -14,7 +14,7 @@ export function Hero() {
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-optical-white tracking-tight leading-tight"
         >
-          Your personal butler, on demand.
+          Your personal butler, <span className="block italic tracking-wider">on demand</span>
         </motion.h1>
 
         <motion.div

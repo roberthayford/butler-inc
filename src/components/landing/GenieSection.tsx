@@ -119,7 +119,7 @@ export function GenieSection() {
                 transition={{ duration: 0.4, ease: PREMIUM_EASE }}
                 className="inline-block text-xs uppercase tracking-[0.25em] text-destructive font-medium"
               >
-                Genie in the Butler
+                Genie In a Butler
               </motion.span>
 
               <motion.h2
@@ -183,7 +183,7 @@ export function GenieSection() {
                   onChange={(e) => setWish(e.target.value)}
                   placeholder="Describe your impossible wish..."
                   rows={4}
-                  className="w-full p-4 rounded-sm bg-primary-foreground/[0.04] border border-primary-foreground/15 text-optical-white placeholder:text-warm-gray/50 resize-none focus:outline-none focus:border-destructive/40 focus:ring-1 focus:ring-destructive/20 transition-colors duration-300"
+                  className="w-full p-4 rounded-sm bg-primary-foreground/4 border border-primary-foreground/15 text-optical-white placeholder:text-warm-gray/50 resize-none focus:outline-none focus:border-destructive/40 focus:ring-1 focus:ring-destructive/20 transition-colors duration-300"
                 />
               </motion.div>
 
@@ -244,7 +244,7 @@ export function GenieSection() {
               transition={{ duration: 0.35, ease: PREMIUM_EASE }}
             >
               <span className="inline-block text-xs uppercase tracking-[0.25em] text-destructive font-medium">
-                Genie in the Butler
+                Genie In a Butler
               </span>
 
               <h2 className="text-3xl sm:text-4xl font-serif font-bold text-optical-white mt-3 tracking-tight">
@@ -255,7 +255,7 @@ export function GenieSection() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.1, ease: PREMIUM_EASE }}
-                className="mt-6 p-4 rounded-sm bg-primary-foreground/[0.04] border border-primary-foreground/10 border-l-2 border-l-destructive/40"
+                className="mt-6 p-4 rounded-sm bg-primary-foreground/4 border border-primary-foreground/10 border-l-2 border-l-destructive/40"
               >
                 <p className="text-optical-white text-sm italic leading-relaxed">
                   {wish}
@@ -315,7 +315,7 @@ export function GenieSection() {
                         }))
                       }
                       placeholder={input.placeholder}
-                      className="w-full p-3 rounded-sm bg-primary-foreground/[0.04] border border-primary-foreground/15 text-optical-white placeholder:text-warm-gray/50 focus:outline-none focus:border-destructive/40 focus:ring-1 focus:ring-destructive/20 transition-colors duration-300"
+                      className="w-full p-3 rounded-sm bg-primary-foreground/4 border border-primary-foreground/15 text-optical-white placeholder:text-warm-gray/50 focus:outline-none focus:border-destructive/40 focus:ring-1 focus:ring-destructive/20 transition-colors duration-300"
                     />
                   </motion.div>
                 ))}
