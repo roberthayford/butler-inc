@@ -26,6 +26,11 @@ describe("Footer", () => {
   it("renders the brand block with mailto", () => {
     render(<Footer />);
     expect(screen.getByText("Butlers Inc.")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Premium Butler, Concierge Service and Personal Assistant service across the UK and Beyond"
+      )
+    ).toBeInTheDocument();
     const email = screen.getByRole("link", { name: "hello@butlersinc.com" });
     expect(email).toHaveAttribute("href", "mailto:hello@butlersinc.com");
   });

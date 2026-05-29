@@ -14,11 +14,11 @@ export default function MembershipPage() {
           Become a member
         </h1>
         <p className="font-serif italic text-lg text-optical-white/85 text-center max-w-2xl mx-auto leading-relaxed mb-5">
-          Membership unlocks the flat £50/hr rate (the same whether you book in three weeks or three hours) plus a monthly allowance of butler hours and virtual tasks.
+          Membership unlocks the flat £50/hr rate (the same whether you book in three weeks or three hours) plus a monthly allowance of butler hours and Virtual Butler tasks.
         </p>
         <div className="flex justify-center gap-7 text-sm text-warm-gray mb-9">
           <div><span className="text-brass">·</span> Same rate, every booking</div>
-          <div><span className="text-brass">·</span> No urgency surcharges</div>
+          <div><span className="text-brass">·</span> No surcharges</div>
           <div><span className="text-brass">·</span> Hours reset monthly</div>
         </div>
         <TierComparison />

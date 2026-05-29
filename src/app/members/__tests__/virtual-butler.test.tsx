@@ -38,6 +38,7 @@ vi.mock("@/hooks/useMembership", () => ({
 describe("VirtualButlerPage", () => {
   it("shows tasks remaining gauge", async () => {
     render(<VirtualButlerPage />);
+    expect(await screen.findByText("Virtual Butler tasks")).toBeInTheDocument();
     expect(await screen.findByText(/5 tasks remaining/)).toBeInTheDocument();
   });
 

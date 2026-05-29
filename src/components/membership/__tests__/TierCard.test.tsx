@@ -11,7 +11,7 @@ describe("TierCard", () => {
     expect(screen.getByText("Lite")).toBeInTheDocument();
     expect(screen.getByText(/£500/)).toBeInTheDocument();
     expect(screen.getByText(/10 personal butler hours/i)).toBeInTheDocument();
-    expect(screen.getByText(/5 virtual tasks/i)).toBeInTheDocument();
+    expect(screen.getByText(/5 Virtual Butler tasks/i)).toBeInTheDocument();
   });
 
   it("renders a CTA link to /membership/checkout/[slug]", () => {

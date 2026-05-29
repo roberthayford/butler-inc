@@ -10,7 +10,7 @@ describe("RenewalReceiptEmail", () => {
     expect(html).toContain("Your Butlers Inc Frequent has renewed");
     expect(html).toContain("£1000");
     expect(html).toContain("20 personal butler hours");
-    expect(html).toContain("10 virtual tasks");
+    expect(html).toContain("10 Virtual Butler tasks");
     expect(html).toContain("25 Jul 2026");
   });
   it("has no em dashes", async () => {

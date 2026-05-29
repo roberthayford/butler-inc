@@ -7,6 +7,9 @@ describe("/membership", () => {
     render(<MembershipPage />);
     expect(screen.getByRole("heading", { name: /become a member/i, level: 1 })).toBeInTheDocument();
     expect(screen.getByText(/flat £50\/hr rate/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Virtual Butler tasks/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/No surcharges/i).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/No urgency surcharges/i)).not.toBeInTheDocument();
     expect(screen.getByText("Lite")).toBeInTheDocument();
     expect(screen.getByText("Frequent")).toBeInTheDocument();
     expect(screen.getByText("Pro")).toBeInTheDocument();

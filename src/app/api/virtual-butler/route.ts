@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
 
     if (updateError) {
       // CHECK constraint violation or optimistic lock failure = no remaining tasks
-      return NextResponse.json({ error: "No remaining virtual tasks" }, { status: 403 });
+      return NextResponse.json({ error: "No remaining Virtual Butler tasks" }, { status: 403 });
     }
 
     const reference = generateReference();

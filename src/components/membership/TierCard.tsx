@@ -13,7 +13,7 @@ export function TierCard({ tier }: Props) {
       </div>
       <ul className="list-none p-0 my-2 text-sm space-y-1.5 text-optical-white/85">
         <li><span className="text-brass">·</span> {tier.personalHoursIncluded} personal butler hours</li>
-        <li><span className="text-brass">·</span> {tier.virtualTasksIncluded} virtual tasks</li>
+        <li><span className="text-brass">·</span> {tier.virtualTasksIncluded} Virtual Butler tasks</li>
         <li><span className="text-brass">·</span> Flat £50/hr, no surcharges</li>
       </ul>
       <Link
