@@ -65,7 +65,7 @@ export function PricedBookingForm({
   isSubmitting,
 }: PricedBookingFormProps) {
   const { user, loading: authLoading } = useAuth();
-  const { isMember } = useMembership();
+  const { isMember, personalHoursRemaining } = useMembership();
   const {
     register,
     handleSubmit,
@@ -163,6 +163,15 @@ export function PricedBookingForm({
   }, [dateString, startTime, endTime, pricing.hourlyRate, isMember]);
 
   const isFormReady = selectedDate && startTime && endTime && pricePreview;
+  const prepaidHoursCoverBooking =
+    Boolean(isMember && pricePreview) &&
+    personalHoursRemaining >= (pricePreview?.durationHours ?? 0);
+
+  const submitLabel = prepaidHoursCoverBooking
+    ? `Confirm Booking · ${pricePreview?.durationHours ?? 0} prepaid ${
+        pricePreview?.durationHours === 1 ? "hour" : "hours"
+      }`
+    : `Continue to Payment${pricePreview ? ` · £${pricePreview.total.toFixed(2)}` : ""}`;
 
   const submitWithLeadTimeCheck = async (data: PricedBookingFormData) => {
     if (!dateString || !startSlots.includes(data.startTime)) {
@@ -357,9 +366,7 @@ export function PricedBookingForm({
           disabled={isSubmitting || !isFormReady}
           className="w-full py-6 text-lg bg-brass text-charcoal hover:bg-brass-muted font-medium disabled:opacity-50"
         >
-          {isSubmitting
-            ? "Processing..."
-            : `Continue to Payment${pricePreview ? ` · £${pricePreview.total.toFixed(2)}` : ""}`}
+          {isSubmitting ? "Processing..." : submitLabel}
         </Button>
 
         {/* Mobile price summary */}

@@ -103,7 +103,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
         ],
         trustIndicators: [
             { text: 'DBS checked and reference verified' },
-            { text: 'Insured for items up to £5,000' },
+            { text: 'Insured for items up to £50,000' },
             { text: 'Live GPS tracking on every delivery' },
         ],
         accentColor: 'hsl(15 70% 60%)', // Warm coral

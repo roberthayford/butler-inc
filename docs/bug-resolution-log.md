@@ -16,6 +16,12 @@ Each entry follows this structure:
 
 ## Entries
 
+### 2026-05-29 — Member prepaid bookings still sent users to payment
+- **Symptom:** Active members booking a self-service butler from their account had prepaid hours deducted correctly, but the flow still sent them to checkout and asked for payment.
+- **Root cause:** `/api/create-checkout-session` checked that active members had enough personal butler hours, but then always created a payment checkout session. The hour deduction only happened later in the payment-complete webhook, so prepaid bookings were coupled to payment.
+- **Fix:** Active members with enough remaining hours now skip checkout: the API inserts the booking, deducts prepaid hours with an optimistic lock, confirms the booking, and returns the booking-confirmation URL. Active members without enough prepaid hours still proceed to checkout at a member paid rate.
+- **Lesson:** Membership pricing and membership prepaid allowance are related but distinct. Active member bookings covered by remaining allowance must not enter payment checkout; overage/used-up allowance bookings may enter checkout.
+
 ### 2026-03-31 — Invisible content on client-side navigation
 - **Symptom:** Sections disappeared when navigating between butler pages via client-side routing
 - **Root cause:** `whileInView` Framer Motion animations don't re-trigger on client-side navigation because the elements are already in the viewport when the component mounts

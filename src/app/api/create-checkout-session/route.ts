@@ -135,27 +135,20 @@ async function handlePost(request: NextRequest) {
   });
 
   // Member bookings are covered by the monthly hour allowance. Gate the
-  // booking on having enough remaining hours; the post-payment webhook
-  // will atomically deduct them (with optimistic lock + CHECK constraint
-  // as the race-safety net).
-  if (isMember) {
-    const membershipRow = membership as
-      | { personal_hours_total: number; personal_hours_used: number }
-      | null;
-    if (!hasSufficientMemberHours(membershipRow, priceResult.durationHours)) {
-      const remaining = membershipRow
-        ? Math.max(0, membershipRow.personal_hours_total - membershipRow.personal_hours_used)
-        : 0;
-      return NextResponse.json(
-        {
-          error: "Insufficient member hours remaining for this booking",
-          remaining,
-          required: priceResult.durationHours,
-        },
-        { status: 400 }
-      );
-    }
-  }
+  // booking on having enough remaining hours. Covered bookings skip checkout
+  // because the hours were prepaid as part of the subscription. Active members
+  // without enough prepaid hours can still pay at the member rate.
+  const membershipRow = membership as
+    | {
+        id: string;
+        personal_hours_total: number;
+        personal_hours_used: number;
+        status?: string;
+      }
+    | null;
+  const memberHasPrepaidHours =
+    isMember &&
+    hasSufficientMemberHours(membershipRow, priceResult.durationHours);
 
   const bookingReference = generateBookingReference();
   const repo = getBookingRepository();
@@ -172,7 +165,10 @@ async function handlePost(request: NextRequest) {
       duration_hours: priceResult.durationHours,
       hourly_rate: priceResult.hourlyRate,
       urgency_multiplier: priceResult.urgencyMultiplier,
-      urgency_label: priceResult.urgencyLabel,
+      urgency_label:
+        isMember && !memberHasPrepaidHours
+          ? "Member paid rate"
+          : priceResult.urgencyLabel,
       subtotal: priceResult.subtotal,
       total_price: priceResult.total,
       currency: "gbp",
@@ -193,6 +189,51 @@ async function handlePost(request: NextRequest) {
       { error: "Failed to create booking" },
       { status: 500 }
     );
+  }
+
+  if (memberHasPrepaidHours && membershipRow) {
+    const nextUsed =
+      membershipRow.personal_hours_used + priceResult.durationHours;
+    const { data: updatedMembership, error: hourUpdateError } = await admin
+      .from("memberships")
+      .update({
+        personal_hours_used: nextUsed,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", membershipRow.id)
+      .eq("personal_hours_used", membershipRow.personal_hours_used)
+      .select("id")
+      .maybeSingle();
+
+    if (hourUpdateError || !updatedMembership) {
+      console.error(
+        "[create-checkout-session] Member hour deduction failed for prepaid booking",
+        bookingReference,
+        hourUpdateError
+      );
+      return NextResponse.json(
+        {
+          error:
+            "We couldn't reserve your prepaid hours. Please refresh and try again.",
+        },
+        { status: 409 }
+      );
+    }
+
+    try {
+      await repo.confirmPayment(bookingId, null);
+    } catch {
+      return NextResponse.json(
+        { error: "Failed to confirm booking" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      url: `/booking-confirmation?ref=${bookingReference}`,
+      bookingReference,
+      prepaid: true,
+    });
   }
 
   const gateway = getPaymentGateway();

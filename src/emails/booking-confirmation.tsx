@@ -181,6 +181,20 @@ export function BookingConfirmationEmail({
 
             <Hr style={{ borderColor: "#E8E4DC", margin: "28px 0 24px" }} />
 
+            {!isGenie && (
+              <Text
+                style={{
+                  fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                  fontSize: "14px",
+                  color: "#4A5568",
+                  margin: "0 0 12px",
+                  lineHeight: "1.6",
+                }}
+              >
+                Book regularly? A Butlers Inc membership can help you save money with prepaid butler hours, Virtual Butler tasks, and no surcharges.
+              </Text>
+            )}
+
             {/* Reassurance */}
             <Text
               style={{

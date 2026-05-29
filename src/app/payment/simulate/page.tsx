@@ -172,9 +172,7 @@ function SubscriptionApproval({
               disabled={processing}
               className="w-full py-3.5 rounded-sm bg-brass text-charcoal font-medium hover:bg-brass-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {processing
-                ? "Processing..."
-                : `Approve subscription · £${tier?.monthlyPrice ?? "?"}/mo`}
+              {processing ? "Processing..." : "Click to Subscribe"}
             </motion.button>
 
             <button
