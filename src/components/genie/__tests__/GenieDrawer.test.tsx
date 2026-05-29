@@ -45,6 +45,16 @@ describe("GenieDrawer", () => {
   });
 
   describe("wish phase", () => {
+    it("renders the opened Genie message", () => {
+      render(<GenieDrawer open={true} onClose={vi.fn()} />);
+      expect(
+        screen.getByText(/for when the butlers aren't quick enough/i)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/tell us what you want and we will make it happen/i)
+      ).toBeInTheDocument();
+    });
+
     it("renders the textarea", () => {
       render(<GenieDrawer open={true} onClose={vi.fn()} />);
       expect(

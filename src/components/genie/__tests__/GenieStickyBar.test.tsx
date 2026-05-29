@@ -36,15 +36,12 @@ describe("GenieStickyBar", () => {
     expect(bar).toHaveAttribute("aria-hidden", "false");
   });
 
-  it("renders the invitation text", () => {
+  it("keeps the closed tab focused on the CTA label", () => {
     render(<GenieStickyBar />);
     expect(
-      screen.getByText(/for when the other butlers aren't quick enough/i)
-    ).toBeInTheDocument();
-  });
-
-  it("renders the CTA button", () => {
-    render(<GenieStickyBar />);
+      screen.queryByText(/butlers aren't quick enough/i)
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/make it happen/i)).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /summon your genie/i, hidden: true })
     ).toBeInTheDocument();
