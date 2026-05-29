@@ -11,7 +11,8 @@ const EXAMPLE_WISHES = [
 ] as const;
 
 const PREMIUM_EASE = [0.22, 1, 0.36, 1] as const;
-const GENIE_TAGLINE = "For when the other butlers aren't quick enough";
+const GENIE_TAGLINE = "For when the butlers aren't quick enough";
+const GENIE_PROMPT = "Tell us what you want and we will make it happen";
 
 type Phase = "wish" | "contact" | "success";
 
@@ -141,7 +142,7 @@ export function GenieDrawer({ open, onClose }: GenieDrawerProps) {
       >
         <div className="sticky top-0 z-10 flex justify-between items-center px-5 pt-4 pb-2 bg-charcoal">
           <span className="text-xs uppercase tracking-[0.25em] text-destructive font-medium">
-            Genie in the Butler
+            Genie In a Butler
           </span>
           <button
             onClick={onClose}
@@ -178,7 +179,7 @@ export function GenieDrawer({ open, onClose }: GenieDrawerProps) {
                   {GENIE_TAGLINE}
                 </h2>
                 <p className="text-warm-gray mt-2 text-sm leading-relaxed">
-                  Tell us what you want. We{"'"}ll make it happen.
+                  {GENIE_PROMPT}
                 </p>
                 <p className="mt-3 text-sm font-medium text-destructive">
                   {GENIE_SERVICE.responsePromise}

@@ -61,7 +61,7 @@ describe("GenieSection", () => {
 
     it("renders the section label", () => {
       render(<GenieSection />);
-      expect(screen.getByText(/genie in the butler/i)).toBeInTheDocument();
+      expect(screen.getByText(/Genie In a Butler/i)).toBeInTheDocument();
     });
 
     it("renders a textarea for wish input", () => {
