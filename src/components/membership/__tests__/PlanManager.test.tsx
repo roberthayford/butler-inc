@@ -44,6 +44,9 @@ describe("PlanManager — state derivation + render", () => {
     setMembership(null);
     render(<PlanManager />);
     expect(screen.getByText(/Choose a plan/i)).toBeInTheDocument();
+    expect(
+      screen.getByText("You don\u2019t have an active Subscription Plan")
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /View plans/i })).toHaveAttribute("href", "/membership");
   });
 

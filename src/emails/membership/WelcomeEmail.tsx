@@ -17,7 +17,7 @@ export function WelcomeEmail({ name, tierName, hoursTotal, tasksTotal, renewsAt 
       heading={`Welcome to Butlers Inc ${tierName}`}
     >
       <Text style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif", fontSize: "15px", color: "#4A5568", lineHeight: "1.6", margin: "0 0 18px" }}>
-        {`Hello ${greetingName}, your ${tierName} membership is active. You have ${hoursTotal} personal butler hours and ${tasksTotal} virtual tasks available this period. Renews on ${renewsAt}.`}
+        {`Hello ${greetingName}, your ${tierName} membership is active. You have ${hoursTotal} personal butler hours and ${tasksTotal} Virtual Butler tasks available this period. Renews on ${renewsAt}.`}
       </Text>
       <Button
         href="https://butlersinc.com/members/dashboard"

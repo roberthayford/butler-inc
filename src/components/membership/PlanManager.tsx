@@ -59,7 +59,9 @@ function renderVariant(view: PlanView, h: Handlers) {
       return (
         <div>
           <p className="text-optical-white mb-3">Choose a plan</p>
-          <p className="text-warm-gray text-sm mb-4">You don&rsquo;t have an active membership yet.</p>
+          <p className="text-warm-gray text-sm mb-4">
+            You don&rsquo;t have an active Subscription Plan
+          </p>
           <Link
             href="/membership"
             className="inline-block bg-brass text-charcoal px-4 py-2 rounded-sm hover:bg-brass-muted"

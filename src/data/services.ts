@@ -32,7 +32,8 @@ export const services: Service[] = [
         image: "/images/baby-butler.png",
         examples: [
             "School pick-up when you have an important meeting",
-            "Watch your child for a few hours between activities",
+            "Accompany child to a playdate or kids party",
+            "Night Nurse support for overnight care",
             "Check on elderly relative who isn't answering the phone",
         ],
         priceFrom: "£50",
@@ -45,8 +46,8 @@ export const services: Service[] = [
         image: "/images/nano-banana.png",
         examples: [
             "Source rare scotch only sold in a tiny shop in Scotland",
-            "Plan and organise a personalised family holiday",
-            "Secure VIP reservations and exclusive event access",
+            "Arrange private jet and private island bookings",
+            "Personal shopper pick ups and returns",
         ],
         priceFrom: "£50",
     },

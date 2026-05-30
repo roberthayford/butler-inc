@@ -9,7 +9,7 @@ describe("WelcomeEmail", () => {
     const html = await render(<WelcomeEmail {...props} />);
     expect(html).toContain("Welcome to Butlers Inc Lite");
     expect(html).toContain("10 personal butler hours");
-    expect(html).toContain("5 virtual tasks");
+    expect(html).toContain("5 Virtual Butler tasks");
     expect(html).toContain("25 Jun 2026");
     expect(html).toContain("/members/dashboard");
   });

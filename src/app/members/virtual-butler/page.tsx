@@ -116,7 +116,7 @@ export default function VirtualButlerPage() {
         {/* Tasks gauge */}
         <div className="mb-8">
           <UsageGauge
-            label="Virtual Tasks"
+            label="Virtual Butler tasks"
             used={membership.virtualTasksUsed}
             total={membership.virtualTasksTotal}
             unit="tasks"
@@ -133,7 +133,7 @@ export default function VirtualButlerPage() {
           </div>
         ) : (
           <div className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-sm p-6 text-center mb-12">
-            <p className="text-optical-white mb-2">All virtual tasks used this period</p>
+            <p className="text-optical-white mb-2">All Virtual Butler tasks used this period</p>
             <p className="text-warm-gray text-sm">
               Your tasks reset on {format(new Date(membership.billingPeriodEnd), "d MMMM yyyy")}.
             </p>

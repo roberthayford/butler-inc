@@ -9,6 +9,7 @@ import { Resend } from "resend";
 import { render } from "@react-email/components";
 import { BookingConfirmationEmail } from "@/emails/booking-confirmation";
 import { BookingNotificationEmail } from "@/emails/booking-notification";
+import { formatButlerName } from "@/emails/format";
 
 const webhookSchema = z.object({
   session_id: z.string().min(1),
@@ -159,7 +160,7 @@ export async function POST(request: NextRequest) {
         resend.emails.send({
           from: "Butlers Inc. <bookings@butlersinc.com>",
           to: "hello@butlersinc.com",
-          subject: `New Booking: ${booking.booking_reference} · ${booking.butler_type} Butler`,
+          subject: `New Booking: ${booking.booking_reference} · ${formatButlerName(booking.butler_type)}`,
           html: notifyHtml,
           text: notifyText,
         }),

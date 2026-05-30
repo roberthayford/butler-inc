@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  PHONE_TOO_SHORT_MESSAGE,
   normalizePhoneNumber,
   phoneNumberSchema,
 } from "../phone";
@@ -16,7 +15,7 @@ describe("phone number validation", () => {
   it("rejects UK mobile numbers that are one digit short", () => {
     expect(normalizePhoneNumber("07700 90000")).toEqual({
       ok: false,
-      message: PHONE_TOO_SHORT_MESSAGE,
+      message: "Invalid Number",
     });
   });
 
@@ -41,7 +40,7 @@ describe("phone number validation", () => {
   it("rejects international numbers shorter than the country minimum", () => {
     expect(normalizePhoneNumber("+1 415 555 267")).toEqual({
       ok: false,
-      message: PHONE_TOO_SHORT_MESSAGE,
+      message: "Invalid Number",
     });
   });
 

@@ -11,6 +11,7 @@ import {
 import { EmailHeader } from "./components/EmailHeader"
 import { EmailFooter } from "./components/EmailFooter"
 import { DetailRow } from "./components/DetailRow"
+import { formatButlerName } from "./format"
 import type { BookingEmailProps } from "./types"
 
 export function BookingNotificationEmail({
@@ -33,6 +34,7 @@ export function BookingNotificationEmail({
 }: BookingEmailProps) {
   const hasPricing = totalPrice != null && hourlyRate != null;
   const isGenie = serviceOption === "genie";
+  const butlerName = formatButlerName(butlerType);
   const receivedAt = new Date().toLocaleString("en-GB", {
     weekday: "long",
     day: "numeric",
@@ -46,7 +48,7 @@ export function BookingNotificationEmail({
     <Html lang="en">
       <Head />
       <Preview>
-        New booking {reference} · {butlerType} Butler · {formattedDate}
+        New booking {reference} · {butlerName} · {formattedDate}
       </Preview>
       <Body style={{ backgroundColor: "#FCFBF9", margin: 0, padding: "40px 0" }}>
         <Container
@@ -144,7 +146,7 @@ export function BookingNotificationEmail({
 
             {/* Booking details */}
             <DetailRow label="Reference" value={reference} />
-            <DetailRow label="Butler" value={`${butlerType} Butler`} />
+            <DetailRow label="Butler" value={butlerName} />
             <DetailRow label="Service" value={serviceOption ?? "Bespoke"} />
             <DetailRow label="Date" value={formattedDate} />
             <DetailRow label="Time" value={timeSlotLabel} />

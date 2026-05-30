@@ -11,7 +11,7 @@ export const PHONE_INVALID_MESSAGE =
   "Please enter a valid phone number. Include the country code for non-UK numbers.";
 
 export const PHONE_TOO_SHORT_MESSAGE =
-  "Phone number is too short for its country. Please check it and include the country code for non-UK numbers.";
+  "Invalid Number";
 
 export function normalizePhoneNumber(
   value: string,

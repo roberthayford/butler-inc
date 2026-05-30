@@ -112,9 +112,7 @@ describe("BookingForm", () => {
     fireEvent.click(screen.getByRole("button", { name: /Request Your Butler/i }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/Phone number is too short for its country/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText("Invalid Number")).toBeInTheDocument();
     });
     expect(defaultProps.onSubmit).not.toHaveBeenCalled();
   });

@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { signMockWebhook } from "@/lib/payment/mock-webhook-signature";
 
 /**
- * Server action invoked when the user clicks "Approve subscription" on the
+ * Server action invoked when the user clicks "Click to Subscribe" on the
  * mock subscription checkout page. The synthetic `checkout.session.completed`
  * event is signed server-side (where MOCK_WEBHOOK_SECRET lives) and forwarded
  * to the webhook route, mirroring the simulate-portal page's pattern.

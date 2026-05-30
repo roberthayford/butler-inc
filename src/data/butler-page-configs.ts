@@ -103,7 +103,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
         ],
         trustIndicators: [
             { text: 'DBS checked and reference verified' },
-            { text: 'Insured for items up to £5,000' },
+            { text: 'Insured for items up to £50,000' },
             { text: 'Live GPS tracking on every delivery' },
         ],
         accentColor: 'hsl(15 70% 60%)', // Warm coral
@@ -128,7 +128,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
                 'For school runs, activity pickups, welfare checks for precious cargo\u2026 and when you can\'t be there yourself.',
             useCases: [
                 'School pickup when your meeting runs late',
-                'Watch your child between after-school activities',
+                'Accompany child to a playdate or kids party',
                 "Check on elderly relative who isn't answering",
             ],
         },
@@ -154,7 +154,8 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             'Supervision between end of school and evening activity',
             "Welfare check on elderly parent who's not responding",
             'Airport drop-off for teenager travelling alone',
-            'Accompany child to medical appointment',
+            'Accompany child to playdate or kids party',
+            'Night Nurse support for overnight care',
             'Emergency childcare when regular arrangements fall through',
         ],
         trustIndicators: [
@@ -174,7 +175,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
                 'luxury concierge London',
                 'VIP restaurant reservations',
                 'rare whisky sourcing',
-                'exclusive event access',
+                'private jet booking',
                 'personal shopper',
             ],
         },
@@ -184,8 +185,8 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
                 'For rare finds, exclusive reservations, and luxury experiences tailored to you.',
             useCases: [
                 'Source a sold-out vintage from a Scottish distillery',
-                'Secure a table at that restaurant with a 3-month wait',
-                'VIP access to exclusive events and launches',
+                'Arrange private jet and private island bookings',
+                'Personal shopper pick ups and returns',
             ],
         },
         howItWorks: {
@@ -207,12 +208,12 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
         },
         commonRequests: [
             'Rare Scotch only sold in a tiny Highland shop, sourced and delivered',
-            'Anniversary dinner at a fully-booked Michelin restaurant',
-            'Front-row seats to sold-out West End shows',
-            'Custom gift curation for high-net-worth clients',
-            'Private viewing arrangements at auction houses',
+            'Restaurant reservation research and booking support',
+            'Private jet and private island bookings',
+            'Custom gift curation for personal and corporate occasions',
+            'Stand in arrangement at auction house',
             'Personalised luxury holiday planning and booking',
-            'Nightclub booking and VIP table service',
+            'Personal shopper pick up and returns',
         ],
         trustIndicators: [
             { text: 'Exclusive network access' },

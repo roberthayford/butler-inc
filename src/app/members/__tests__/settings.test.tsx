@@ -91,7 +91,7 @@ describe("SettingsPage", () => {
     fireEvent.click(saveBtn);
 
     expect(
-      await screen.findByText(/Phone number is too short for its country/i)
+      await screen.findByText("Invalid Number")
     ).toBeInTheDocument();
     expect(mockFetch).not.toHaveBeenCalled();
   });

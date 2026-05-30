@@ -31,6 +31,20 @@ describe("BookingConfirmationEmail", () => {
       const html = await render(<BookingConfirmationEmail {...baseProps} />)
       expect(html).toContain("Your booking is confirmed")
     })
+
+    it("includes the subscription savings blurb", async () => {
+      const html = await render(<BookingConfirmationEmail {...baseProps} />)
+      expect(html).toContain("membership can help you save money")
+      expect(html).toContain("no surcharges")
+    })
+
+    it("formats butler names in title case", async () => {
+      const html = await render(
+        <BookingConfirmationEmail {...baseProps} butlerType="busy" />
+      )
+      expect(html).toContain("Busy Butler")
+      expect(html).not.toContain("busy Butler")
+    })
   })
 
   describe("genie booking", () => {
@@ -44,6 +58,7 @@ describe("BookingConfirmationEmail", () => {
       const html = await render(<BookingConfirmationEmail {...genieProps} />)
       expect(html).toContain("your wish")
       expect(html).toContain("already on it")
+      expect(html).not.toContain("membership can help you save money")
     })
 
     it("shows 'Genie' in the service row", async () => {
