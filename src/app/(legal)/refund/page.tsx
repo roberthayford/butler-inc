@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
-import { PlaceholderPage } from "@/components/PlaceholderPage";
+import { LegalPolicyPage } from "@/components/LegalPolicyPage";
+import { legalPolicies } from "@/data/legal-policies";
 
 export const metadata: Metadata = {
   title: "Refund Policy",
 };
 
 export default function RefundPage() {
-  return (
-    <PlaceholderPage
-      title="Refund Policy"
-      subtitle="Refunds, written precisely."
-      body="Check back shortly."
-    />
-  );
+  return <LegalPolicyPage policy={legalPolicies.refund} />;
 }
