@@ -74,6 +74,7 @@ src/app/                        # Next.js App Router pages
     virtual-butler/page.tsx     # Virtual Butler requests (task-based)
     settings/page.tsx           # Account settings (profile, email, password)
   admin/page.tsx                # Admin panel (content editor + member manager, tabbed)
+  (legal)/                      # Footer pages (terms, privacy, refund, cookies, FAQs, etc.)
   booking-confirmation/         # Post-booking confirmation
   payment/simulate/             # Dev-only payment simulation
 
@@ -86,6 +87,7 @@ src/app/api/                    # API routes
   webhooks/payment-complete/    # Payment webhook handler
 
 src/components/
+  LegalPolicyPage.tsx           # Shared renderer for long-form legal policy pages
   landing/                      # Header, Hero, Footer, HowItWorks, ButlerCategoryGrid
   booking/                      # BookingFlow, BookingForm, ServiceOptionSelector
   membership/                   # TierBadge, UsageGauge, VirtualRequestForm
@@ -101,6 +103,7 @@ src/data/                       # Static config
   membership-config.ts          # Tier definitions (Lite/Essential/Heavy)
   pricing-config.ts             # Pricing rules
   content-schema.ts             # CMS content schema
+  legal-policies.ts             # Imported footer policy copy (terms, privacy, refund, cookies)
 
 src/lib/
   supabase/                     # client.ts, server.ts
