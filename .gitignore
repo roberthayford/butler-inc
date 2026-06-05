@@ -52,3 +52,5 @@ test-results/
 
 # Brainstorming visual companion
 .superpowers/
+# Added by code-review-graph
+.code-review-graph/
