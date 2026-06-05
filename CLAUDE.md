@@ -4,6 +4,14 @@
 
 Premium concierge service website. Next.js 16 (App Router), React 19, Tailwind CSS v4, Supabase (auth + database), Vitest + Testing Library.
 
+## Philosophy
+
+Deliberate choices that shape how to extend this codebase. Default to the existing in-process pattern before reaching for external infrastructure:
+
+- **Payment is mocked by design.** `MockPaymentGateway` is the live path; `StripeGateway` is a tested stub. The codebase is Stripe-shaped but not Stripe-wired. Do not propose adding real payment infra unprompted.
+- **No cron, no background jobs.** UIOLO resets are a lazy reset on read, not a scheduled task. Rate limiting and the dev booking store are in-memory. Prefer lazy / in-process patterns over queues, schedulers, or workers until there is a concrete need.
+- **Webhooks are the source of truth for provisioning**, not success URLs (per Stripe's recommendation). State changes belong in the webhook handler.
+
 ## Environments
 
 - **Production:** butlersinc.com (branch: `main`)
@@ -64,6 +72,14 @@ The latest audit report is at `docs/ui-ux-audit-2026-03-20.md`.
 - Admin access: email-based allowlist in `src/lib/admin.ts`
 - Forms: react-hook-form + zod validation
 - Email: Resend + @react-email/components
+
+## Hard Constraints (Never)
+
+- **Never merge or promote to `main` without explicit approval.** `staging` is the integration branch; promoting to production is always a separate, explicitly requested step.
+- **Never use em dashes in customer-facing copy** (see Key Conventions for full scope). This is the most-violated rule in the codebase.
+- **Never let `PAYMENT_GATEWAY=mock` run in production.** `getPaymentGateway()` throws when `NODE_ENV=production` and the gateway is mock; do not weaken that guard.
+- **Never ship `/api/webhooks/stripe` without an explicit `PAYMENT_GATEWAY`.** The route returns 500 when it is unset, on purpose, to prevent silent downgrade to mock mode.
+- **Never trust client-supplied prices or `isMember`.** `/api/calculate-price` and all booking-submit routes re-derive `isMember` server-side and recompute totals; keep it that way.
 
 ## Architecture
 
@@ -200,6 +216,17 @@ docs/plans/                     # Design docs and implementation plans
 - **Membership banner reach:** `<MembershipBanner />` is mounted in `src/app/members/layout.tsx`, so the past_due / paused / pending-cancel state is visible across every `/members/*` page, not only the settings page. `<WelcomeBanner />` (gated by `?welcome=1` + a localStorage flag) lives in the same layout, wrapped in `<Suspense>` because it uses `useSearchParams`.
 - **Portal-return acknowledgement:** `PlanManager` calls `stashPortalSnapshot(membership)` before navigating to Stripe Portal; on return to `/members/settings`, the page calls `consumePortalSnapshot()` and diffs against current membership state to toast the specific change (plan_changed, cancel_scheduled, cancel_reversed, cancelled). If the webhook hasn't landed within ~5s, falls back to a generic info toast.
 
+## Gotchas — do not "refactor" these
+
+Counter-intuitive, load-bearing code. Each looks wrong or improvable but is deliberate. Changing it reintroduces a fixed bug.
+
+- **Dev booking store is pinned to `globalThis.__butlersDevStore`, not a module-level `let`.** Module scope is not shared across route handlers in App Router dev mode, so a `let` makes bookings vanish between requests. Keep it on `globalThis`.
+- **Mock `verifyPayment` accepts any `mock_session_*` by prefix; replay protection lives at the DB layer, not the gateway.** Gateway-level Set-based replay protection does not survive serverless instance boundaries. Do not "harden" the gateway with an in-memory seen-set.
+- **Lifecycle notifier errors are swallowed by each webhook handler's try/catch.** This is intentional: DB-write correctness must never be blocked on email plumbing. Do not let notifier errors propagate.
+- **Lazy UIOLO rollover is skipped for Stripe-managed memberships (`stripe_subscription_id` present).** `invoice.paid` is the source of truth there; admin-created rows (sub_id NULL) keep the lazy fallback. Do not re-enable lazy rollover for Stripe rows.
+- **`/api/create-checkout-session` and `/api/bookings` wrap the whole handler in try/catch that always returns JSON 500.** This pairs with `readErrorMessage` in `BookingFlow.tsx` to avoid Safari's cryptic `JSON.parse` toast on a synchronous upstream throw. Do not remove the envelope or return a non-JSON error.
+- **Every `StripeGateway` method throws "not yet implemented" on purpose.** It is a tested stub whose messages double as the implementation checklist, not a bug to patch.
+
 ## Bug Resolution Log
 
 Before debugging an issue, check `docs/bug-resolution-log.md` for previously resolved bugs — it may contain relevant root causes or patterns. After resolving a significant bug, add an entry with the symptom, root cause, fix, and lesson learned.
@@ -212,3 +239,42 @@ After implementing a major feature, new route, or architectural change, update t
 - New env vars → update Environment Variables list
 - New data files or config → update Architecture tree
 - New patterns or conventions → update Key Patterns or Key Conventions
+
+<!-- code-review-graph MCP tools -->
+## MCP Tools: code-review-graph
+
+**IMPORTANT: This project has a knowledge graph. ALWAYS use the
+code-review-graph MCP tools BEFORE using Grep/Glob/Read to explore
+the codebase.** The graph is faster, cheaper (fewer tokens), and gives
+you structural context (callers, dependents, test coverage) that file
+scanning cannot.
+
+### When to use graph tools FIRST
+
+- **Exploring code**: `semantic_search_nodes` or `query_graph` instead of Grep
+- **Understanding impact**: `get_impact_radius` instead of manually tracing imports
+- **Code review**: `detect_changes` + `get_review_context` instead of reading entire files
+- **Finding relationships**: `query_graph` with callers_of/callees_of/imports_of/tests_for
+- **Architecture questions**: `get_architecture_overview` + `list_communities`
+
+Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
+
+### Key Tools
+
+| Tool | Use when |
+| ------ | ---------- |
+| `detect_changes` | Reviewing code changes — gives risk-scored analysis |
+| `get_review_context` | Need source snippets for review — token-efficient |
+| `get_impact_radius` | Understanding blast radius of a change |
+| `get_affected_flows` | Finding which execution paths are impacted |
+| `query_graph` | Tracing callers, callees, imports, tests, dependencies |
+| `semantic_search_nodes` | Finding functions/classes by name or keyword |
+| `get_architecture_overview` | Understanding high-level codebase structure |
+| `refactor_tool` | Planning renames, finding dead code |
+
+### Workflow
+
+1. The graph auto-updates on file changes (via hooks).
+2. Use `detect_changes` for code review.
+3. Use `get_affected_flows` to understand impact.
+4. Use `query_graph` pattern="tests_for" to check coverage.
