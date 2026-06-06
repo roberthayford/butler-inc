@@ -1,14 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
-const { mockCreateSub, mockGetUser } = vi.hoisted(() => ({
+const { mockCreateSub, mockGetUser, mockMaybeSingle } = vi.hoisted(() => ({
   mockCreateSub: vi.fn(),
   mockGetUser: vi.fn(),
+  mockMaybeSingle: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(async () => ({
     auth: { getUser: mockGetUser },
+    from: () => ({
+      select: () => ({
+        eq: () => ({
+          order: () => ({
+            limit: () => ({ maybeSingle: mockMaybeSingle }),
+          }),
+        }),
+      }),
+    }),
   })),
 }));
 vi.mock("@/lib/payment/gateway", () => ({
@@ -30,6 +40,7 @@ describe("POST /api/membership/checkout", () => {
     vi.clearAllMocks();
     mockGetUser.mockResolvedValue({ data: { user: { id: "u1", email: "u1@example.com" } } });
     mockCreateSub.mockResolvedValue({ url: "https://stripe.test/checkout/sess_1", sessionId: "sess_1" });
+    mockMaybeSingle.mockResolvedValue({ data: null, error: null });
   });
 
   it("returns 401 when no auth session", async () => {
@@ -57,5 +68,16 @@ describe("POST /api/membership/checkout", () => {
       successUrl: "https://staging.butlersinc.com/members/checkout/success?session_id={CHECKOUT_SESSION_ID}",
       cancelUrl: "https://staging.butlersinc.com/membership",
     }));
+  });
+
+  it("passes the existing stripe customer id for a re-subscribing member", async () => {
+    mockMaybeSingle.mockResolvedValue({
+      data: { stripe_customer_id: "cus_existing" },
+      error: null,
+    });
+    await POST(req({ tier: "lite" }));
+    expect(mockCreateSub).toHaveBeenCalledWith(
+      expect.objectContaining({ customerId: "cus_existing" })
+    );
   });
 });

@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getPaymentGateway } from "@/lib/payment/gateway";
 import { getTierPriceId } from "@/lib/membership/tier-pricing";
+import { getExistingStripeCustomerId } from "@/lib/membership/customer-lookup";
 import { getSiteUrl } from "@/lib/site-url";
 import type { TierSlug } from "@/types/membership";
 
@@ -29,11 +30,13 @@ export default async function CheckoutPage({ params }: { params: Params }) {
   const host = h.get("host") ?? "";
   const origin = getSiteUrl({ url: `${proto}://${host}/membership/checkout/${tier}` });
 
+  const customerId = await getExistingStripeCustomerId(supabase, user!.id);
   const session = await getPaymentGateway().createSubscriptionCheckoutSession({
     tier,
     priceId: getTierPriceId(tier),
     userId: user!.id,
     customerEmail: user!.email!,
+    customerId,
     successUrl: `${origin}/members/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
     cancelUrl: `${origin}/membership`,
   });

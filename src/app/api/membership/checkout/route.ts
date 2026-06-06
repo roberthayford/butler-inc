@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getPaymentGateway } from "@/lib/payment/gateway";
 import { getTierPriceId } from "@/lib/membership/tier-pricing";
+import { getExistingStripeCustomerId } from "@/lib/membership/customer-lookup";
 import { getSiteUrl } from "@/lib/site-url";
 
 const schema = z.object({ tier: z.enum(["lite", "frequent", "pro"]) });
@@ -17,11 +18,13 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: "invalid tier" }, { status: 400 });
 
   const origin = getSiteUrl(request);
+  const customerId = await getExistingStripeCustomerId(supabase, user.id);
   const session = await getPaymentGateway().createSubscriptionCheckoutSession({
     tier: parsed.data.tier,
     priceId: getTierPriceId(parsed.data.tier),
     userId: user.id,
     customerEmail: user.email!,
+    customerId,
     successUrl: `${origin}/members/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
     cancelUrl: `${origin}/membership`,
   });

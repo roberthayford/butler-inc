@@ -20,9 +20,6 @@ import type {
  */
 export const STRIPE_API_VERSION = "2026-05-27.dahlia" as const;
 
-const NOT_IMPLEMENTED = (method: string) =>
-  new Error(`StripeGateway.${method}() is not yet implemented.`);
-
 /**
  * Narrow structural surface of the Stripe SDK that StripeGateway depends on.
  * A real `Stripe` instance satisfies this; tests inject `vi.fn()` stubs so no
