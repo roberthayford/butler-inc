@@ -437,6 +437,7 @@ describe("StripeGateway", () => {
       // possibly-incomplete webhook payload.
       const sessionsRetrieve = vi.fn().mockResolvedValue({
         id: "cs_1",
+        mode: "subscription",
         client_reference_id: "user-1",
         customer: "cus_1",
         subscription: {
@@ -472,12 +473,54 @@ describe("StripeGateway", () => {
         id: "evt_cs",
         data: {
           id: "cs_1",
+          mode: "subscription",
           client_reference_id: "user-1",
           customer: "cus_1",
           subscription: "sub_1",
           current_period_start: 111,
           current_period_end: 222,
           line_items: [{ price: { id: "price_lite" } }],
+        },
+      });
+    });
+
+    it("maps a one-off checkout.session.completed (mode=payment, no subscription)", async () => {
+      const stripe = realStripe();
+      const sessionsRetrieve = vi.fn().mockResolvedValue({
+        id: "cs_2",
+        mode: "payment",
+        client_reference_id: "bk_1", // booking id, not a user id
+        customer: null,
+        subscription: null,
+        line_items: { data: [] },
+      });
+      const body = JSON.stringify({
+        id: "evt_cs2",
+        type: "checkout.session.completed",
+        created: 1717002500,
+        data: { object: { id: "cs_2" } },
+      });
+      const gw = new StripeGateway(
+        clientWithRealWebhooks(stripe, {
+          checkout: { sessions: { retrieve: sessionsRetrieve } },
+        })
+      );
+
+      const event = await gw.parseWebhookEvent(body, signed(stripe, body));
+
+      expect(event).toEqual({
+        type: "checkout.session.completed",
+        created: 1717002500,
+        id: "evt_cs2",
+        data: {
+          id: "cs_2",
+          mode: "payment",
+          client_reference_id: "bk_1",
+          customer: "",
+          subscription: null,
+          current_period_start: 0,
+          current_period_end: 0,
+          line_items: [],
         },
       });
     });

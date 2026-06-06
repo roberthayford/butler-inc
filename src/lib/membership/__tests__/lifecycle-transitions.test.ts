@@ -30,7 +30,7 @@ describe("detectTransition", () => {
       type: "checkout.session.completed",
       created: 1716_000_000,
       data: {
-        id: "cs_1", client_reference_id: "u1", customer: "cus_1", subscription: "sub_123",
+        id: "cs_1", mode: "subscription", client_reference_id: "u1", customer: "cus_1", subscription: "sub_123",
         current_period_start: 1716_000_000, current_period_end: 1718_000_000,
         line_items: [{ price: { id: "mock_lite" } }],
       },
@@ -44,7 +44,7 @@ describe("detectTransition", () => {
       type: "checkout.session.completed",
       created: 1716_000_000,
       data: {
-        id: "cs_1", client_reference_id: "u1", customer: "cus_1", subscription: "sub_123",
+        id: "cs_1", mode: "subscription", client_reference_id: "u1", customer: "cus_1", subscription: "sub_123",
         current_period_start: 1716_000_000, current_period_end: 1718_000_000,
         line_items: [{ price: { id: "mock_lite" } }],
       },
@@ -214,7 +214,7 @@ describe("detectTransition", () => {
     const event: WebhookEvent = {
       type: "checkout.session.completed", created: 1716_000_000,
       data: {
-        id: "cs_1", client_reference_id: "u1", customer: "cus_1", subscription: "sub_123",
+        id: "cs_1", mode: "subscription", client_reference_id: "u1", customer: "cus_1", subscription: "sub_123",
         current_period_start: 0, current_period_end: 0,
         line_items: [{ price: { id: "mock_unknown" } }],
       },

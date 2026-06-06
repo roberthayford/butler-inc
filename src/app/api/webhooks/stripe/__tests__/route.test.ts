@@ -2,8 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { signMockWebhook } from "@/lib/payment/mock-webhook-signature";
 
-const { mockParse, mockHandlers } = vi.hoisted(() => {
+const { mockParse, mockHandlers, mockFulfilBooking } = vi.hoisted(() => {
   const mockParse = vi.fn();
+  const mockFulfilBooking = vi.fn();
   const mockHandlers = {
     handleCheckoutCompleted: vi.fn(),
     handleSubscriptionUpdated: vi.fn(),
@@ -11,7 +12,7 @@ const { mockParse, mockHandlers } = vi.hoisted(() => {
     handleInvoicePaid: vi.fn(),
     handleInvoicePaymentFailed: vi.fn(),
   };
-  return { mockParse, mockHandlers };
+  return { mockParse, mockHandlers, mockFulfilBooking };
 });
 
 vi.mock("@/lib/payment/gateway", () => ({
@@ -21,6 +22,9 @@ vi.mock("@/lib/supabase/server", () => ({
   createServiceClient: () => ({ from: vi.fn() }),
 }));
 vi.mock("@/lib/payment/webhook-handler", () => mockHandlers);
+vi.mock("@/lib/payment/booking-fulfilment", () => ({
+  fulfilBooking: mockFulfilBooking,
+}));
 
 import { POST } from "../route";
 
@@ -137,6 +141,33 @@ describe("POST /api/webhooks/stripe", () => {
     mockParse.mockRejectedValue(new Error("StripeGateway.parseWebhookEvent() is not yet implemented. Wire @stripe/stripe-node in a focused PR."));
     const res = await POST(webhookRequest('{}', { "stripe-signature": "t=123,v1=fake" }));
     expect(res.status).toBe(503);
+  });
+
+  it("routes a one-off (mode=payment) checkout.session.completed to fulfilBooking", async () => {
+    process.env.PAYMENT_GATEWAY = "mock";
+    mockFulfilBooking.mockResolvedValue({ status: "fulfilled", bookingReference: "BUT-1" });
+    mockParse.mockResolvedValue({
+      type: "checkout.session.completed",
+      created: 1,
+      data: { id: "cs_pay_1", mode: "payment" },
+    });
+    const res = await POST(mockSigned('{"type":"checkout.session.completed"}'));
+    expect(res.status).toBe(200);
+    expect(mockFulfilBooking).toHaveBeenCalledWith("cs_pay_1");
+    expect(mockHandlers.handleCheckoutCompleted).not.toHaveBeenCalled();
+  });
+
+  it("routes a subscription (mode=subscription) checkout.session.completed to membership provisioning", async () => {
+    process.env.PAYMENT_GATEWAY = "mock";
+    mockParse.mockResolvedValue({
+      type: "checkout.session.completed",
+      created: 1,
+      data: { id: "cs_sub_1", mode: "subscription" },
+    });
+    const res = await POST(mockSigned('{"type":"checkout.session.completed"}'));
+    expect(res.status).toBe(200);
+    expect(mockHandlers.handleCheckoutCompleted).toHaveBeenCalled();
+    expect(mockFulfilBooking).not.toHaveBeenCalled();
   });
 
   it("dispatches subscription.updated events to the updated handler", async () => {

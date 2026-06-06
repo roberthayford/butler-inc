@@ -52,6 +52,11 @@ export interface PortalSessionRequest {
  */
 export interface CheckoutSessionData {
   id: string;
+  /**
+   * Checkout mode. `subscription` → membership provisioning;
+   * `payment` → one-off booking fulfilment. The webhook route branches on this.
+   */
+  mode: "payment" | "subscription";
   client_reference_id: string | null;
   customer: string;
   subscription: string | null;

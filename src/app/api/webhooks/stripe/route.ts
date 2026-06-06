@@ -10,6 +10,7 @@ import {
   handleInvoicePaid,
   handleInvoicePaymentFailed,
 } from "@/lib/payment/webhook-handler";
+import { fulfilBooking } from "@/lib/payment/booking-fulfilment";
 
 export async function POST(request: NextRequest) {
   const guard = requireGatewayConfigured();
@@ -52,7 +53,14 @@ export async function POST(request: NextRequest) {
 
   switch (event.type) {
     case "checkout.session.completed":
-      await handleCheckoutCompleted(event, db);
+      if (event.data.mode === "payment") {
+        // One-off butler booking — fulfil it (verify, confirm, hours, email).
+        // Soft outcomes are acknowledged; a thrown hard failure → 500 (Stripe retries).
+        await fulfilBooking(event.data.id);
+      } else {
+        // Subscription checkout — membership provisioning.
+        await handleCheckoutCompleted(event, db);
+      }
       break;
     case "customer.subscription.updated":
       await handleSubscriptionUpdated(event, db);

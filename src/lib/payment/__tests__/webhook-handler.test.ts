@@ -9,6 +9,7 @@ function makeCheckoutEvent(overrides: Partial<{ userId: string; subId: string; p
     created,
     data: {
       id: "cs_1",
+      mode: "subscription",
       client_reference_id: userId,
       customer: "cus_1",
       subscription: subId,

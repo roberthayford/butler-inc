@@ -245,6 +245,7 @@ export class StripeGateway implements PaymentGateway {
           id: event.id,
           data: {
             id: full.id,
+            mode: full.mode === "payment" ? "payment" : "subscription",
             client_reference_id: full.client_reference_id ?? null,
             customer: toId(full.customer),
             subscription: subscriptionId || null,
