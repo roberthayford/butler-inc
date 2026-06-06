@@ -24,6 +24,13 @@ export interface SubscriptionCheckoutRequest {
   customerEmail: string;
   successUrl: string;
   cancelUrl: string;
+  /**
+   * Existing Stripe customer id to reuse (e.g. a re-subscribing member). When
+   * present the gateway passes `customer` to Checkout; otherwise it passes
+   * `customer_email` and lets Stripe create the customer. Avoids duplicate
+   * Stripe customers across resubscriptions.
+   */
+  customerId?: string;
 }
 
 export interface PortalSessionRequest {

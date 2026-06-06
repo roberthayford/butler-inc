@@ -64,6 +64,19 @@ export interface StripeLike {
   };
 }
 
+/** Coerce a Stripe field that may be an id string or an expanded object to its id. */
+function toId(
+  value: string | { id: string } | null | undefined
+): string {
+  if (!value) return "";
+  return typeof value === "string" ? value : value.id;
+}
+
+/** Canonical site origin for building Checkout return URLs (no request available here). */
+function siteOrigin(): string {
+  return process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
+}
+
 function makeRealStripe(): StripeLike {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) {
@@ -87,21 +100,67 @@ export class StripeGateway implements PaymentGateway {
   }
 
   async createCheckoutSession(
-    _req: CheckoutSessionRequest
+    req: CheckoutSessionRequest
   ): Promise<CheckoutSessionResult> {
-    throw NOT_IMPLEMENTED("createCheckoutSession");
+    const origin = siteOrigin();
+    const session = await this.stripe.checkout.sessions.create({
+      mode: "payment",
+      customer_email: req.customerEmail,
+      client_reference_id: req.bookingId,
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: req.currency,
+            // request.amount is in pounds; Stripe unit_amount is the minor unit (pence).
+            unit_amount: Math.round(req.amount * 100),
+            product_data: { name: req.description },
+          },
+        },
+      ],
+      metadata: req.metadata,
+      success_url: `${origin}/booking-confirmation?ref=${encodeURIComponent(
+        req.bookingReference
+      )}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/`,
+    });
+    return { sessionId: session.id, url: session.url ?? "" };
   }
 
   async verifyPayment(
-    _sessionId: string
+    sessionId: string
   ): Promise<{ verified: boolean; paymentIntentId?: string }> {
-    throw NOT_IMPLEMENTED("verifyPayment");
+    const session = await this.stripe.checkout.sessions.retrieve(sessionId);
+    if (session.payment_status !== "paid") {
+      return { verified: false };
+    }
+    return { verified: true, paymentIntentId: toId(session.payment_intent) };
   }
 
   async createSubscriptionCheckoutSession(
-    _req: SubscriptionCheckoutRequest
+    req: SubscriptionCheckoutRequest
   ): Promise<CheckoutSessionResult> {
-    throw NOT_IMPLEMENTED("createSubscriptionCheckoutSession");
+    // Stripe rejects passing both `customer` and `customer_email`. Reuse an
+    // existing customer when we have one, else let Checkout create it by email.
+    const customerParams: Pick<
+      Stripe.Checkout.SessionCreateParams,
+      "customer" | "customer_email"
+    > = req.customerId
+      ? { customer: req.customerId }
+      : { customer_email: req.customerEmail };
+
+    const session = await this.stripe.checkout.sessions.create({
+      mode: "subscription",
+      line_items: [{ price: req.priceId, quantity: 1 }],
+      client_reference_id: req.userId,
+      ...customerParams,
+      success_url: req.successUrl,
+      cancel_url: req.cancelUrl,
+      subscription_data: {
+        metadata: { user_id: req.userId, tier: req.tier },
+      },
+    });
+    return { sessionId: session.id, url: session.url ?? "" };
   }
 
   async createPortalSession(
