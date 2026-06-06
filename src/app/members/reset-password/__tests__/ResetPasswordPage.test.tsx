@@ -79,4 +79,16 @@ describe("ResetPasswordPage", () => {
     expect(mockUpdateUser).not.toHaveBeenCalled();
     expect(mockPush).not.toHaveBeenCalled();
   });
+
+  it("shows an error toast and does not navigate when updateUser throws", async () => {
+    mockUpdateUser.mockRejectedValue(new Error("network down"));
+    render(<ResetPasswordPage />);
+    fireEvent.change(screen.getByLabelText(/new password/i), { target: { value: "secret123" } });
+    fireEvent.change(screen.getByLabelText(/confirm password/i), { target: { value: "secret123" } });
+    fireEvent.click(screen.getByRole("button", { name: /update password/i }));
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith("Couldn't update your password. Please try again."),
+    );
+    expect(mockPush).not.toHaveBeenCalled();
+  });
 });

@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ResendResetButton } from "@/components/auth/ResendResetButton";
+import { firstString } from "@/lib/search-params";
 
 export const metadata: Metadata = {
   title: "Check your email",
 };
-
-function firstString(v: string | string[] | undefined): string | null {
-  if (Array.isArray(v)) return v[0]?.trim() || null;
-  if (typeof v === "string") return v.trim() || null;
-  return null;
-}
 
 export default async function Page({
   searchParams,

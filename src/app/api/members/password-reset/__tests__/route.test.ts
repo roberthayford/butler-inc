@@ -72,4 +72,15 @@ describe("POST /api/members/password-reset", () => {
     }
     expect(res.status).toBe(429);
   });
+
+  it("returns 400 on a non-JSON body without calling Supabase", async () => {
+    const req = new NextRequest("https://butlersinc.com/api/members/password-reset", {
+      method: "POST",
+      body: "not json",
+      headers: { "content-type": "application/json", "x-forwarded-for": "5.5.5.5" },
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(400);
+    expect(mockReset).not.toHaveBeenCalled();
+  });
 });

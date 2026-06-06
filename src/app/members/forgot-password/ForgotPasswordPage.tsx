@@ -32,11 +32,17 @@ export function ForgotPasswordPage() {
   });
 
   const onSubmit = async (data: ForgotForm) => {
-    const response = await fetch("/api/members/password-reset", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: data.email }),
-    });
+    let response: Response;
+    try {
+      response = await fetch("/api/members/password-reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: data.email }),
+      });
+    } catch {
+      toast.error("Couldn't send the reset email. Please try again.");
+      return;
+    }
 
     if (!response.ok) {
       if (response.status === 429) {

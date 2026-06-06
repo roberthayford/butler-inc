@@ -64,4 +64,28 @@ describe("ForgotPasswordPage", () => {
     );
     expect(mockPush).not.toHaveBeenCalled();
   });
+
+  it("shows a generic error toast when the request rejects (network failure)", async () => {
+    global.fetch = vi.fn(async () => {
+      throw new Error("network down");
+    });
+    render(<ForgotPasswordPage />);
+    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: "jane@example.com" } });
+    fireEvent.click(screen.getByRole("button", { name: /send reset link/i }));
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith("Couldn't send the reset email. Please try again."),
+    );
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it("shows a generic error toast on a non-429 failure response", async () => {
+    global.fetch = vi.fn(async () => ({ ok: false, status: 500, json: async () => ({}) }) as Response);
+    render(<ForgotPasswordPage />);
+    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: "jane@example.com" } });
+    fireEvent.click(screen.getByRole("button", { name: /send reset link/i }));
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith("Couldn't send the reset email. Please try again."),
+    );
+    expect(mockPush).not.toHaveBeenCalled();
+  });
 });

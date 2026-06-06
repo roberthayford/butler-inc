@@ -40,9 +40,14 @@ export function ResetPasswordPage() {
   });
 
   const onSubmit = async (data: ResetForm) => {
-    const { error } = await supabase.auth.updateUser({ password: data.password });
-    if (error) {
-      toast.error(error.message);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: data.password });
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+    } catch {
+      toast.error("Couldn't update your password. Please try again.");
       return;
     }
     toast.success("Password updated");
