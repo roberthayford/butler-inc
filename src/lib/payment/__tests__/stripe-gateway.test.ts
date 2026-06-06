@@ -1,34 +1,53 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { StripeGateway } from "../stripe-gateway";
 
-describe("StripeGateway (stub)", () => {
-  const gw = new StripeGateway();
+// A loose fake of the narrow StripeLike surface. Each test wires up only the
+// methods it exercises; the rest stay undefined and must not be touched.
+function fakeClient(partial: Record<string, unknown>) {
+  return partial as never;
+}
 
-  it("createCheckoutSession throws not-yet-implemented", async () => {
-    await expect(gw.createCheckoutSession({} as never)).rejects.toThrow(/not yet implemented/i);
+describe("StripeGateway", () => {
+  let envBackup: NodeJS.ProcessEnv;
+
+  beforeEach(() => {
+    envBackup = { ...process.env };
   });
 
-  it("verifyPayment throws not-yet-implemented", async () => {
-    await expect(gw.verifyPayment("any")).rejects.toThrow(/not yet implemented/i);
+  afterEach(() => {
+    process.env = envBackup;
+    vi.restoreAllMocks();
   });
 
-  it("createSubscriptionCheckoutSession throws not-yet-implemented", async () => {
-    await expect(gw.createSubscriptionCheckoutSession({} as never)).rejects.toThrow(/not yet implemented/i);
+  describe("client configuration", () => {
+    it("throws a clear error when STRIPE_SECRET_KEY is missing and no client is injected", async () => {
+      delete process.env.STRIPE_SECRET_KEY;
+      const gw = new StripeGateway(); // no injected client → lazy real client
+      await expect(
+        gw.createPortalSession({ customerId: "cus_1", returnUrl: "https://app/return" })
+      ).rejects.toThrow(/STRIPE_SECRET_KEY is required/i);
+    });
   });
 
-  it("createPortalSession throws not-yet-implemented", async () => {
-    await expect(gw.createPortalSession({} as never)).rejects.toThrow(/not yet implemented/i);
-  });
+  describe("createPortalSession", () => {
+    it("returns the portal url from the injected client", async () => {
+      const create = vi
+        .fn()
+        .mockResolvedValue({ url: "https://billing.stripe.com/p/session/abc" });
+      const gw = new StripeGateway(
+        fakeClient({ billingPortal: { sessions: { create } } })
+      );
 
-  it("pauseSubscription throws not-yet-implemented", async () => {
-    await expect(gw.pauseSubscription("any")).rejects.toThrow(/not yet implemented/i);
-  });
+      const result = await gw.createPortalSession({
+        customerId: "cus_1",
+        returnUrl: "https://app/return",
+      });
 
-  it("resumeSubscription throws not-yet-implemented", async () => {
-    await expect(gw.resumeSubscription("any")).rejects.toThrow(/not yet implemented/i);
-  });
-
-  it("parseWebhookEvent throws not-yet-implemented", async () => {
-    await expect(gw.parseWebhookEvent("{}", null)).rejects.toThrow(/not yet implemented/i);
+      expect(result).toEqual({ url: "https://billing.stripe.com/p/session/abc" });
+      expect(create).toHaveBeenCalledWith({
+        customer: "cus_1",
+        return_url: "https://app/return",
+      });
+    });
   });
 });
