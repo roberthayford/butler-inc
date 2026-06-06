@@ -40,5 +40,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, already_processed: true });
     case "fulfilled":
       return NextResponse.json({ success: true, bookingReference: result.bookingReference });
+    default: {
+      // Exhaustiveness guard: a new FulfilResult status must be handled above.
+      const _exhaustive: never = result;
+      void _exhaustive;
+      return NextResponse.json({ error: "Unhandled fulfilment status" }, { status: 500 });
+    }
   }
 }

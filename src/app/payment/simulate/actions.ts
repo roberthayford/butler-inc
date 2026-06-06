@@ -25,6 +25,7 @@ export async function approveSubscription(input: {
     created,
     data: {
       id: input.sessionId,
+      mode: "subscription",
       client_reference_id: input.userId,
       customer: `mock_cus_${input.userId || "unknown"}`,
       subscription: `mock_sub_${input.userId || "unknown"}_${created}`,

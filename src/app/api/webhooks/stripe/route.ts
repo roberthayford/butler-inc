@@ -55,8 +55,18 @@ export async function POST(request: NextRequest) {
     case "checkout.session.completed":
       if (event.data.mode === "payment") {
         // One-off butler booking — fulfil it (verify, confirm, hours, email).
-        // Soft outcomes are acknowledged; a thrown hard failure → 500 (Stripe retries).
-        await fulfilBooking(event.data.id);
+        // Bare await is deliberate: a thrown HARD failure (e.g. confirmPayment
+        // rejects) propagates → 500 so Stripe retries. Do NOT wrap in try/catch
+        // returning 200, or hard failures would be silently dropped.
+        const result = await fulfilBooking(event.data.id);
+        // Soft outcomes are acknowledged (200, no retry storm) but logged so an
+        // unprovisioned paid booking is visible rather than vanishing silently.
+        if (result.status !== "fulfilled" && result.status !== "already_paid") {
+          console.error(
+            "[webhooks/stripe] one-off booking not fulfilled",
+            { session: event.data.id, status: result.status }
+          );
+        }
       } else {
         // Subscription checkout — membership provisioning.
         await handleCheckoutCompleted(event, db);
