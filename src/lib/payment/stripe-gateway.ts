@@ -173,12 +173,20 @@ export class StripeGateway implements PaymentGateway {
     return { url: session.url };
   }
 
-  async pauseSubscription(_subscriptionId: string): Promise<void> {
-    throw NOT_IMPLEMENTED("pauseSubscription");
+  async pauseSubscription(subscriptionId: string): Promise<void> {
+    // `void` = don't generate invoices while paused (no charges). The resulting
+    // customer.subscription.updated webhook carries pause_collection, which
+    // parseWebhookEvent maps to status "paused" so the handler keeps it paused.
+    await this.stripe.subscriptions.update(subscriptionId, {
+      pause_collection: { behavior: "void" },
+    });
   }
 
-  async resumeSubscription(_subscriptionId: string): Promise<void> {
-    throw NOT_IMPLEMENTED("resumeSubscription");
+  async resumeSubscription(subscriptionId: string): Promise<void> {
+    // Empty string clears pause_collection (Stripe's documented unset).
+    await this.stripe.subscriptions.update(subscriptionId, {
+      pause_collection: "",
+    });
   }
 
   async parseWebhookEvent(

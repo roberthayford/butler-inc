@@ -186,4 +186,26 @@ describe("StripeGateway", () => {
       expect(p.customer_email).toBeUndefined();
     });
   });
+
+  describe("pauseSubscription / resumeSubscription", () => {
+    it("pause sets pause_collection behavior=void on the subscription", async () => {
+      const update = vi.fn().mockResolvedValue({});
+      const gw = new StripeGateway(fakeClient({ subscriptions: { update } }));
+
+      await gw.pauseSubscription("sub_1");
+
+      expect(update).toHaveBeenCalledWith("sub_1", {
+        pause_collection: { behavior: "void" },
+      });
+    });
+
+    it("resume clears pause_collection", async () => {
+      const update = vi.fn().mockResolvedValue({});
+      const gw = new StripeGateway(fakeClient({ subscriptions: { update } }));
+
+      await gw.resumeSubscription("sub_1");
+
+      expect(update).toHaveBeenCalledWith("sub_1", { pause_collection: "" });
+    });
+  });
 });
