@@ -14,6 +14,9 @@ const AUTH_PAGE_PATHS: ReadonlySet<string> = new Set([
   "/members/login",
   "/members/signup",
   "/members/signup/check-email",
+  "/members/forgot-password",
+  "/members/forgot-password/check-email",
+  "/members/reset-password",
 ]);
 
 export function Header() {

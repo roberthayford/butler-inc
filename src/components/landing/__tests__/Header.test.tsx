@@ -139,4 +139,16 @@ describe("Header", () => {
     expect(toastSuccess).toHaveBeenCalledWith("Signed out");
     expect(mockPush).toHaveBeenCalledWith("/");
   });
+
+  it.each([
+    "/members/forgot-password",
+    "/members/forgot-password/check-email",
+    "/members/reset-password",
+  ])("logged-out user on %s does NOT see Sign In or Create Account", (path) => {
+    pathnameRef.current = path;
+    useAuthMock.mockReturnValue(loggedOut);
+    render(<Header />);
+    expect(screen.queryByRole("link", { name: /sign in/i })).toBeNull();
+    expect(screen.queryByRole("link", { name: /create account/i })).toBeNull();
+  });
 });

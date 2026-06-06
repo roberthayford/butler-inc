@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ResendVerificationButton } from "@/components/auth/ResendVerificationButton";
+import { ResendResetButton } from "@/components/auth/ResendResetButton";
 import { firstString } from "@/lib/search-params";
 
 export const metadata: Metadata = {
@@ -10,11 +10,10 @@ export const metadata: Metadata = {
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ email?: string | string[]; next?: string | string[] }>;
+  searchParams: Promise<{ email?: string | string[] }>;
 }) {
   const sp = await searchParams;
   const email = firstString(sp.email);
-  const next = firstString(sp.next);
 
   return (
     <div className="min-h-screen bg-charcoal flex items-center justify-center px-4 py-16">
@@ -27,14 +26,14 @@ export default async function Page({
           <p className="text-warm-gray text-sm leading-relaxed text-center">
             {email ? (
               <>
-                We sent a verification link to{" "}
+                We sent a password reset link to{" "}
                 <span className="text-optical-white font-medium">{email}</span>.
-                Click the link to activate your account.
+                Click the link to choose a new password.
               </>
             ) : (
               <>
-                We sent a verification link to the email you signed up with.
-                Click the link to activate your account.
+                We sent a password reset link to your email. Click the link to
+                choose a new password.
               </>
             )}
           </p>
@@ -47,15 +46,15 @@ export default async function Page({
 
           <ol className="text-warm-gray text-sm space-y-2 list-decimal list-inside marker:text-brass-text marker:font-medium">
             <li>Click the link in the email</li>
-            <li>We&rsquo;ll sign you in automatically</li>
+            <li>Choose a new password</li>
             <li>You&rsquo;ll land on your dashboard</li>
           </ol>
 
-          <ResendVerificationButton email={email} next={next} />
+          <ResendResetButton email={email} />
 
           <div className="flex flex-col sm:flex-row sm:justify-between gap-3 pt-2 text-sm text-center">
             <Link
-              href="/members/signup"
+              href="/members/forgot-password"
               className="text-warm-gray hover:text-optical-white transition-colors"
             >
               Wrong email? Start over
@@ -64,7 +63,7 @@ export default async function Page({
               href="/members/login"
               className="text-brass-text hover:text-brass-muted transition-colors"
             >
-              Already verified? Sign in
+              Remembered it? Sign in
             </Link>
           </div>
         </div>

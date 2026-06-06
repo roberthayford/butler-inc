@@ -1,12 +1,12 @@
 "use client";
 
-import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,40 +18,80 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
-
-export function LoginPage() {
-  const { signIn } = useAuth();
-  const router = useRouter();
-
-  const form = useForm<LoginForm>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+const resetSchema = z
+  .object({
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((d) => d.password === d.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
   });
 
-  const onSubmit = async (data: LoginForm) => {
-    const { error } = await signIn(data.email, data.password);
-    if (error) {
-      toast.error(error.message);
+type ResetForm = z.infer<typeof resetSchema>;
+
+export function ResetPasswordPage() {
+  const router = useRouter();
+  const { user, loading, supabase } = useAuth();
+
+  const form = useForm<ResetForm>({
+    resolver: zodResolver(resetSchema),
+    defaultValues: { password: "", confirmPassword: "" },
+  });
+
+  const onSubmit = async (data: ResetForm) => {
+    try {
+      const { error } = await supabase.auth.updateUser({ password: data.password });
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+    } catch {
+      toast.error("Couldn't update your password. Please try again.");
       return;
     }
+    toast.success("Password updated");
     router.push("/members/dashboard");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-charcoal flex items-center justify-center px-4">
+        <p className="text-warm-gray">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-charcoal flex items-center justify-center px-4">
+        <div className="w-full max-w-md text-center space-y-4">
+          <h1 className="text-3xl font-serif font-bold text-optical-white tracking-tight">
+            This reset link is invalid or has expired
+          </h1>
+          <p className="text-warm-gray">
+            Request a new password reset link to continue.
+          </p>
+          <Link
+            href="/members/forgot-password"
+            className="inline-block text-brass-text hover:text-brass-muted transition-colors"
+          >
+            Request a new link
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-charcoal flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-serif font-bold text-optical-white tracking-tight">
-            Welcome Back
+            Set a new password
           </h1>
           <p className="text-warm-gray mt-2">
-            Sign in to your Butlers Inc. account
+            Choose a new password for your account.
           </p>
         </div>
 
@@ -60,30 +100,11 @@ export function LoginPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
               <FormField
                 control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-optical-white">Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="you@example.com"
-                        className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
                 name="password"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-optical-white">
-                      Password
+                      New password
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -98,43 +119,36 @@ export function LoginPage() {
                 )}
               />
 
-              <div className="text-right -mt-2">
-                <Link
-                  href="/members/forgot-password"
-                  className="text-sm text-brass-text hover:text-brass-muted transition-colors"
-                >
-                  Forgot password?
-                </Link>
-              </div>
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-optical-white">
+                      Confirm password
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <Button
                 type="submit"
                 className="w-full bg-brass text-charcoal hover:bg-brass-muted"
                 disabled={form.formState.isSubmitting}
               >
-                {form.formState.isSubmitting ? "Signing in..." : "Sign In"}
+                {form.formState.isSubmitting ? "Updating..." : "Update password"}
               </Button>
             </form>
           </Form>
-
-          <p className="text-center text-warm-gray text-sm mt-6">
-            Don&apos;t have an account?{" "}
-            <Link
-              href="/members/signup"
-              className="text-brass-text hover:text-brass-muted transition-colors"
-            >
-              Create an account
-            </Link>
-          </p>
-        </div>
-
-        <div className="text-center mt-6">
-          <Link
-            href="/"
-            className="text-warm-gray text-sm hover:text-optical-white transition-colors"
-          >
-            &larr; Back to home
-          </Link>
         </div>
       </div>
     </div>

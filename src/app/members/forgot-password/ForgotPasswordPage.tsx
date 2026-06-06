@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,29 +17,45 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-const loginSchema = z.object({
+const forgotSchema = z.object({
   email: z.string().email("Please enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-type LoginForm = z.infer<typeof loginSchema>;
+type ForgotForm = z.infer<typeof forgotSchema>;
 
-export function LoginPage() {
-  const { signIn } = useAuth();
+export function ForgotPasswordPage() {
   const router = useRouter();
 
-  const form = useForm<LoginForm>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+  const form = useForm<ForgotForm>({
+    resolver: zodResolver(forgotSchema),
+    defaultValues: { email: "" },
   });
 
-  const onSubmit = async (data: LoginForm) => {
-    const { error } = await signIn(data.email, data.password);
-    if (error) {
-      toast.error(error.message);
+  const onSubmit = async (data: ForgotForm) => {
+    let response: Response;
+    try {
+      response = await fetch("/api/members/password-reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: data.email }),
+      });
+    } catch {
+      toast.error("Couldn't send the reset email. Please try again.");
       return;
     }
-    router.push("/members/dashboard");
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        toast.error("Too many requests. Please try again later.");
+      } else {
+        toast.error("Couldn't send the reset email. Please try again.");
+      }
+      return;
+    }
+
+    router.push(
+      `/members/forgot-password/check-email?email=${encodeURIComponent(data.email)}`,
+    );
   };
 
   return (
@@ -48,10 +63,10 @@ export function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-serif font-bold text-optical-white tracking-tight">
-            Welcome Back
+            Reset your password
           </h1>
           <p className="text-warm-gray mt-2">
-            Sign in to your Butlers Inc. account
+            Enter your email and we&rsquo;ll send you a reset link.
           </p>
         </div>
 
@@ -77,53 +92,23 @@ export function LoginPage() {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-optical-white">
-                      Password
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="••••••••"
-                        className="bg-charcoal/50 border-primary-foreground/20 text-optical-white placeholder:text-warm-gray"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="text-right -mt-2">
-                <Link
-                  href="/members/forgot-password"
-                  className="text-sm text-brass-text hover:text-brass-muted transition-colors"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-
               <Button
                 type="submit"
                 className="w-full bg-brass text-charcoal hover:bg-brass-muted"
                 disabled={form.formState.isSubmitting}
               >
-                {form.formState.isSubmitting ? "Signing in..." : "Sign In"}
+                {form.formState.isSubmitting ? "Sending..." : "Send reset link"}
               </Button>
             </form>
           </Form>
 
           <p className="text-center text-warm-gray text-sm mt-6">
-            Don&apos;t have an account?{" "}
+            Remembered it?{" "}
             <Link
-              href="/members/signup"
+              href="/members/login"
               className="text-brass-text hover:text-brass-muted transition-colors"
             >
-              Create an account
+              Sign in
             </Link>
           </p>
         </div>
