@@ -45,3 +45,4 @@ export class InMemoryRateLimiter {
 export const bookingLimiter = new InMemoryRateLimiter({ maxRequests: 5, windowMs: 60_000 });
 export const priceLimiter = new InMemoryRateLimiter({ maxRequests: 20, windowMs: 60_000 });
 export const webhookLimiter = new InMemoryRateLimiter({ maxRequests: 10, windowMs: 60_000 });
+export const passwordResetLimiter = new InMemoryRateLimiter({ maxRequests: 5, windowMs: 60_000 });
