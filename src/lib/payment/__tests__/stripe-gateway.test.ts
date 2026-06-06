@@ -1,10 +1,38 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { StripeGateway } from "../stripe-gateway";
+import Stripe from "stripe";
+import { StripeGateway, STRIPE_API_VERSION } from "../stripe-gateway";
 
 // A loose fake of the narrow StripeLike surface. Each test wires up only the
 // methods it exercises; the rest stay undefined and must not be touched.
 function fakeClient(partial: Record<string, unknown>) {
   return partial as never;
+}
+
+// A real Stripe instance whose webhooks.constructEvent / generateTestHeaderString
+// exercise genuine HMAC verification. Other resources are stubbed via `extra`.
+const WEBHOOK_SECRET = "whsec_test_secret";
+
+function realStripe(): Stripe {
+  return new Stripe("sk_test_dummy", { apiVersion: STRIPE_API_VERSION });
+}
+
+function clientWithRealWebhooks(
+  stripe: Stripe,
+  extra: Record<string, unknown> = {}
+) {
+  return fakeClient({
+    webhooks: {
+      constructEvent: stripe.webhooks.constructEvent.bind(stripe.webhooks),
+    },
+    ...extra,
+  });
+}
+
+function signed(stripe: Stripe, body: string): string {
+  return stripe.webhooks.generateTestHeaderString({
+    payload: body,
+    secret: WEBHOOK_SECRET,
+  });
 }
 
 describe("StripeGateway", () => {
@@ -206,6 +234,61 @@ describe("StripeGateway", () => {
       await gw.resumeSubscription("sub_1");
 
       expect(update).toHaveBeenCalledWith("sub_1", { pause_collection: "" });
+    });
+  });
+
+  describe("parseWebhookEvent — signature verification", () => {
+    it("rejects when the signature is null", async () => {
+      process.env.STRIPE_WEBHOOK_SECRET = WEBHOOK_SECRET;
+      const gw = new StripeGateway(clientWithRealWebhooks(realStripe()));
+
+      await expect(gw.parseWebhookEvent("{}", null)).rejects.toThrow(/signature/i);
+    });
+
+    it("rejects when STRIPE_WEBHOOK_SECRET is unset", async () => {
+      delete process.env.STRIPE_WEBHOOK_SECRET;
+      const gw = new StripeGateway(clientWithRealWebhooks(realStripe()));
+
+      await expect(
+        gw.parseWebhookEvent("{}", "t=1,v1=deadbeef")
+      ).rejects.toThrow(/STRIPE_WEBHOOK_SECRET/);
+    });
+
+    it("verifies a genuinely signed payload and returns the parsed event", async () => {
+      process.env.STRIPE_WEBHOOK_SECRET = WEBHOOK_SECRET;
+      const stripe = realStripe();
+      const body = JSON.stringify({
+        id: "evt_1",
+        type: "payment_intent.succeeded",
+        created: 1717000000,
+        data: { object: { id: "pi_1" } },
+      });
+      const gw = new StripeGateway(clientWithRealWebhooks(stripe));
+
+      const event = await gw.parseWebhookEvent(body, signed(stripe, body));
+
+      // An unhandled type proves verification + parsing without exercising mapping.
+      expect(event).toEqual({
+        type: "unhandled",
+        rawType: "payment_intent.succeeded",
+        created: 1717000000,
+        id: "evt_1",
+      });
+    });
+
+    it("rejects a tampered body whose signature no longer matches", async () => {
+      process.env.STRIPE_WEBHOOK_SECRET = WEBHOOK_SECRET;
+      const stripe = realStripe();
+      const body = JSON.stringify({
+        id: "evt_1",
+        type: "payment_intent.succeeded",
+        created: 1,
+        data: { object: {} },
+      });
+      const header = signed(stripe, body);
+      const gw = new StripeGateway(clientWithRealWebhooks(stripe));
+
+      await expect(gw.parseWebhookEvent(body + " ", header)).rejects.toThrow();
     });
   });
 });

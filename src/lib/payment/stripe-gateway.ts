@@ -190,9 +190,35 @@ export class StripeGateway implements PaymentGateway {
   }
 
   async parseWebhookEvent(
-    _rawBody: string,
-    _signature: string | null
+    rawBody: string,
+    signature: string | null
   ): Promise<WebhookEvent> {
-    throw NOT_IMPLEMENTED("parseWebhookEvent");
+    if (!signature) {
+      throw new Error("Missing Stripe signature header");
+    }
+    const secret = process.env.STRIPE_WEBHOOK_SECRET;
+    if (!secret) {
+      throw new Error(
+        "STRIPE_WEBHOOK_SECRET is required to verify Stripe webhooks"
+      );
+    }
+    // Real HMAC verification + JSON parse in one call. Throws
+    // StripeSignatureVerificationError (message contains "signature") on a bad
+    // signature, which the webhook route maps to HTTP 400.
+    const event = this.stripe.webhooks.constructEvent(rawBody, signature, secret);
+    return normalizeEvent(event);
+  }
+}
+
+/** Map a verified Stripe.Event into our gateway-normalized WebhookEvent union. */
+function normalizeEvent(event: Stripe.Event): WebhookEvent {
+  switch (event.type) {
+    default:
+      return {
+        type: "unhandled",
+        created: event.created,
+        id: event.id,
+        rawType: event.type,
+      };
   }
 }
