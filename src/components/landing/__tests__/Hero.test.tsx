@@ -27,9 +27,11 @@ vi.mock("@/components/landing/AudienceCTA", () => ({
 describe("Hero", () => {
   it("renders the headline", () => {
     render(<Hero />);
-    expect(
-      screen.getByText("Your personal butler, on demand.")
-    ).toBeInTheDocument();
+    // The headline is split across elements ("Your personal butler," + a
+    // <span>on demand</span>), so assert on the heading's combined text content.
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      "Your personal butler, on demand"
+    );
   });
 
   it("renders the AudienceCTA inside the hero", () => {

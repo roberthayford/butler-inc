@@ -148,8 +148,9 @@ export function LandingHeroBackground({
         }}
       />
 
-      {/* DIRECTION D — image clearly visible (full opacity, full color) with a strong
-          radial vignette covering both the H1 and the CTA stack for AA-level contrast */}
+      {/* Hero image, clearly visible at full opacity. The dark contrast vignette
+          was removed per design preference; the white hero text now sits directly
+          over the photo. */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <Image
           src="/images/hero-butler.png"
@@ -157,13 +158,6 @@ export function LandingHeroBackground({
           fill
           priority
           className="object-cover object-center"
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse 75% 65% at 50% 42%, hsla(220, 25%, 7%, 0.88) 0%, hsla(220, 25%, 9%, 0.62) 45%, hsla(220, 25%, 11%, 0.20) 80%, transparent 100%)",
-          }}
         />
       </div>
 
