@@ -148,9 +148,10 @@ export function LandingHeroBackground({
         }}
       />
 
-      {/* Hero image, clearly visible at full opacity. The dark contrast vignette
-          was removed per design preference; the white hero text now sits directly
-          over the photo. */}
+      {/* Hero image with a uniform charcoal tint. Replaces the earlier radial
+          vignette (a localised dark "cloud" behind the text that read as heavy):
+          this is an EVEN scrim across the whole image, so white hero copy stays
+          legible everywhere without a spotlight. Tune opacity to taste. */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <Image
           src="/images/hero-butler.png"
@@ -158,6 +159,10 @@ export function LandingHeroBackground({
           fill
           priority
           className="object-cover object-center"
+        />
+        <div
+          className="absolute inset-0"
+          style={{ background: "hsla(220, 25%, 10%, 0.42)" }}
         />
       </div>
 
