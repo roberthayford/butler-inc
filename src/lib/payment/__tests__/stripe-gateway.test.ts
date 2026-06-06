@@ -291,4 +291,240 @@ describe("StripeGateway", () => {
       await expect(gw.parseWebhookEvent(body + " ", header)).rejects.toThrow();
     });
   });
+
+  describe("parseWebhookEvent — event mapping", () => {
+    beforeEach(() => {
+      process.env.STRIPE_WEBHOOK_SECRET = WEBHOOK_SECRET;
+    });
+
+    it("maps customer.subscription.updated, reading periods from the item level", async () => {
+      const stripe = realStripe();
+      const body = JSON.stringify({
+        id: "evt_sub_upd",
+        type: "customer.subscription.updated",
+        created: 1717001000,
+        data: {
+          object: {
+            id: "sub_1",
+            customer: "cus_1",
+            status: "active",
+            cancel_at_period_end: true,
+            pause_collection: null,
+            items: {
+              data: [
+                {
+                  price: { id: "price_frequent" },
+                  current_period_start: 1717000000,
+                  current_period_end: 1719592000,
+                },
+              ],
+            },
+          },
+        },
+      });
+      const gw = new StripeGateway(clientWithRealWebhooks(stripe));
+
+      const event = await gw.parseWebhookEvent(body, signed(stripe, body));
+
+      expect(event).toEqual({
+        type: "customer.subscription.updated",
+        created: 1717001000,
+        id: "evt_sub_upd",
+        data: {
+          id: "sub_1",
+          customer: "cus_1",
+          status: "active",
+          cancel_at_period_end: true,
+          current_period_start: 1717000000,
+          current_period_end: 1719592000,
+          pause_collection: null,
+          items: { data: [{ price: { id: "price_frequent" } }] },
+        },
+      });
+    });
+
+    it("maps pause_collection to status 'paused' so the handler keeps it paused", async () => {
+      const stripe = realStripe();
+      const body = JSON.stringify({
+        id: "evt_pause",
+        type: "customer.subscription.updated",
+        created: 1717001500,
+        data: {
+          object: {
+            id: "sub_1",
+            customer: "cus_1",
+            status: "active", // Stripe leaves status active when pause_collection is set
+            cancel_at_period_end: false,
+            pause_collection: { behavior: "void" },
+            items: {
+              data: [
+                {
+                  price: { id: "price_lite" },
+                  current_period_start: 1,
+                  current_period_end: 2,
+                },
+              ],
+            },
+          },
+        },
+      });
+      const gw = new StripeGateway(clientWithRealWebhooks(stripe));
+
+      const event = await gw.parseWebhookEvent(body, signed(stripe, body));
+
+      expect(event.type).toBe("customer.subscription.updated");
+      if (event.type !== "customer.subscription.updated") throw new Error("narrow");
+      expect(event.data.status).toBe("paused");
+      expect(event.data.pause_collection).toEqual({ behavior: "void" });
+    });
+
+    it("maps customer.subscription.deleted", async () => {
+      const stripe = realStripe();
+      const body = JSON.stringify({
+        id: "evt_del",
+        type: "customer.subscription.deleted",
+        created: 1717003000,
+        data: {
+          object: {
+            id: "sub_9",
+            customer: "cus_9",
+            status: "canceled",
+            cancel_at_period_end: false,
+            pause_collection: null,
+            items: {
+              data: [
+                {
+                  price: { id: "price_pro" },
+                  current_period_start: 10,
+                  current_period_end: 20,
+                },
+              ],
+            },
+          },
+        },
+      });
+      const gw = new StripeGateway(clientWithRealWebhooks(stripe));
+
+      const event = await gw.parseWebhookEvent(body, signed(stripe, body));
+
+      expect(event.type).toBe("customer.subscription.deleted");
+      if (event.type !== "customer.subscription.deleted") throw new Error("narrow");
+      expect(event.data.status).toBe("canceled");
+      expect(event.data.id).toBe("sub_9");
+    });
+
+    it("maps checkout.session.completed by expanding line_items and retrieving the subscription for periods", async () => {
+      const stripe = realStripe();
+      const sessionsRetrieve = vi.fn().mockResolvedValue({
+        id: "cs_1",
+        line_items: { data: [{ price: { id: "price_lite" } }] },
+      });
+      const subsRetrieve = vi.fn().mockResolvedValue({
+        items: { data: [{ current_period_start: 111, current_period_end: 222 }] },
+      });
+      const body = JSON.stringify({
+        id: "evt_cs",
+        type: "checkout.session.completed",
+        created: 1717002000,
+        data: {
+          object: {
+            id: "cs_1",
+            client_reference_id: "user-1",
+            customer: "cus_1",
+            subscription: "sub_1",
+          },
+        },
+      });
+      const gw = new StripeGateway(
+        clientWithRealWebhooks(stripe, {
+          checkout: { sessions: { retrieve: sessionsRetrieve } },
+          subscriptions: { retrieve: subsRetrieve },
+        })
+      );
+
+      const event = await gw.parseWebhookEvent(body, signed(stripe, body));
+
+      expect(sessionsRetrieve).toHaveBeenCalledWith("cs_1", {
+        expand: ["line_items"],
+      });
+      expect(subsRetrieve).toHaveBeenCalledWith("sub_1");
+      expect(event).toEqual({
+        type: "checkout.session.completed",
+        created: 1717002000,
+        id: "evt_cs",
+        data: {
+          id: "cs_1",
+          client_reference_id: "user-1",
+          customer: "cus_1",
+          subscription: "sub_1",
+          current_period_start: 111,
+          current_period_end: 222,
+          line_items: [{ price: { id: "price_lite" } }],
+        },
+      });
+    });
+
+    it("maps invoice.paid resolving the subscription via parent.subscription_details", async () => {
+      const stripe = realStripe();
+      const body = JSON.stringify({
+        id: "evt_inv",
+        type: "invoice.paid",
+        created: 1717004000,
+        data: {
+          object: {
+            id: "in_1",
+            customer: "cus_1",
+            status: "paid",
+            period_start: 100,
+            period_end: 200,
+            parent: { subscription_details: { subscription: "sub_1" } },
+          },
+        },
+      });
+      const gw = new StripeGateway(clientWithRealWebhooks(stripe));
+
+      const event = await gw.parseWebhookEvent(body, signed(stripe, body));
+
+      expect(event).toEqual({
+        type: "invoice.paid",
+        created: 1717004000,
+        id: "evt_inv",
+        data: {
+          id: "in_1",
+          customer: "cus_1",
+          subscription: "sub_1",
+          period_start: 100,
+          period_end: 200,
+          status: "paid",
+        },
+      });
+    });
+
+    it("maps invoice.payment_failed (subscription as an expanded object)", async () => {
+      const stripe = realStripe();
+      const body = JSON.stringify({
+        id: "evt_inv2",
+        type: "invoice.payment_failed",
+        created: 1717005000,
+        data: {
+          object: {
+            id: "in_2",
+            customer: "cus_2",
+            status: "open",
+            period_start: 1,
+            period_end: 2,
+            parent: { subscription_details: { subscription: { id: "sub_2" } } },
+          },
+        },
+      });
+      const gw = new StripeGateway(clientWithRealWebhooks(stripe));
+
+      const event = await gw.parseWebhookEvent(body, signed(stripe, body));
+
+      expect(event.type).toBe("invoice.payment_failed");
+      if (event.type !== "invoice.payment_failed") throw new Error("narrow");
+      expect(event.data.subscription).toBe("sub_2");
+      expect(event.data.status).toBe("open");
+    });
+  });
 });

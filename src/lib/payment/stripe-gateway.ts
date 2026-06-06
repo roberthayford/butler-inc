@@ -6,6 +6,8 @@ import type {
   SubscriptionCheckoutRequest,
   PortalSessionRequest,
   WebhookEvent,
+  SubscriptionData,
+  InvoiceData,
 } from "./types";
 
 /**
@@ -206,19 +208,124 @@ export class StripeGateway implements PaymentGateway {
     // StripeSignatureVerificationError (message contains "signature") on a bad
     // signature, which the webhook route maps to HTTP 400.
     const event = this.stripe.webhooks.constructEvent(rawBody, signature, secret);
-    return normalizeEvent(event);
+    return this.normalizeEvent(event);
+  }
+
+  /** Map a verified Stripe.Event into our gateway-normalized WebhookEvent union. */
+  private async normalizeEvent(event: Stripe.Event): Promise<WebhookEvent> {
+    switch (event.type) {
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        // line_items + period dates are not on the webhook session payload:
+        // expand line_items on the session and read item-level periods off the
+        // subscription (periods moved onto subscription items in this API ver).
+        const full = await this.stripe.checkout.sessions.retrieve(session.id, {
+          expand: ["line_items"],
+        });
+        const lineItems = (full.line_items?.data ?? []).map((li) => ({
+          price: { id: toId(li.price) },
+        }));
+        const subscriptionId = toId(session.subscription);
+        let current_period_start = 0;
+        let current_period_end = 0;
+        if (subscriptionId) {
+          const sub = await this.stripe.subscriptions.retrieve(subscriptionId);
+          const period = periodFromItems(sub);
+          current_period_start = period.start;
+          current_period_end = period.end;
+        }
+        return {
+          type: "checkout.session.completed",
+          created: event.created,
+          id: event.id,
+          data: {
+            id: session.id,
+            client_reference_id: session.client_reference_id ?? null,
+            customer: toId(session.customer),
+            subscription: subscriptionId || null,
+            current_period_start,
+            current_period_end,
+            line_items: lineItems,
+          },
+        };
+      }
+      case "customer.subscription.updated":
+      case "customer.subscription.deleted": {
+        return {
+          type: event.type,
+          created: event.created,
+          id: event.id,
+          data: subscriptionData(event.data.object as Stripe.Subscription),
+        };
+      }
+      case "invoice.paid":
+      case "invoice.payment_failed": {
+        return {
+          type: event.type,
+          created: event.created,
+          id: event.id,
+          data: invoiceData(event.data.object as Stripe.Invoice),
+        };
+      }
+      default:
+        return {
+          type: "unhandled",
+          created: event.created,
+          id: event.id,
+          rawType: event.type,
+        };
+    }
   }
 }
 
-/** Map a verified Stripe.Event into our gateway-normalized WebhookEvent union. */
-function normalizeEvent(event: Stripe.Event): WebhookEvent {
-  switch (event.type) {
-    default:
-      return {
-        type: "unhandled",
-        created: event.created,
-        id: event.id,
-        rawType: event.type,
-      };
-  }
+/** Item-level billing period (periods live on subscription items in this API version). */
+function periodFromItems(sub: Stripe.Subscription): { start: number; end: number } {
+  const item = sub.items?.data?.[0];
+  return {
+    start: item?.current_period_start ?? 0,
+    end: item?.current_period_end ?? 0,
+  };
+}
+
+function subscriptionData(sub: Stripe.Subscription): SubscriptionData {
+  const period = periodFromItems(sub);
+  // Stripe keeps status "active" when pause_collection is set; surface "paused"
+  // so the webhook handler does not reconcile a self-serve pause back to active.
+  const status = sub.pause_collection ? "paused" : sub.status;
+  return {
+    id: sub.id,
+    customer: toId(sub.customer),
+    status,
+    cancel_at_period_end: sub.cancel_at_period_end,
+    current_period_start: period.start,
+    current_period_end: period.end,
+    pause_collection: sub.pause_collection
+      ? { behavior: sub.pause_collection.behavior }
+      : null,
+    items: {
+      data: (sub.items?.data ?? []).map((i) => ({ price: { id: toId(i.price) } })),
+    },
+  };
+}
+
+function invoiceData(inv: Stripe.Invoice): InvoiceData {
+  return {
+    id: inv.id ?? "",
+    customer: toId(inv.customer),
+    subscription: invoiceSubscriptionId(inv),
+    period_start: inv.period_start,
+    period_end: inv.period_end,
+    status: inv.status ?? "draft",
+  };
+}
+
+/** Resolve the subscription id from an invoice (parent.subscription_details in this API version). */
+function invoiceSubscriptionId(inv: Stripe.Invoice): string | null {
+  const fromParent = inv.parent?.subscription_details?.subscription;
+  if (fromParent) return toId(fromParent);
+  // Defensive: some payload shapes expose a top-level subscription field.
+  const legacy = (
+    inv as unknown as { subscription?: string | { id: string } | null }
+  ).subscription;
+  return legacy ? toId(legacy) : null;
 }
