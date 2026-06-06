@@ -98,6 +98,15 @@ export function LoginPage() {
                 )}
               />
 
+              <div className="text-right -mt-2">
+                <Link
+                  href="/members/forgot-password"
+                  className="text-sm text-brass-text hover:text-brass-muted transition-colors"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+
               <Button
                 type="submit"
                 className="w-full bg-brass text-charcoal hover:bg-brass-muted"
