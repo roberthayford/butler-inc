@@ -114,7 +114,7 @@ export function LoginPage() {
               href="/members/signup"
               className="text-brass-text hover:text-brass-muted transition-colors"
             >
-              Join Butlers Inc.
+              Create an account
             </Link>
           </p>
         </div>

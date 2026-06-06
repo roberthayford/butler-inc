@@ -58,53 +58,53 @@ describe("Header", () => {
     } as ReturnType<typeof navigation.useRouter>);
   });
 
-  it("Join CTA links to /membership (not /members/signup)", () => {
+  it("Create Account CTA links to /members/signup (not /membership)", () => {
     useAuthMock.mockReturnValue(loggedOut);
     render(<Header />);
-    const joinLinks = screen.getAllByRole("link", { name: /^join$/i });
-    expect(joinLinks.length).toBeGreaterThan(0);
-    joinLinks.forEach((link) => {
-      expect(link).toHaveAttribute("href", "/membership");
+    const signupLinks = screen.getAllByRole("link", { name: /create account/i });
+    expect(signupLinks.length).toBeGreaterThan(0);
+    signupLinks.forEach((link) => {
+      expect(link).toHaveAttribute("href", "/members/signup");
     });
   });
 
-  it("logged-out user on / sees Sign In and Join", () => {
+  it("logged-out user on / sees Sign In and Create Account", () => {
     useAuthMock.mockReturnValue(loggedOut);
     render(<Header />);
     expect(screen.getAllByRole("link", { name: /sign in/i }).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("link", { name: /^join$/i }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: /create account/i }).length).toBeGreaterThan(0);
   });
 
-  it("logged-out user on /members/login does NOT see Sign In or Join", () => {
+  it("logged-out user on /members/login does NOT see Sign In or Create Account", () => {
     pathnameRef.current = "/members/login";
     useAuthMock.mockReturnValue(loggedOut);
     render(<Header />);
     expect(screen.queryByRole("link", { name: /sign in/i })).toBeNull();
-    expect(screen.queryByRole("link", { name: /^join$/i })).toBeNull();
+    expect(screen.queryByRole("link", { name: /create account/i })).toBeNull();
   });
 
-  it("logged-out user on /members/signup does NOT see Sign In or Join", () => {
+  it("logged-out user on /members/signup does NOT see Sign In or Create Account", () => {
     pathnameRef.current = "/members/signup";
     useAuthMock.mockReturnValue(loggedOut);
     render(<Header />);
     expect(screen.queryByRole("link", { name: /sign in/i })).toBeNull();
-    expect(screen.queryByRole("link", { name: /^join$/i })).toBeNull();
+    expect(screen.queryByRole("link", { name: /create account/i })).toBeNull();
   });
 
-  it("logged-out user on /members/signup/check-email does NOT see Sign In or Join", () => {
+  it("logged-out user on /members/signup/check-email does NOT see Sign In or Create Account", () => {
     pathnameRef.current = "/members/signup/check-email";
     useAuthMock.mockReturnValue(loggedOut);
     render(<Header />);
     expect(screen.queryByRole("link", { name: /sign in/i })).toBeNull();
-    expect(screen.queryByRole("link", { name: /^join$/i })).toBeNull();
+    expect(screen.queryByRole("link", { name: /create account/i })).toBeNull();
   });
 
-  it("logged-out user on /members/dashboard still sees Sign In and Join (suppression scoped to auth pages only)", () => {
+  it("logged-out user on /members/dashboard still sees Sign In and Create Account (suppression scoped to auth pages only)", () => {
     pathnameRef.current = "/members/dashboard";
     useAuthMock.mockReturnValue(loggedOut);
     render(<Header />);
     expect(screen.getAllByRole("link", { name: /sign in/i }).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("link", { name: /^join$/i }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: /create account/i }).length).toBeGreaterThan(0);
   });
 
   it("logged-in user sees AccountMenu trigger, not a standalone Dashboard link in the desktop nav", () => {
@@ -115,11 +115,11 @@ describe("Header", () => {
     expect(dashboardLinks.length).toBe(0);
   });
 
-  it("logged-in user does not see Sign In or Join", () => {
+  it("logged-in user does not see Sign In or Create Account", () => {
     useAuthMock.mockReturnValue(loggedIn);
     render(<Header />);
     expect(screen.queryByRole("link", { name: /sign in/i })).toBeNull();
-    expect(screen.queryByRole("link", { name: /^join$/i })).toBeNull();
+    expect(screen.queryByRole("link", { name: /create account/i })).toBeNull();
   });
 
   it("loading state renders neither auth branch (no Sign In, no AccountMenu)", () => {

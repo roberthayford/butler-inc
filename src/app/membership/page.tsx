@@ -19,7 +19,6 @@ export default function MembershipPage() {
         <div className="flex justify-center gap-7 text-sm text-warm-gray mb-9">
           <div><span className="text-brass">·</span> Same rate, every booking</div>
           <div><span className="text-brass">·</span> No surcharges</div>
-          <div><span className="text-brass">·</span> Hours reset monthly</div>
         </div>
         <TierComparison />
         <p className="text-center text-warm-gray/70 text-xs mt-8">
