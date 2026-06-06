@@ -39,11 +39,11 @@ const site = (process.env.NEXT_PUBLIC_SITE_URL || "https://butlersinc.com").repl
 );
 
 async function findOrCreateProduct(tier) {
-  const found = await stripe.products.search({
-    query: `metadata['butlers_tier']:'${tier.slug}'`,
-  });
-  const active = found.data.find((p) => p.active);
-  if (active) return active;
+  // products.list is strongly consistent; products.search is eventually
+  // consistent, so a re-run before its index catches up would create duplicates.
+  const existing = await stripe.products.list({ active: true, limit: 100 });
+  const match = existing.data.find((p) => p.metadata?.butlers_tier === tier.slug);
+  if (match) return match;
   return stripe.products.create({
     name: `Butlers ${tier.name} Membership`,
     metadata: { butlers_tier: tier.slug },
@@ -121,10 +121,13 @@ async function main() {
   console.error(`  ✓ Billing Portal configuration: ${portal.id}`);
 
   // Env lines to stdout (so `... > prices.env` captures only these).
+  // STRIPE_PORTAL_CONFIGURATION_ID is passed explicitly by createPortalSession,
+  // so the portal uses THIS config regardless of the account's default.
   console.log("");
   for (const { tier, price } of results) {
     console.log(`STRIPE_PRICE_${tier.slug.toUpperCase()}=${price.id}`);
   }
+  console.log(`STRIPE_PORTAL_CONFIGURATION_ID=${portal.id}`);
 }
 
 main().catch((err) => {

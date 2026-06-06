@@ -58,7 +58,8 @@ describe("StripeGateway", () => {
   });
 
   describe("createPortalSession", () => {
-    it("returns the portal url from the injected client", async () => {
+    it("returns the portal url from the injected client (no configuration when env unset)", async () => {
+      delete process.env.STRIPE_PORTAL_CONFIGURATION_ID;
       const create = vi
         .fn()
         .mockResolvedValue({ url: "https://billing.stripe.com/p/session/abc" });
@@ -75,6 +76,22 @@ describe("StripeGateway", () => {
       expect(create).toHaveBeenCalledWith({
         customer: "cus_1",
         return_url: "https://app/return",
+      });
+    });
+
+    it("passes the explicit portal configuration id when STRIPE_PORTAL_CONFIGURATION_ID is set", async () => {
+      process.env.STRIPE_PORTAL_CONFIGURATION_ID = "bpc_123";
+      const create = vi.fn().mockResolvedValue({ url: "https://billing.stripe.com/x" });
+      const gw = new StripeGateway(
+        fakeClient({ billingPortal: { sessions: { create } } })
+      );
+
+      await gw.createPortalSession({ customerId: "cus_1", returnUrl: "https://app/return" });
+
+      expect(create).toHaveBeenCalledWith({
+        customer: "cus_1",
+        return_url: "https://app/return",
+        configuration: "bpc_123",
       });
     });
   });
@@ -413,41 +430,42 @@ describe("StripeGateway", () => {
       expect(event.data.id).toBe("sub_9");
     });
 
-    it("maps checkout.session.completed by expanding line_items and retrieving the subscription for periods", async () => {
+    it("maps checkout.session.completed by expanding line_items + subscription and reading item-level periods from the retrieved session", async () => {
       const stripe = realStripe();
+      // The retrieved (authoritative) session carries the expanded subscription;
+      // we read client_reference_id/customer/subscription from it, not the
+      // possibly-incomplete webhook payload.
       const sessionsRetrieve = vi.fn().mockResolvedValue({
         id: "cs_1",
+        client_reference_id: "user-1",
+        customer: "cus_1",
+        subscription: {
+          id: "sub_1",
+          items: {
+            data: [{ current_period_start: 111, current_period_end: 222 }],
+          },
+        },
         line_items: { data: [{ price: { id: "price_lite" } }] },
-      });
-      const subsRetrieve = vi.fn().mockResolvedValue({
-        items: { data: [{ current_period_start: 111, current_period_end: 222 }] },
       });
       const body = JSON.stringify({
         id: "evt_cs",
         type: "checkout.session.completed",
         created: 1717002000,
         data: {
-          object: {
-            id: "cs_1",
-            client_reference_id: "user-1",
-            customer: "cus_1",
-            subscription: "sub_1",
-          },
+          object: { id: "cs_1", subscription: null }, // webhook copy may lag
         },
       });
       const gw = new StripeGateway(
         clientWithRealWebhooks(stripe, {
           checkout: { sessions: { retrieve: sessionsRetrieve } },
-          subscriptions: { retrieve: subsRetrieve },
         })
       );
 
       const event = await gw.parseWebhookEvent(body, signed(stripe, body));
 
       expect(sessionsRetrieve).toHaveBeenCalledWith("cs_1", {
-        expand: ["line_items"],
+        expand: ["line_items", "subscription"],
       });
-      expect(subsRetrieve).toHaveBeenCalledWith("sub_1");
       expect(event).toEqual({
         type: "checkout.session.completed",
         created: 1717002000,

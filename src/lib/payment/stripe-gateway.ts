@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { getSiteUrl } from "@/lib/site-url";
 import type {
   PaymentGateway,
   CheckoutSessionRequest,
@@ -71,11 +72,6 @@ function toId(
   return typeof value === "string" ? value : value.id;
 }
 
-/** Canonical site origin for building Checkout return URLs (no request available here). */
-function siteOrigin(): string {
-  return process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
-}
-
 function makeRealStripe(): StripeLike {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) {
@@ -101,7 +97,7 @@ export class StripeGateway implements PaymentGateway {
   async createCheckoutSession(
     req: CheckoutSessionRequest
   ): Promise<CheckoutSessionResult> {
-    const origin = siteOrigin();
+    const origin = getSiteUrl();
     const session = await this.stripe.checkout.sessions.create({
       mode: "payment",
       customer_email: req.customerEmail,
@@ -165,9 +161,14 @@ export class StripeGateway implements PaymentGateway {
   async createPortalSession(
     req: PortalSessionRequest
   ): Promise<{ url: string }> {
+    // Pass the app-managed portal configuration explicitly when set (printed by
+    // scripts/stripe/setup-products.mjs). Without it, Stripe uses the account
+    // default config, which may not allow tier switching / at-period-end cancel.
+    const configuration = process.env.STRIPE_PORTAL_CONFIGURATION_ID;
     const session = await this.stripe.billingPortal.sessions.create({
       customer: req.customerId,
       return_url: req.returnUrl,
+      ...(configuration ? { configuration } : {}),
     });
     return { url: session.url };
   }
@@ -212,20 +213,27 @@ export class StripeGateway implements PaymentGateway {
   private async normalizeEvent(event: Stripe.Event): Promise<WebhookEvent> {
     switch (event.type) {
       case "checkout.session.completed": {
-        const session = event.data.object as Stripe.Checkout.Session;
-        // line_items + period dates are not on the webhook session payload:
-        // expand line_items on the session and read item-level periods off the
-        // subscription (periods moved onto subscription items in this API ver).
-        const full = await this.stripe.checkout.sessions.retrieve(session.id, {
-          expand: ["line_items"],
-        });
+        const webhookSession = event.data.object as Stripe.Checkout.Session;
+        // line_items + period dates are not on the webhook session payload, and
+        // the webhook copy's `subscription` can lag. Retrieve the authoritative
+        // session expanding both, then read everything off `full`. Periods live
+        // on subscription items in this API version.
+        const full = await this.stripe.checkout.sessions.retrieve(
+          webhookSession.id,
+          { expand: ["line_items", "subscription"] }
+        );
         const lineItems = (full.line_items?.data ?? []).map((li) => ({
           price: { id: toId(li.price) },
         }));
-        const subscriptionId = toId(session.subscription);
+        const subscriptionId = toId(full.subscription);
         let current_period_start = 0;
         let current_period_end = 0;
-        if (subscriptionId) {
+        if (full.subscription && typeof full.subscription === "object") {
+          const period = periodFromItems(full.subscription);
+          current_period_start = period.start;
+          current_period_end = period.end;
+        } else if (subscriptionId) {
+          // Defensive: subscription returned un-expanded as an id string.
           const sub = await this.stripe.subscriptions.retrieve(subscriptionId);
           const period = periodFromItems(sub);
           current_period_start = period.start;
@@ -236,9 +244,9 @@ export class StripeGateway implements PaymentGateway {
           created: event.created,
           id: event.id,
           data: {
-            id: session.id,
-            client_reference_id: session.client_reference_id ?? null,
-            customer: toId(session.customer),
+            id: full.id,
+            client_reference_id: full.client_reference_id ?? null,
+            customer: toId(full.customer),
             subscription: subscriptionId || null,
             current_period_start,
             current_period_end,

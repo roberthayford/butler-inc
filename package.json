@@ -10,7 +10,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "stripe:setup": "node --env-file=.env.local scripts/stripe/setup-products.mjs"
+    "stripe:setup": "node --env-file-if-exists=.env.local scripts/stripe/setup-products.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

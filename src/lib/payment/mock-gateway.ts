@@ -69,6 +69,9 @@ export class MockPaymentGateway implements PaymentGateway {
       success_url: req.successUrl,
       cancel_url: req.cancelUrl,
     });
+    // Thread customerId through so the mock flow exercises the same field the
+    // Stripe gateway uses for customer reuse (parity; otherwise it's untested in mock mode).
+    if (req.customerId) params.set("customer_id", req.customerId);
     return { sessionId, url: `/payment/simulate?${params.toString()}` };
   }
 
