@@ -43,7 +43,7 @@ describe("notifyLifecycle", () => {
     sendMock.mockResolvedValue({ data: { id: "re_id_1" }, error: null });
     await notifyLifecycle({
       eventId: "evt_1",
-      transition: { kind: "activated", tierSlug: "lite", hoursTotal: 10, tasksTotal: 5, renewsAt: "25 Jun 2026" },
+      transition: { kind: "activated", tierSlug: "lite", hoursTotal: 10, tasksTotal: 5, renewsAt: "25 Jun 2026", monthlyPrice: 500 },
       recipient: { email: "ada@example.com", name: "Ada" },
       subscriptionId: "sub_abc",
     }, makeDb() as never);
@@ -156,7 +156,7 @@ describe("notifyLifecycle", () => {
     sendMock.mockResolvedValue({ data: { id: "x" }, error: null });
     await notifyLifecycle({
       eventId: "evt_5",
-      transition: { kind: "activated", tierSlug: "lite", hoursTotal: 10, tasksTotal: 5, renewsAt: "25 Jun 2026" },
+      transition: { kind: "activated", tierSlug: "lite", hoursTotal: 10, tasksTotal: 5, renewsAt: "25 Jun 2026", monthlyPrice: 500 },
       recipient: { email: "ada@example.com", name: "Ada" },
       subscriptionId: "sub_abc",
     }, makeDb() as never);

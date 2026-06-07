@@ -16,7 +16,7 @@ export type MembershipRow = {
 };
 
 export type Transition =
-  | { kind: "activated"; tierSlug: TierSlug; hoursTotal: number; tasksTotal: number; renewsAt: string }
+  | { kind: "activated"; tierSlug: TierSlug; hoursTotal: number; tasksTotal: number; renewsAt: string; monthlyPrice: number }
   | { kind: "renewed"; tierSlug: TierSlug; periodEnd: string; monthlyPrice: number }
   | { kind: "payment_failed"; tierSlug: TierSlug }
   | { kind: "paused"; tierSlug: TierSlug; pausedAt: string }
@@ -54,12 +54,16 @@ export function detectTransition({ event, priorRow, updatedRow, tierSlugLookup }
       if (!tierSlug) return { kind: "noop" };
       const wasUnattached = priorRow !== null && priorRow.stripe_subscription_id === null;
       if (priorRow === null || wasUnattached) {
+        const activatedTier = MEMBERSHIP_TIERS.find((t) => t.slug === tierSlug);
         return {
           kind: "activated",
           tierSlug,
           hoursTotal: updatedRow.personal_hours_total,
           tasksTotal: updatedRow.virtual_tasks_total,
           renewsAt: updatedRow.billing_period_end,
+          // First-payment amount so the Welcome email doubles as the initial
+          // receipt (the first invoice.paid is a noop — same billing period).
+          monthlyPrice: activatedTier?.monthlyPrice ?? 0,
         };
       }
       return { kind: "noop" };

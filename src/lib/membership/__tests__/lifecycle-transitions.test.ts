@@ -36,7 +36,7 @@ describe("detectTransition", () => {
       },
     };
     const t = detectTransition({ event, priorRow: null, updatedRow: row(), tierSlugLookup: lookup });
-    expect(t).toMatchObject({ kind: "activated", tierSlug: "lite", hoursTotal: 10, tasksTotal: 5 });
+    expect(t).toMatchObject({ kind: "activated", tierSlug: "lite", hoursTotal: 10, tasksTotal: 5, monthlyPrice: 500 });
   });
 
   it("admin-overlap upgrade (existing row gained stripe_subscription_id) → activated", () => {

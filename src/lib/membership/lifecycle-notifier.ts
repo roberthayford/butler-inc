@@ -61,7 +61,7 @@ function memberRenderer(t: Transition, name: string): RenderFn | null {
   switch (t.kind) {
     case "activated":
       return () => renderEmail(`Welcome to Butlers Inc ${tierName(t.tierSlug)}`,
-        WelcomeEmail({ name, tierName: tierName(t.tierSlug), hoursTotal: t.hoursTotal, tasksTotal: t.tasksTotal, renewsAt: formatUk(t.renewsAt) }));
+        WelcomeEmail({ name, tierName: tierName(t.tierSlug), hoursTotal: t.hoursTotal, tasksTotal: t.tasksTotal, renewsAt: formatUk(t.renewsAt), monthlyPrice: t.monthlyPrice }));
     case "renewed":
       return () => renderEmail(`Your Butlers Inc ${tierName(t.tierSlug)} has renewed`,
         RenewalReceiptEmail({

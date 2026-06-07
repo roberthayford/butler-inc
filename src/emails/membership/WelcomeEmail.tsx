@@ -7,17 +7,20 @@ export interface WelcomeEmailProps {
   hoursTotal: number;
   tasksTotal: number;
   renewsAt: string;
+  /** Amount charged for the first month, in pounds. Serves as the initial receipt. */
+  monthlyPrice: number;
 }
 
-export function WelcomeEmail({ name, tierName, hoursTotal, tasksTotal, renewsAt }: WelcomeEmailProps) {
+export function WelcomeEmail({ name, tierName, hoursTotal, tasksTotal, renewsAt, monthlyPrice }: WelcomeEmailProps) {
   const greetingName = name.split(" ")[0] ?? name;
+  const amount = `£${monthlyPrice.toLocaleString("en-GB")}`;
   return (
     <MembershipEmailLayout
-      preview={`Your ${hoursTotal} hours are ready. Here's where to start.`}
+      preview={`Payment received. Your ${hoursTotal} hours are ready.`}
       heading={`Welcome to Butlers Inc ${tierName}`}
     >
       <Text style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif", fontSize: "15px", color: "#4A5568", lineHeight: "1.6", margin: "0 0 18px" }}>
-        {`Hello ${greetingName}, your ${tierName} membership is active. You have ${hoursTotal} personal butler hours and ${tasksTotal} Virtual Butler tasks available this period. Renews on ${renewsAt}.`}
+        {`Hello ${greetingName}, your ${tierName} membership is active and your first payment of ${amount} has been received. You have ${hoursTotal} personal butler hours and ${tasksTotal} Virtual Butler tasks available this period. Renews on ${renewsAt}.`}
       </Text>
       <Button
         href="https://butlersinc.com/members/dashboard"
@@ -30,7 +33,7 @@ export function WelcomeEmail({ name, tierName, hoursTotal, tasksTotal, renewsAt 
 }
 
 WelcomeEmail.PreviewProps = {
-  name: "Ada Lovelace", tierName: "Lite", hoursTotal: 10, tasksTotal: 5, renewsAt: "25 Jun 2026",
+  name: "Ada Lovelace", tierName: "Lite", hoursTotal: 10, tasksTotal: 5, renewsAt: "25 Jun 2026", monthlyPrice: 500,
 } satisfies WelcomeEmailProps;
 
 export default WelcomeEmail;
