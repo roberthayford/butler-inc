@@ -28,7 +28,7 @@ describe("AudienceCTA", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("renders two cards when unauthenticated", () => {
+  it("renders the Pay-As-You-Go and Members boxes when unauthenticated", () => {
     vi.spyOn(AuthContext, "useAuth").mockReturnValue({
       user: null,
       loading: false,
@@ -39,18 +39,16 @@ describe("AudienceCTA", () => {
       signOut: vi.fn(),
     });
     render(<AudienceCTA />);
-    expect(screen.getByText("New to Butlers Inc.?")).toBeInTheDocument();
-    expect(screen.getByText("Already a member?")).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /Browse Our Butlers/i })
-    ).toHaveAttribute("href", "/butlers");
-    expect(screen.getByRole("link", { name: /Sign In/i })).toHaveAttribute(
+      screen.getByRole("link", { name: /pay-as-you-go/i })
+    ).toHaveAttribute("href", "/pay-as-you-go");
+    expect(screen.getByRole("link", { name: /members/i })).toHaveAttribute(
       "href",
-      "/members/login"
+      "/join"
     );
-    expect(
-      screen.queryByText(/Premium concierge across England from £50\/hr/i)
-    ).not.toBeInTheDocument();
+    // Old wording is gone
+    expect(screen.queryByText("New to Butlers Inc.?")).not.toBeInTheDocument();
+    expect(screen.queryByText("Already a member?")).not.toBeInTheDocument();
   });
 
   it("renders personalised welcome card when authenticated", () => {

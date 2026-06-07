@@ -53,25 +53,21 @@ export function AudienceCTA({ className }: { className?: string }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="p-8 flex flex-col gap-6 sm:border-r sm:border-optical-white/15"
         >
-          <h2 className="text-2xl font-serif font-bold text-optical-white">
-            New to Butlers Inc.?
-          </h2>
-          <div className="flex flex-col gap-3">
-            <Link
-              href="/butlers"
-              className="px-6 py-3 rounded-sm bg-brass text-charcoal font-medium hover:bg-brass-muted transition-colors text-sm tracking-wide text-center"
-            >
-              Browse Our Butlers
-            </Link>
-            <Link
-              href="/membership"
-              className="px-6 py-3 rounded-sm border border-brass/60 text-brass font-medium hover:border-brass hover:bg-brass/10 transition-colors text-sm tracking-wide text-center"
-            >
-              Become a member
-            </Link>
-          </div>
+          <Link
+            href="/pay-as-you-go"
+            className="group h-full flex flex-col gap-3 p-8 rounded-sm border border-brass/50 hover:border-brass hover:bg-brass/5 transition-colors"
+          >
+            <h2 className="text-2xl font-serif font-bold text-optical-white">
+              Pay-As-You-Go
+            </h2>
+            <p className="text-warm-gray text-sm leading-relaxed">
+              Book any butler when you need one. No commitment.
+            </p>
+            <span className="mt-auto text-sm font-medium text-brass-text tracking-wide">
+              Browse our butlers &rarr;
+            </span>
+          </Link>
         </motion.div>
 
         <motion.div
@@ -79,16 +75,20 @@ export function AudienceCTA({ className }: { className?: string }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.45, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-          className="p-8 flex flex-col gap-6"
         >
-          <h2 className="text-2xl font-serif font-bold text-optical-white">
-            Already a member?
-          </h2>
           <Link
-            href="/members/login"
-            className="px-6 py-3 rounded-sm border border-optical-white/40 text-optical-white font-medium hover:border-optical-white hover:bg-optical-white/10 transition-colors text-sm tracking-wide"
+            href="/join"
+            className="group h-full flex flex-col gap-3 p-8 rounded-sm border border-optical-white/30 hover:border-optical-white/60 hover:bg-optical-white/5 transition-colors"
           >
-            Sign In
+            <h2 className="text-2xl font-serif font-bold text-optical-white">
+              Members
+            </h2>
+            <p className="text-warm-gray text-sm leading-relaxed">
+              Sign in, or join to save on every booking.
+            </p>
+            <span className="mt-auto text-sm font-medium text-optical-white tracking-wide">
+              Sign in or become a member &rarr;
+            </span>
           </Link>
         </motion.div>
       </div>
