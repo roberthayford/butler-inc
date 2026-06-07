@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { MEMBER_HOURLY_RATE } from "@/data/membership-config";
 
 /**
@@ -45,15 +44,6 @@ export function MembershipValueCallout() {
             the month. If you book more than once or twice a month, a membership
             usually costs less than paying as you go.
           </p>
-        </div>
-
-        <div className="mt-8">
-          <Link
-            href="/membership"
-            className="inline-block px-6 py-3 rounded-sm bg-brass text-charcoal font-medium hover:bg-brass-muted transition-colors text-sm tracking-wide"
-          >
-            See membership plans
-          </Link>
         </div>
       </div>
     </section>

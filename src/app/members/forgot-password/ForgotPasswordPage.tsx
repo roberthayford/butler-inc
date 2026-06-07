@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import Link from "next/link";
+import { BackToHomeLink } from "@/components/BackToHomeLink";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -114,12 +115,7 @@ export function ForgotPasswordPage() {
         </div>
 
         <div className="text-center mt-6">
-          <Link
-            href="/"
-            className="text-warm-gray text-sm hover:text-optical-white transition-colors"
-          >
-            &larr; Back to home
-          </Link>
+          <BackToHomeLink />
         </div>
       </div>
     </div>

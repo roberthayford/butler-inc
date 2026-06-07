@@ -2,10 +2,10 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { SignInForm } from "@/components/auth/SignInForm";
 import { TierComparison } from "@/components/membership/TierComparison";
+import { BackToHomeLink } from "@/components/BackToHomeLink";
 import { MEMBER_HOURLY_RATE } from "@/data/membership-config";
 
 /**
@@ -59,12 +59,7 @@ export function JoinPage() {
       </section>
 
       <div className="text-center pb-16">
-        <Link
-          href="/"
-          className="text-warm-gray text-sm hover:text-optical-white transition-colors"
-        >
-          &larr; Back to home
-        </Link>
+        <BackToHomeLink />
       </div>
     </div>
   );

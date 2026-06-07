@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ButlerCategoryGrid } from "@/components/landing/ButlerCategoryGrid";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { MembershipValueCallout } from "@/components/landing/MembershipValueCallout";
 import { TierComparison } from "@/components/membership/TierComparison";
+import { BackToHomeLink } from "@/components/BackToHomeLink";
 
 export const metadata: Metadata = {
   title: "Pay As You Go | Butlers Inc.",
@@ -41,12 +41,7 @@ export default function PayAsYouGoPage() {
       </section>
 
       <div className="text-center pb-16">
-        <Link
-          href="/"
-          className="text-warm-gray text-sm hover:text-optical-white transition-colors"
-        >
-          &larr; Back to home
-        </Link>
+        <BackToHomeLink />
       </div>
     </div>
   );

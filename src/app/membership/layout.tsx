@@ -1,16 +1,9 @@
-import { Header } from "@/components/landing/Header";
-import { Footer } from "@/components/landing/Footer";
+import { MarketingShell } from "@/components/layout/MarketingShell";
 
 export default function MembershipLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <>
-      <Header />
-      <main className="pt-20">{children}</main>
-      <Footer />
-    </>
-  );
+  return <MarketingShell>{children}</MarketingShell>;
 }

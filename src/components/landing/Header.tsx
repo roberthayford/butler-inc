@@ -11,6 +11,7 @@ import { Menu, X } from "lucide-react";
 import { AccountMenu } from "./AccountMenu";
 
 const AUTH_PAGE_PATHS: ReadonlySet<string> = new Set([
+  "/join",
   "/members/login",
   "/members/signup",
   "/members/signup/check-email",
@@ -86,7 +87,7 @@ export function Header() {
             ) : suppressAuthCTAs ? null : (
               <>
                 <Link
-                  href="/members/login"
+                  href="/join"
                   className="text-optical-white/80 hover:text-optical-white transition-colors text-sm"
                 >
                   Sign In
@@ -151,7 +152,7 @@ export function Header() {
                 ) : suppressAuthCTAs ? null : (
                   <>
                     <Link
-                      href="/members/login"
+                      href="/join"
                       className="block text-optical-white/80 hover:text-optical-white py-3"
                       onClick={() => setMobileOpen(false)}
                     >

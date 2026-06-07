@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { SignInForm } from "@/components/auth/SignInForm";
+import { BackToHomeLink } from "@/components/BackToHomeLink";
 
 export function LoginPage() {
   return (
@@ -21,12 +21,7 @@ export function LoginPage() {
         </div>
 
         <div className="text-center mt-6">
-          <Link
-            href="/"
-            className="text-warm-gray text-sm hover:text-optical-white transition-colors"
-          >
-            &larr; Back to home
-          </Link>
+          <BackToHomeLink />
         </div>
       </div>
     </div>

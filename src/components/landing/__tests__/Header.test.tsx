@@ -75,6 +75,24 @@ describe("Header", () => {
     expect(screen.getAllByRole("link", { name: /create account/i }).length).toBeGreaterThan(0);
   });
 
+  it("Sign In links to /join (the Members entry), matching the homepage", () => {
+    useAuthMock.mockReturnValue(loggedOut);
+    render(<Header />);
+    const signInLinks = screen.getAllByRole("link", { name: /sign in/i });
+    expect(signInLinks.length).toBeGreaterThan(0);
+    signInLinks.forEach((link) => {
+      expect(link).toHaveAttribute("href", "/join");
+    });
+  });
+
+  it("logged-out user on /join does NOT see Sign In or Create Account", () => {
+    pathnameRef.current = "/join";
+    useAuthMock.mockReturnValue(loggedOut);
+    render(<Header />);
+    expect(screen.queryByRole("link", { name: /sign in/i })).toBeNull();
+    expect(screen.queryByRole("link", { name: /create account/i })).toBeNull();
+  });
+
   it("logged-out user on /members/login does NOT see Sign In or Create Account", () => {
     pathnameRef.current = "/members/login";
     useAuthMock.mockReturnValue(loggedOut);
