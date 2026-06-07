@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { GENIE_SERVICE } from "@/data/booking-config";
 
 const EXAMPLE_WISHES = [
-  "Source a sold-out designer handbag before the weekend",
+  "Arrange emergency childcare for tonight",
   "Arrange a private chef for 12 guests in under 3 hours",
   "Find and book a villa in Santorini departing this Friday",
 ] as const;

@@ -97,9 +97,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             "Prescription collection from pharmacy when you're unwell",
             'Birthday gift delivery you forgot to order',
             'Queue standing for limited releases or ticket lines',
-            'Important documents from solicitor to client',
             'Keys collected from estate agent on moving day',
-            'Urgent shopping: forgotten ingredients, replacement charger, specific item needed today',
         ],
         trustIndicators: [
             { text: 'DBS checked and reference verified' },
@@ -214,6 +212,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             'Stand in arrangement at auction house',
             'Personalised luxury holiday planning and booking',
             'Personal shopper pick up and returns',
+            'Coordinate groceries from multiple shops and deliver',
         ],
         trustIndicators: [
             { text: 'Exclusive network access' },
@@ -351,7 +350,7 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
         hero: {
             headline: 'Tell us what you need. We\'ll figure it out.',
             subheading:
-                'For requests that don\'t fit a category. Complex, creative, or completely unique.',
+                'For those out of the box requests that require a personalised touch.',
             useCases: [
                 'Coordinate a surprise proposal across three locations',
                 'Plan and execute a private dinner party for 20',
@@ -376,11 +375,10 @@ export const butlerPageConfigs: Record<ServiceId, ButlerPageConfig> = {
             ],
         },
         commonRequests: [
-            'Surprise delivery of flowers, chocolates, and cake to her office at 4pm',
             'Plan and execute a birthday dinner with personalised touches',
-            'Complex multi-vendor coordination for a wedding anniversary',
             'Manage entire house move: packing, transit, unpacking',
-            'Source and install home office setup while owner is away',
+            "Gifts, organisation and presentation for Valentine's Day, birthdays, engagements, anniversaries, celebrations, and all other special events",
+            'Multi-trip planning and booking, including flights, hotels, transport, itineraries and other services',
             'If you can describe it, consider it arranged',
         ],
         trustIndicators: [

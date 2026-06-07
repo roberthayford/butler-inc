@@ -64,7 +64,7 @@ describe("GenieDrawer", () => {
 
     it("renders example wishes", () => {
       render(<GenieDrawer open={true} onClose={vi.fn()} />);
-      expect(screen.getByText(/sold-out designer/i)).toBeInTheDocument();
+      expect(screen.getByText(/emergency childcare for tonight/i)).toBeInTheDocument();
     });
 
     it("continue button is disabled when textarea is empty", () => {

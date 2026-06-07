@@ -101,7 +101,7 @@ describe("GenieSection", () => {
     it("displays example wishes", () => {
       render(<GenieSection />);
       expect(
-        screen.getByText(/sold-out designer/i)
+        screen.getByText(/emergency childcare for tonight/i)
       ).toBeInTheDocument();
     });
   });

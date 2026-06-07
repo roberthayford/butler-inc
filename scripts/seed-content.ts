@@ -1,3 +1,12 @@
+/**
+ * Seeds/re-syncs the Supabase `site_content` rows from the static butler
+ * configs. `src/data/butler-page-configs.ts` is the SINGLE SOURCE OF TRUTH for
+ * butler hero/trustIndicators/commonRequests — the live site serves these from
+ * `site_content` (overriding static at render time, see src/lib/content.ts), so
+ * the DB must be kept in sync with static. The admin content editor introduces
+ * drift; reconcile by re-running this (or applying the generated migration).
+ * The `site-content-drift.test.ts` guard fails if static carries forbidden copy.
+ */
 import { createClient } from "@supabase/supabase-js";
 import { butlerPageConfigs } from "../src/data/butler-page-configs";
 import type { ServiceId } from "../src/data/services";
