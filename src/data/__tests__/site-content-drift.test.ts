@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { butlerPageConfigs } from "../butler-page-configs";
 import type { ServiceId } from "../services";
+import { findCopyViolations } from "@/lib/content-policy";
 
 /**
  * site_content drift guard.
@@ -44,12 +45,11 @@ function allSeedText(): string {
 
 describe("site_content seed (static source of truth)", () => {
   it("contains no em dashes in any seeded butler copy", () => {
-    // The #1 customer-facing copy rule. The DB overrides previously carried em
-    // dashes because the static cleanup never reached the data layer.
+    // The #1 customer-facing copy rule. Reuses the same findCopyViolations
+    // policy the admin editor enforces (src/lib/content-policy.ts), so the
+    // static seed path and the admin write path can never disagree.
     for (const id of BUTLER_IDS) {
-      expect(seedText(id), `${id} seed must not contain em dashes`).not.toContain(
-        "—"
-      );
+      expect(findCopyViolations(seedBlob(id)), `${id} seed`).toEqual([]);
     }
   });
 

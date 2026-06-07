@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { butlerContentSchema } from "@/data/content-schema";
+import { findCopyViolations } from "@/lib/content-policy";
 
 export async function updateButlerContent(slug: string, rawContent: unknown) {
   const supabase = await createClient();
@@ -20,6 +21,14 @@ export async function updateButlerContent(slug: string, rawContent: unknown) {
   const parsed = butlerContentSchema.safeParse(rawContent);
   if (!parsed.success) {
     return { error: parsed.error.message };
+  }
+
+  // Enforce the customer-facing copy policy (no em dashes) before persisting.
+  // site_content overrides the static config at render time, so this is the
+  // only guard between an admin edit and what the reader sees.
+  const violations = findCopyViolations(parsed.data);
+  if (violations.length > 0) {
+    return { error: violations.join(" ") };
   }
 
   const { error } = await supabase
