@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MEMBER_HOURLY_RATE } from "@/data/membership-config";
 
 /**
  * "Membership is cheaper" section for the Pay-As-You-Go path.
@@ -27,7 +28,7 @@ export function MembershipValueCallout() {
           <p>
             Members skip both. Membership locks in a{" "}
             <span className="text-optical-white font-medium">
-              flat £50 per hour
+              flat £{MEMBER_HOURLY_RATE} per hour
             </span>{" "}
             on every self-service butler, with{" "}
             <span className="text-optical-white font-medium">

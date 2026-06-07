@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { SignInForm } from "@/components/auth/SignInForm";
 import { TierComparison } from "@/components/membership/TierComparison";
+import { MEMBER_HOURLY_RATE } from "@/data/membership-config";
 
 /**
  * Combined "Members" entry: sign in (existing members) or become a member
@@ -50,8 +51,8 @@ export function JoinPage() {
             Become a member
           </h2>
           <p className="text-warm-gray text-center mb-12 max-w-2xl mx-auto leading-relaxed">
-            A flat £50 per hour, no urgency surcharges, and a prepaid monthly
-            allowance of butler hours and Virtual Butler tasks.
+            A flat £{MEMBER_HOURLY_RATE} per hour, no urgency surcharges, and a
+            prepaid monthly allowance of butler hours and Virtual Butler tasks.
           </p>
           <TierComparison />
         </div>
