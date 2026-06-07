@@ -40,13 +40,13 @@ export function GenieStickyBar() {
         <button
           onClick={() => setDrawerOpen(true)}
           className={`
-            bg-charcoal/95 backdrop-blur-md
+            bg-destructive backdrop-blur-md
             border-t border-primary-foreground/10
             w-full px-4 py-3 rounded-sm
             text-white text-sm font-medium
-            hover:bg-charcoal transition-colors
-            md:border md:bg-destructive md:px-5 md:py-3
-            md:hover:bg-destructive/90 md:shadow-lg md:shadow-black/20
+            hover:bg-destructive/90 transition-colors
+            md:border md:px-5 md:py-3
+            md:shadow-lg md:shadow-black/20
             md:hover:shadow-[0_0_24px_rgba(223,49,49,0.25)]
             md:transition-all md:duration-300
           `}

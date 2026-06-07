@@ -47,6 +47,18 @@ describe("GenieStickyBar", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows the CTA in red on mobile (not charcoal)", () => {
+    Object.defineProperty(window, "scrollY", { value: 250 });
+    render(<GenieStickyBar />);
+    fireEvent.scroll(window);
+    const button = screen.getByRole("button", {
+      name: /summon your genie/i,
+    });
+    // Red must apply on all breakpoints, not only at md+.
+    expect(button.className).toContain("bg-destructive");
+    expect(button.className).not.toMatch(/(^|\s)bg-charcoal/);
+  });
+
   it("opens the drawer when CTA button is clicked", () => {
     Object.defineProperty(window, "scrollY", { value: 250 });
     render(<GenieStickyBar />);
